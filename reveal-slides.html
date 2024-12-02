@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <title>reveal.jsのおためし</title>
+
+        <!-- デフォルトのReveal.jsテーマ -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/white.min.css">
+
+        <!-- カスタムテーマの読み込み -->
+        <style>
+            :root {
+                --r-background-color: #fff;
+                --r-main-font: "Yu Gothic Medium", "Noto Sans Japanese", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", "Helvetica Neue", Arial, sans-serif;
+                --r-main-font-size: 42px;
+                --r-main-color: #222;
+                --r-heading-font: "Yu Gothic Medium", "Noto Sans Japanese", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", "Helvetica Neue", Arial, sans-serif;
+                --r-heading-color: #1A3260;
+                --r-heading-text-transform: none;
+            }
+            /*
+            :root {
+                --r-background-color: #fff;
+                --r-main-font: "Yu Gothic Medium", "Noto Sans Japanese", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", "Helvetica Neue", Arial, sans-serif;
+                --r-main-font-size: 42px;
+                --r-main-color: #222;
+                --r-block-margin: 20px;
+                --r-heading-margin: 0 0 20px 0;
+                --r-heading-font: "Yu Gothic Medium", "Noto Sans Japanese", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", "Helvetica Neue", Arial, sans-serif;
+                --r-heading-color: #1A3260;
+                --r-heading-line-height: 1.2;
+                --r-heading-letter-spacing: normal;
+                --r-heading-text-transform: none;
+                --r-heading-text-shadow: none;
+                --r-heading-font-weight: 600;
+                --r-heading1-text-shadow: none;
+                --r-heading1-size: 2.5em;
+                --r-heading2-size: 1.6em;
+                --r-heading3-size: 1.3em;
+                --r-heading4-size: 1em;
+                --r-code-font: monospace;
+                --r-link-color: #42affa;
+                --r-link-color-dark: #068de9;
+                --r-link-color-hover: #8dcffc;
+                --r-selection-background-color: #bee4fd;
+                --r-selection-color: #fff;
+            }
+            */
+            /*
+            .reveal .slides section {
+                overflow-y: auto;
+                height: 100%;
+            }
+            */
+            .reveal .slides section[data-long] {
+                overflow-y: auto;
+                max-height: 100%;
+
+                /* https://ccg-wheads.jp/journal/article-634/ */
+                scrollbar-color: #eee transparent;
+            }
+
+            .reveal .slide-number {
+                font-family: var(--r-main-font);
+                color: #222;
+                background-color: transparent;
+                right: 35px;
+                bottom: 4px;
+            }
+        </style>
+
+        <!-- MathJax -->
+        <script>
+            MathJax = {
+                tex: {
+                    inlineMath: [['$', '$'], ['\\(', '\\)']]
+                }
+            };
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <section>
+                    <h1>Reveal.jsによる<br>日本語<br>プレゼンテーション</h1>
+                    <p>Reveal.jsを使って日本語のスライドを作成しました。</p>
+                </section>
+
+                <section>
+                    <h2>Reveal.jsの特徴</h2>
+                    <ul>
+                        <li>HTMLベースの軽量なプレゼンテーションフレームワーク</li>
+                        <li>スライドを簡単に作成・管理できる</li>
+                        <li>スライドのナビゲーションが直観的</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h2>Reveal.jsの機能</h2>
+                    <ul>
+                        <li>スライドのスクロール表示</li>
+                        <li>Markdown記法のサポート</li>
+                        <li>テーマやプラグインの拡張性</li>
+                    </ul>
+                </section>
+
+                <section data-long>
+                    <h2>ロングバージョン</h2>
+                    <ul>
+                        <li>HTMLベースの軽量なプレゼンテーションフレームワーク</li>
+                        <li>スライドを簡単に作成・管理できる</li>
+                        <li>スライドのナビゲーションが直観的</li>
+                        <li>スライドのスクロール表示</li>
+                        <li>Markdown記法のサポート</li>
+                        <li>テーマやプラグインの拡張性</li>
+                        <li>HTMLベースの軽量なプレゼンテーションフレームワーク</li>
+                        <li>スライドを簡単に作成・管理できる</li>
+                        <li>スライドのナビゲーションが直観的</li>
+                        <li>スライドのスクロール表示</li>
+                        <li>Markdown記法のサポート</li>
+                        <li>テーマやプラグインの拡張性</li>
+                        <li>HTMLベースの軽量なプレゼンテーションフレームワーク</li>
+                        <li>スライドを簡単に作成・管理できる</li>
+                        <li>スライドのナビゲーションが直観的</li>
+                        <li>スライドのスクロール表示</li>
+                        <li>Markdown記法のサポート</li>
+                        <li>テーマやプラグインの拡張性</li>
+                        <li>HTMLベースの軽量なプレゼンテーションフレームワーク</li>
+                        <li>スライドを簡単に作成・管理できる</li>
+                        <li>スライドのナビゲーションが直観的</li>
+                        <li>スライドのスクロール表示</li>
+                        <li>Markdown記法のサポート</li>
+                        <li>テーマやプラグインの拡張性</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>日本語の活用</h2>
+                    <p>Reveal.jsでは日本語の表示が問題なく行えます。</p>
+                    <p>日本語での説明や、日本語のコンテンツを含めることができます。</p>
+                </section>
+                <section>
+                    <h2>Reveal.jsのMarkdown対応</h2>
+                    <p>Reveal.jsでは、Markdown記法を使ってスライドのコンテンツを記述できます。</p>
+                </section>
+
+                <section>
+                    <h2>Markdownの活用方法</h2>
+                    <ul>
+                        <li>見出し（# や ##）で、スライドの構造を定義できる</li>
+                        <li>箇条書きやリンク、コードブロックなど、Markdownの各種書式が利用できる</li>
+                        <li>スライドの区切りは空行で指定する</li>
+                        <li>Markdownファイルをそのままインポートすることも可能</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>MathJax</h2>
+                    <p>2次方程式 $ax^2+bx+c=0(a\neq 0)$ の解の公式</p>
+                    \[ x = \frac{-b\pm\sqrt{b^2-4ac}}{2a}\]
+                </section>
+                
+                <section>
+                    <h2>Markdownの例</h2>
+                    <pre><code class="hljs" data-line-numbers="4-6|9-11|14-16">
+# タイトルスライド
+## 1つ目のセクション
+- 箇条書きの1つ目
+- 箇条書きの2つ目
+
+## 2つ目のセクション
+この部分は通常の段落です。
+
+`this is a code block`
+
+[リンクのサンプル](https://example.com)
+
+# タイトルスライド
+## 1つ目のセクション
+- 箇条書きの1つ目
+- 箇条書きの2つ目
+
+## 2つ目のセクション
+この部分は通常の段落です。
+
+`this is a code block`
+
+[リンクのサンプル](https://example.com)
+
+# タイトルスライド
+## 1つ目のセクション
+- 箇条書きの1つ目
+- 箇条書きの2つ目
+
+## 2つ目のセクション
+この部分は通常の段落です。
+
+`this is a code block`
+
+[リンクのサンプル](https://example.com)
+                    </code></pre>
+                </section>
+
+                <section>
+                    <h2>まとめ</h2>
+                    <ul>
+                        <li>Reveal.jsは日本語に対応したプレゼンテーションツール</li>
+                        <li>HTMLベースなので柔軟な構成が可能</li>
+                        <li>簡単にスライドを作成・管理できる</li>
+                    </ul>
+                    <p>Reveal.jsのMarkdown対応により、スライドの作成がより簡単になります。</p>
+                    <p>Markdownの各種書式を活用して、効果的なプレゼンテーションを作成できます。</p>
+                </section>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+        <script>
+            Reveal.initialize({
+                slideNumber: "c/t"
+            });
+        </script>
+    </body>
+</html>

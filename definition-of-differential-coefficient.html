@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微分係数</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute; /* 絶対位置 */
+            top: 50%; /* 縦方向中央 */
+            left: 50%; /* 横方向中央 */
+            transform: translate(-50%, -50%); /* 要素の中心に基準を移動 */
+            width: 90%; /* 必要に応じて幅を調整 */
+            max-width: 800px; /* 最大幅を設定 */
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .graph-container {
+            margin: 20px 0;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .slider-container {
+            flex: 1;
+        }
+        .slider-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }/*
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }*/
+        #hSlider {
+            appearance: none;
+            width: 200px;
+            height: 12px;
+            width: 100%;
+            margin: 10px 0;
+            border-radius: 9999px;
+            background: #7ca6bc;
+            cursor: pointer;
+        }
+        /* ツマミ：Chrome, Safari, Edge用 */
+        #hSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background: #1f5660;
+            box-shadow: none;
+        }
+        /* ツマミ：Firefox用 */
+        #hSlider::-moz-range-thumb {
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background: #1f5660;
+            box-shadow: none;
+        }
+        .value-display {
+            font-size: 1.1em;
+            color: #2980b9;
+            font-weight: bold;
+        }
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>微分係数</h1>
+
+        <!-- グラフを表示する場所 -->
+        <div id="graph" style="width:100%; height:500px;"></div>
+        
+        <!-- スライダーとラベル -->
+        <div class="slider-container">
+            <label for="hSlider">h の値: </label>
+            <input type="range" id="hSlider" min="0" max="1.5" step="0.1" value="1.5">
+            <span id="hValue">1.5</span>
+        </div>
+    </div>
+
+    <script>
+        // 初期設定
+        const a = 3;  // aの値 (固定)
+        const x0 = a; // 接点 (x0, e^x0)
+        let h = 1.4;    // 初期の h の値
+
+        // x と y の値を計算する関数
+        function updateGraph() {
+            const xValues = [];
+            const yValues = [];
+            const lineX = [];
+            const lineY = [];
+            const pointX = a + h; // x = a + h の点
+            const pointY = Math.exp(a + h); // y = e^(a+h) の点
+
+            // y = e^x のグラフのデータ
+            for (let x = -1; x <= 5; x += 0.1) {
+                xValues.push(x);
+                yValues.push(Math.exp(x)); // y = e^x
+            }
+
+            // 接点と x = a + h の点を通る直線のデータ
+            const slopeLine = (Math.exp(a + h) - Math.exp(a)) / (a + h - a); // 傾き
+            // 直線の方程式：y - y1 = m * (x - x1)
+            for (let x = -1; x <= 5; x += 0.1) {
+                lineX.push(x);
+                const lineYVal = Math.exp(a) + slopeLine * (x - a); // 直線の方程式
+                lineY.push(lineYVal);
+            }
+
+            // 接点での接線のデータ（接点 (a, e^a) での接線）
+            const tangentX = [];
+            const tangentY = [];
+            const slope = Math.exp(a); // 接線の傾きは e^a
+            for (let x = -1; x <= 5; x += 0.1) {
+                tangentX.push(x);
+                tangentY.push(Math.exp(a) + slope * (x - a)); // 接線の方程式 y = e^a + e^a * (x - a)
+            }
+
+            // グラフのデータ
+            const data = [
+                {
+                    x: xValues,
+                    y: yValues,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: '曲線 y = f(x)'
+                },
+                {
+                    x: tangentX,
+                    y: tangentY,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'x = a での f(x) の接線',
+                    line: { color: 'orange' }  // 接線は点線で表示
+                },
+                {
+                    x: lineX,
+                    y: lineY,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'x = a での微分係数',
+                    line: { color: '#fc2200' }
+                },
+                {
+                    x: [a, pointX],
+                    y: [Math.exp(a), pointY],
+                    type: 'scatter',
+                    mode: 'markers',
+                    name: '接点と x = a + h の点',
+                    marker: { color: 'black', size: 8 }
+                }
+            ];
+
+            // グラフのレイアウト
+            const layout = {
+                title: 'y=f(x)のx=aでの接線と微分係数',
+                xaxis: {
+                    title: 'x',
+                    range: [-1, 5]  // x軸の範囲を固定
+                },
+                yaxis: {
+                    title: 'y',
+                    range: [-10, 100]  // y軸の範囲を固定
+                }
+            };
+
+            // グラフを描画
+            Plotly.newPlot('graph', data, layout);
+        }
+
+        // スライダーの変更イベントリスナー
+        document.getElementById('hSlider').addEventListener('input', function() {
+            h = parseFloat(this.value);  // スライダーの値を h に設定
+            document.getElementById('hValue').textContent = Number(h).toFixed(1);  // スライダーの値を表示
+            updateGraph();  // グラフを更新
+        });
+
+        // 初回のグラフ描画
+        updateGraph();
+    </script>
+
+    <script>
+        const inputRange = document.getElementById("hSlider");
+        const activeColor = "#7ca6bc";
+        const inactiveColor = "#dddddd";
+
+        inputRange.addEventListener("input", function() {
+            const ratio = (this.value - this.min) / (this.max - this.min) * 100;
+            this.style.background = `linear-gradient(90deg, ${activeColor} ${ratio}%, ${inactiveColor} ${ratio}%)`;
+        });
+    </script>
+</body>
+</html>

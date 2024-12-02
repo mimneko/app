@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>テキストの表示切り替え</title>
+    <style>
+        /* チェックボックスは非表示 */
+        .toggle-input {
+            display: none;
+        }
+
+        /* 付箋 */
+        .term-hidden {
+            display: inline-block;
+            background-color: #333;
+            color: #333;
+            padding: 5px;
+            border-radius: 5px;
+            position: relative;
+            cursor: pointer;
+
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+
+        }
+
+        /* チェックされたときにテキストを表示 */
+        .toggle-input:checked + .term-hidden {
+            background-color: #f9f9f9;
+            color: #ff0000;
+            
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>日本史</h2>
+
+    <p>
+        日本の歴史は、
+        <input type="checkbox" id="term1" class="toggle-input"><label for="term1" class="term-hidden">飛鳥時代</label>
+        から
+        <input type="checkbox" id="term2" class="toggle-input"><label for="term2" class="term-hidden">平安時代</label>
+        にかけて多くの文化が栄えました。その後、
+        <input type="checkbox" id="term3" class="toggle-input"><label for="term3" class="term-hidden">鎌倉幕府</label>
+        が成立し、日本は武士の時代に入りました。
+    </p>
+
+</body>
+</html>

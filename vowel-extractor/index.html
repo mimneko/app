@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <title>母音抽出ツール</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .description {
+            margin-bottom: 20px;
+            color: #666;
+            padding: 10px;
+            border-left: 4px solid #0066cc;
+            background-color: #f8f9fa;
+        }
+        textarea {
+            width: calc(100% - 20px);
+            height: 150px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: vertical;
+        }
+        .output {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            min-height: 50px;
+            white-space: pre-wrap;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>母音抽出ツール</h1>
+        <div class="description">
+            ひらがな・カタカナから母音を抽出します。かな以外の文字はそのまま出力されます。
+            <!-- 現在「りょうあんじ（龍安寺）」は「おうあんい」としているが、「おおあんい」の方が良いか。 -->
+        </div>
+        <textarea id="input" placeholder="ここに文章を入力してください"></textarea>
+        <div class="output" id="output"></div>
+    </div>
+
+    <script>
+        function extractVowels(text) {
+            const hiraganaMap = {
+                'あ': 'あ', 'い': 'い', 'う': 'う', 'え': 'え', 'お': 'お',
+                'か': 'あ', 'き': 'い', 'く': 'う', 'け': 'え', 'こ': 'お',
+                'さ': 'あ', 'し': 'い', 'す': 'う', 'せ': 'え', 'そ': 'お',
+                'た': 'あ', 'ち': 'い', 'つ': 'う', 'て': 'え', 'と': 'お',
+                'な': 'あ', 'に': 'い', 'ぬ': 'う', 'ね': 'え', 'の': 'お',
+                'は': 'あ', 'ひ': 'い', 'ふ': 'う', 'へ': 'え', 'ほ': 'お',
+                'ま': 'あ', 'み': 'い', 'む': 'う', 'め': 'え', 'も': 'お',
+                'や': 'あ', 'ゆ': 'う', 'よ': 'お',
+                'ら': 'あ', 'り': 'い', 'る': 'う', 'れ': 'え', 'ろ': 'お',
+                'わ': 'あ', 'を': 'お', 'ん': 'ん',
+                'が': 'あ', 'ぎ': 'い', 'ぐ': 'う', 'げ': 'え', 'ご': 'お',
+                'ざ': 'あ', 'じ': 'い', 'ず': 'う', 'ぜ': 'え', 'ぞ': 'お',
+                'だ': 'あ', 'ぢ': 'い', 'づ': 'う', 'で': 'え', 'ど': 'お',
+                'ば': 'あ', 'び': 'い', 'ぶ': 'う', 'べ': 'え', 'ぼ': 'お',
+                'ぱ': 'あ', 'ぴ': 'い', 'ぷ': 'う', 'ぺ': 'え', 'ぽ': 'お',
+                'ぁ': 'あ', 'ぃ': 'い', 'ぅ': 'う', 'ぇ': 'え', 'ぉ': 'お',
+                'ゃ': 'あ', 'ゅ': 'う', 'ょ': 'お'
+            };
+
+            const katakanaMap = {
+                'ア': 'あ', 'イ': 'い', 'ウ': 'う', 'エ': 'え', 'オ': 'お',
+                'カ': 'あ', 'キ': 'い', 'ク': 'う', 'ケ': 'え', 'コ': 'お',
+                'サ': 'あ', 'シ': 'い', 'ス': 'う', 'セ': 'え', 'ソ': 'お',
+                'タ': 'あ', 'チ': 'い', 'ツ': 'う', 'テ': 'え', 'ト': 'お',
+                'ナ': 'あ', 'ニ': 'い', 'ヌ': 'う', 'ネ': 'え', 'ノ': 'お',
+                'ハ': 'あ', 'ヒ': 'い', 'フ': 'う', 'ヘ': 'え', 'ホ': 'お',
+                'マ': 'あ', 'ミ': 'い', 'ム': 'う', 'メ': 'え', 'モ': 'お',
+                'ヤ': 'あ', 'ユ': 'う', 'ヨ': 'お',
+                'ラ': 'あ', 'リ': 'い', 'ル': 'う', 'レ': 'え', 'ロ': 'お',
+                'ワ': 'あ', 'ヲ': 'お', 'ン': 'ん',
+                'ガ': 'あ', 'ギ': 'い', 'グ': 'う', 'ゲ': 'え', 'ゴ': 'お',
+                'ザ': 'あ', 'ジ': 'い', 'ズ': 'う', 'ゼ': 'え', 'ゾ': 'お',
+                'ダ': 'あ', 'ヂ': 'い', 'ヅ': 'う', 'デ': 'え', 'ド': 'お',
+                'バ': 'あ', 'ビ': 'い', 'ブ': 'う', 'ベ': 'え', 'ボ': 'お',
+                'パ': 'あ', 'ピ': 'い', 'プ': 'う', 'ペ': 'え', 'ポ': 'お',
+                'ァ': 'あ', 'ィ': 'い', 'ゥ': 'う', 'ェ': 'え', 'ォ': 'お',
+                'ャ': 'あ', 'ュ': 'う', 'ョ': 'お',
+                'ヴ': 'う', 'ッ': ''
+            };
+
+            const specialCombinations = {
+                'ファ': 'あ',
+                'フィ': 'い',
+                'フュ': 'う',
+                'フェ': 'え',
+                'フォ': 'お',
+                'ウァ': 'あ',
+                'ウィ': 'い',
+                'ウュ': 'う',
+                'ウェ': 'え',
+                'ウォ': 'お',
+                'ヴァ': 'あ',
+                'ヴィ': 'い',
+                'ヴュ': 'う',
+                'ヴェ': 'え',
+                'ヴォ': 'お',
+                'ふぁ': 'あ',
+                'ふぃ': 'い',
+                'ふゅ': 'う',
+                'ふぇ': 'え',
+                'ふぉ': 'お',
+                'うぁ': 'あ',
+                'うぃ': 'い',
+                'うゅ': 'う',
+                'うぇ': 'え',
+                'うぉ': 'お',
+                'ゔぁ': 'あ',
+                'ゔぃ': 'い',
+                'ゔゅ': 'う',
+                'ゔぇ': 'え',
+                'ゔぉ': 'お'
+            };
+
+            let result = '';
+            let i = 0;
+            let lastVowel = '';  // 直前の母音を保持する変数
+            
+            while (i < text.length) {
+                // 特殊な組み合わせのチェック
+                let foundSpecial = false;
+                for (let combo in specialCombinations) {
+                    if (text.slice(i, i + combo.length) === combo) {
+                        const vowel = specialCombinations[combo];
+                        result += vowel;
+                        lastVowel = vowel;  // 直前の母音を更新
+                        i += combo.length;
+                        foundSpecial = true;
+                        break;
+                    }
+                }
+                if (foundSpecial) continue;
+
+                const char = text[i];
+                const nextChar = text[i + 1];
+                
+                // 伸ばし棒の処理
+                if (char === 'ー' || char === '－') {
+                    if (lastVowel) {
+                        result += lastVowel;  // 直前の母音を追加
+                    }
+                    i++;
+                    continue;
+                }
+                
+                // 拗音の処理
+                if (nextChar && ('ょゅゃッょュャ'.includes(nextChar))) {
+                    const combined = char + nextChar;
+                    let vowel = '';
+                    if (combined.match(/[キギシジチヂニヒビピミリキぎしじちぢにひびぴみり][ょョ]/)) {
+                        vowel = 'お';
+                    } else if (combined.match(/[キギシジチヂニヒビピミリきぎしじちぢにひびぴみり][ゅュ]/)) {
+                        vowel = 'う';
+                    } else if (combined.match(/[キギシジチヂニヒビピミリきぎしじちぢにひびぴみり][ゃャ]/)) {
+                        vowel = 'あ';
+                    }
+                    if (vowel) {
+                        result += vowel;
+                        lastVowel = vowel;  // 直前の母音を更新
+                    }
+                    i += 2;
+                    continue;
+                }
+
+                // 通常の文字の処理
+                if (hiraganaMap[char]) {
+                    lastVowel = hiraganaMap[char];  // 直前の母音を更新
+                    result += lastVowel;
+                } else if (katakanaMap[char]) {
+                    lastVowel = katakanaMap[char];  // 直前の母音を更新
+                    result += lastVowel;
+                } else {
+                    result += char;
+                }
+                i++;
+            }
+            
+            return result;
+        }
+
+        const inputTextarea = document.getElementById('input');
+        const outputDiv = document.getElementById('output');
+
+        inputTextarea.addEventListener('input', () => {
+            const inputText = inputTextarea.value;
+            const result = extractVowels(inputText);
+            outputDiv.textContent = result;
+        });
+    </script>
+    
+</body>
+</html>
