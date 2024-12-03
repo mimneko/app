@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuromoji.js 形態素解析 サンプル</title>
+    <!-- Kuromoji.jsをjsdelivrのCDNから読み込む -->
+    <script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script>
+    <style>
+        ruby {
+            ruby-position: over; /* ルビの位置を上に設定 */
+        }
+    </style>
+</head>
+<body>
+    <h1>Kuromoji.js 形態素解析 サンプル</h1>
+    <h2>元の文章</h2>
+    <p id="originalText"></p>
+    <h2>解析結果（ルビ付き）</h2>
+    <p id="rubyText"></p>
+
+    <script>
+        let tokenizer; // トークナイザーのインスタンス
+
+        // Kuromoji.jsの初期化
+        function initializeKuromoji() {
+            return new Promise((resolve, reject) => {
+                if (typeof kuromoji === 'undefined') {
+                    reject(new Error('Kuromoji.jsの読み込みに失敗しました。'));
+                    return;
+                }
+
+                kuromoji.builder({ dicPath: "https://unpkg.com/kuromoji@0.1.2/dict" })
+                    .build((err, _tokenizer) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            tokenizer = _tokenizer;
+                            resolve();
+                        }
+                    });
+            });
+        }
+
+        // カタカナをひらがなにする
+        function kanaToHira(str) {
+            return str.replace(/[\u30a1-\u30f6]/g, function(match) {
+                var chr = match.charCodeAt(0) - 0x60;
+                return String.fromCharCode(chr);
+            });
+        }
+
+        function isOnlyKana(str) {
+            // ひらがなの正規表現
+            const hiraganaPattern = /^[\u3040-\u309F]+$/;
+            // カタカナの正規表現
+            const katakanaPattern = /^[\u30A0-\u30FF]+$/;
+            
+            // ひらがなまたはカタカナのみならtrueを返す
+            return hiraganaPattern.test(str) || katakanaPattern.test(str);
+        }
+
+        // 固定のテキストの解析
+        function analyzeText() {
+            const text = "東京（とうきょう、英: Tokyo）は、関東平野の南部に位置し、東京湾に面する都市。日本の首都である。「東京」は広域的地方公共団体である東京都を指す場合や、特に東京都区部（東京23区）を指す場合がある。";
+
+            // 元の文章を表示
+            document.getElementById('originalText').textContent = text;
+
+            // Kuromojiの初期化後に解析を行う
+            initializeKuromoji().then(() => {
+                const tokens = tokenizer.tokenize(text);
+                const rubyText = [];
+
+                // 解析結果を文章に反映
+                tokens.forEach(token => {
+                    // 表層形
+                    let surface = token.surface_form;
+                    
+                    // 表層形がひらがなとカタカナで完結しているなら、そのルビを付けない
+                    if (!isOnlyKana(surface)) {
+                        // 名詞でかつ品詞詳細が「固有名詞」の場合、品詞を「固有名詞」に変更
+                        let pos = token.pos;
+                        if (token.pos === "名詞" && token.pos_detail_1 === "固有名詞") {
+                            pos = "固有名詞";
+                        }
+
+                        // 品詞が「記号」の場合、読みは空にする
+                        let reading = token.reading;
+                        if (token.pos === "記号") {
+                            reading = ""; // 空に設定
+                        }
+
+                        // 表層形と読みをrubyタグで表示する処理
+                        if (reading) {
+                            surface = `<ruby>${surface}<rt>${kanaToHira(reading)}</rt></ruby>`;
+                        }
+                    }
+
+                    rubyText.push(surface); // 文章にルビ付きの表層形を追加
+                });
+
+                // 解析結果をルビ付きで表示
+                document.getElementById('rubyText').innerHTML = rubyText.join('');
+            }).catch((error) => {
+                alert("エラー: " + error.message);
+            });
+        }
+
+        // ページが読み込まれた際に自動で解析を実行
+        window.onload = analyzeText;
+    </script>
+</body>
+</html>
