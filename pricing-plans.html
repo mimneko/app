@@ -80,15 +80,11 @@
         }
 
         .toggle-buttons {
-            display: flex;
             border: 1px solid #ccc;
             border-radius: 5px;
-            overflow: hidden;
-            width: 400px;
         }
 
         .toggle-btn {
-            flex: 1;
             padding: 10px 19px 9px 20px;
             border: none;
             background-color: #fff;
@@ -97,6 +93,7 @@
             font-size: 16px;
             outline: none;
             transition: background-color 0.3s, color 0.3s;
+            border-radius: 0;
         }
 
         .toggle-btn.active {
@@ -113,6 +110,14 @@
 
         .toggle-btn:not(.active):hover {
             color: black;
+        }
+
+        .toggle-btn.monthly {
+            border-radius: 5px 0 0 5px;
+        }
+
+        .toggle-btn.yearly {
+            border-radius: 0 5px 5px 0;
         }
 
         /* 料金プランカード */
@@ -394,8 +399,7 @@
 
             <div class="toggle-wrap">
                 <div class="toggle-buttons">
-                    <button id="billing-monthly" class="toggle-btn monthly active">月額</button>
-                    <button id="billing-yearly" class="toggle-btn yearly">年額（約17%OFF）</button>
+                    <button id="billing-monthly" class="toggle-btn monthly active">月額</button><button id="billing-yearly" class="toggle-btn yearly">年額（約17%OFF）</button>
                 </div>
             </div>
 
