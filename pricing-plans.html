@@ -372,6 +372,69 @@
                 margin: 0 auto 10px;
             }
         }
+
+        /* ダークモード */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+                color: #f5f5f5;
+            }
+
+            .logo, .nav-link, .footer-links a {
+                color: #f5f5f5;
+            }
+
+            .nav-link:hover, .footer-links a:hover {
+                color: #fff;
+            }
+
+            #header-container {
+                border-bottom-color: #333;
+            }
+
+            .card {
+                background-color: #2d2d2d;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            }
+
+            .card .note, .case-item p, .stat-label {
+                color: #aaa;
+            }
+
+            .toggle-buttons {
+                border-color: #444;
+            }
+
+            .toggle-btn {
+                background-color: #2d2d2d;
+                color: #aaa;
+            }
+
+            .toggle-btn:not(.active):hover {
+                color: #fff;
+            }
+
+            .case-item {
+                background-color: #2d2d2d;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .case-item h3 {
+                color: #f5f5f5;
+            }
+
+            .case-stats {
+                border-top-color: #444;
+            }
+
+            footer {
+                background-color: #2d2d2d;
+            }
+
+            .footer-column h3, .company-name {
+                color: #f5f5f5;
+            }
+        }
     </style>
     <!-- Font Awesome の読み込み -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
