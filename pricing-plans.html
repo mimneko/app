@@ -15,7 +15,7 @@
         }
 
         /* ヘッダー */
-        .header-container {
+        #header-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -283,7 +283,7 @@
             padding: 60px 0;
         }
 
-        .footer-container {
+        #footer-container {
             display: grid;
             grid-template-columns: auto repeat(3, 1fr);
             gap: 40px;
@@ -337,7 +337,7 @@
 
         /* レスポンシブ対応 */
         @media (max-width: 768px) {
-            .header-container {
+            #header-container {
                 flex-direction: column;
                 gap: 20px;
                 padding: 20px;
@@ -359,7 +359,7 @@
                 max-width: 300px;
             }
 
-            .footer-container {
+            #footer-container {
                 grid-template-columns: 1fr;
                 text-align: center;
             }
@@ -378,7 +378,7 @@
 </head>
 <body>
     <header>
-        <div class="header-container">
+        <div id="header-container">
             <a href="/" class="logo">MathCompass</a>
             <nav class="nav-menu">
                 <a href="/" class="nav-link">料金プラン</a>
@@ -394,7 +394,7 @@
         </div>
     </header>
     <main>
-        <div class="main-container">
+        <div id="main-container">
             <h1 class="title">料金プラン</h1>
 
             <div class="toggle-wrap">
@@ -504,7 +504,7 @@
         </div>
     </main>
     <footer>
-        <div class="footer-container">
+        <div id="footer-container">
             <div class="footer-logo-section">
                 <img src="https://mimneko.github.io/note/assets/icons/android-chrome-192x192.png" alt="MathCompass" class="footer-logo">
                 <p class="company-name">
