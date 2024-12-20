@@ -236,7 +236,7 @@
 
         .case-list {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
         }
 
@@ -283,20 +283,28 @@
             color: #666;
         }
 
+        @media (max-width: 768px) {
+            .case-item {
+                padding: 20px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+
         /* フッター */
         footer {
             background-color: #f5f5f5;
-            padding: 60px 0;
+            padding: 20px 0;
         }
 
         #footer-container {
-            display: grid;
-            grid-template-columns: auto repeat(3, 1fr);
-            gap: 40px;
-            max-width: 1200px;
+            display: flex;
+            justify-content: center;
+            gap: 60px;
             margin: 0 auto;
-            padding: 0 300px;
-            align-items: start;
+            padding: 0 20px;
         }
 
         .footer-logo-section {
@@ -309,36 +317,88 @@
             margin-bottom: 10px;
         }
 
-        .company-name {
-            font-size: 16px;
-            color: #333;
+        .footer-logo-section .company-name {
             margin: 0;
+        }
+
+        .footer-nav-section {
+            display: flex;
+            justify-content: flex-start;
+            gap: 20px;
+            max-width: 660px;
+        }
+
+        .footer-column {
+            flex: 1;
+            min-width: 160px;
+            text-align: left;
         }
 
         .footer-column h3 {
             font-size: 18px;
-            margin-bottom: 20px;
-            color: #333;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
 
-        .footer-links {
+        .footer-column ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
 
-        .footer-links li {
-            margin-bottom: 12px;
+        .footer-column li {
+            margin-bottom: 8px;
         }
 
-        .footer-links a {
+        .footer-column a {
             text-decoration: none;
-            color: #666;
-            transition: color 0.3s;
+            color: #333;
         }
 
-        .footer-links a:hover {
-            color: #000;
+        .footer-column a:hover {
+            text-decoration: underline;
+        }
+
+        .copyright {
+            text-align: center;
+            padding: 2em;
+            font-size: small;
+        }
+
+        @media (max-width: 768px) {
+            #footer-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .footer-logo-section {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .footer-column {
+                min-width: unset;
+            }
+        }
+
+        /* 365px以下: 全要素を縦並び */
+        @media (max-width: 365px) {
+            .footer-nav-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .footer-column {
+                flex: 1 1 100%;
+                max-width: none;
+                width: 100%;
+            }
+
+            .footer-logo-section {
+                text-align: center;
+            }
         }
 
         /* レスポンシブ対応 */
@@ -362,7 +422,7 @@
 
             .card {
                 width: 100%;
-                max-width: 300px;
+                max-width: 240px;
             }
 
             #footer-container {
@@ -705,42 +765,43 @@
         <div id="footer-container">
             <div class="footer-logo-section">
                 <a href="https://mimneko.github.io/note/" style="text-decoration: none; color: #333;">
-                    <img src="https://mimneko.github.io/note/assets/icons/android-chrome-192x192.png" alt="MathCompass" class="footer-logo">
-                    <p class="company-name">みむねこ</p>
+                    <img src="https://msp.c.yimg.jp/images/v2/FUTi93tXq405grZVGgDqG-xDq6NMUZA590viUSL7E1t9Dafn3bT2ssvzeTVSVhA8y4iZTldufLUyozbcCsSNUUvlsvJJ5n-bxkwDyfr7LXsHkfAtsZk9GQp2yv8RFLbbd0XRgvS1dkUzsTp1yDMALIBChlLTJjw6LO2QPrAUJkOmnhB4skm__wUKy4a7PA8XoPAu1aivy-X05EsU8j9_eN8Zon-Ne8oSL-VLLsltV7R4G7X2ukrH1zGMSybdMAkOlv4e0jKSmDfoqY4MwAX4sgzR-V0zRUTUHf8GRDQntdqDZNRaifXhNCs_BugWVA5o/2644-600x600.jpg" alt="MathCompass" class="footer-logo">
+                    <p class="company-name">MathCompass</p>
                 </a>
             </div>
-            
-            <nav class="footer-column">
-                <h3>製品</h3>
-                <ul class="footer-links">
-                    <li><a href="/">機能</a></li>
-                    <li><a href="/">料金プラン</a></li>
-                    <li><a href="/">アップデート情報</a></li>
-                    <li><a href="/">ダウンロード</a></li>
-                </ul>
-            </nav>
 
-            <nav class="footer-column">
-                <h3>サポート</h3>
-                <ul class="footer-links">
-                    <li><a href="/">ドキュメント</a></li>
-                    <li><a href="/">フォーラム</a></li>
-                    <li><a href="/">よくある質問</a></li>
-                    <li><a href="/">お問い合わせ</a></li>
-                </ul>
-            </nav>
-
-            <nav class="footer-column">
-                <h3>会社情報</h3>
-                <ul class="footer-links">
-                    <li><a href="/">会社概要</a></li>
-                    <li><a href="/">ブログ</a></li>
-                    <li><a href="/">採用情報</a></li>
-                    <li><a href="/">利用規約</a></li>
-                    <li><a href="/">プライバシポリシー</a></li>
-                </ul>
-            </nav>
+            <div class="footer-nav-section">
+                <nav class="footer-column">
+                    <h3>製品</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">機能</a></li>
+                        <li><a href="#">料金プラン</a></li>
+                        <li><a href="#">アップデート情報</a></li>
+                        <li><a href="#">ダウンロード</a></li>
+                    </ul>
+                </nav>
+                <nav class="footer-column">
+                    <h3>サポート</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">ドキュメント</a></li>
+                        <li><a href="#">フォーラム</a></li>
+                        <li><a href="#">よくある質問</a></li>
+                        <li><a href="#">お問い合わせ</a></li>
+                    </ul>
+                </nav>
+                <nav class="footer-column">
+                    <h3>会社情報</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">会社概要</a></li>
+                        <li><a href="#">ブログ</a></li>
+                        <li><a href="#">採用情報</a></li>
+                        <li><a href="#">利用規約</a></li>
+                        <li><a href="#">プライバシーポリシー</a></li>
+                    </ul>
+                </nav>
+            </div>
         </div>
+        <div class="copyright">© 2024 MathCompass. All Rights Reserved.</div>
     </footer>
 
     <script>
