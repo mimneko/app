@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>フッター</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        footer {
+            background-color: #f8f8f8;
+            padding: 20px 0;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: flex-start; /* 左寄せ */
+            gap: 20px; /* 列間の固定間隔 */
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px; /* 左右の余白を追加 */
+        }
+
+        .footer-column {
+            flex: 1;
+            max-width: 300px;
+            text-align: left; /* 左揃え */
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-column li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .footer-column a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 365px) {
+            .footer-container {
+                flex-direction: column; /* 列を縦に並べる */
+                align-items: flex-start; /* 左寄せを維持 */
+            }
+
+            .footer-column {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <footer>
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3>製品</h3>
+                <ul>
+                    <li><a href="#">機能</a></li>
+                    <li><a href="#">料金プラン</a></li>
+                    <li><a href="#">アップデート情報</a></li>
+                    <li><a href="#">ダウンロード</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>サポート</h3>
+                <ul>
+                    <li><a href="#">ドキュメント</a></li>
+                    <li><a href="#">フォーラム</a></li>
+                    <li><a href="#">よくある質問</a></li>
+                    <li><a href="#">お問い合わせ</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>会社情報</h3>
+                <ul>
+                    <li><a href="#">会社概要</a></li>
+                    <li><a href="#">ブログ</a></li>
+                    <li><a href="#">採用情報</a></li>
+                    <li><a href="#">利用規約</a></li>
+                    <li><a href="#">プライバシーポリシー</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
