@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>料金プラン - MathCompass</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3498db',
+                        secondary: '#ea5506',
+                    },
+                    fontFamily: {
+                        sans: ['"Yu Gothic Medium"', '"Noto Sans Japanese"', '"Hiragino Kaku Gothic ProN"', '"Hiragino Sans"', '"Meiryo"', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Ribeye+Marrow&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="font-sans bg-white text-black">
+    <!-- Header -->
+    <header class="border-b border-gray-200">
+        <div class="container mx-auto flex justify-between items-center p-5">
+            <a href="/" class="text-lg font-serif text-black" style="font-family: 'Ribeye Marrow', serif;">MathCompass</a>
+            <nav class="flex items-center gap-6">
+                <a href="/" class="text-gray-600 hover:text-black">料金プラン</a>
+                <a href="/" class="text-gray-600 hover:text-black">機能</a>
+                <a href="/" class="text-gray-600 hover:text-black">ブログ</a>
+                <a href="/" class="text-gray-600 hover:text-black">ドキュメント</a>
+                <a href="/" class="bg-primary text-white py-2 px-4 rounded flex items-center gap-2 hover:bg-blue-600">
+                    <i class="fa-regular fa-user"></i>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-5">
+        <h1 class="text-center text-2xl font-bold my-10">料金プラン</h1>
+
+        <!-- Toggle Buttons -->
+        <div class="flex justify-center mb-10">
+            <div class="flex border border-gray-300 rounded">
+                <button id="billing-monthly" class="py-2 px-5 bg-primary text-white rounded-l active">月額</button>
+                <button id="billing-yearly" class="py-2 px-5 bg-white text-gray-500 hover:text-black rounded-r">年額（約17%OFF）</button>
+            </div>
+        </div>
+
+        <!-- Pricing Cards -->
+        <div id="pricing-cards" class="flex flex-wrap justify-center gap-6">
+            <!-- Card: Basic -->
+            <div class="bg-white rounded-lg shadow-lg p-6 w-60 text-center flex flex-col">
+                <h2 class="text-xl font-bold">Basic</h2>
+                <p class="text-gray-500">おためし</p>
+                <p class="text-lg font-bold my-4">0円</p>
+                <ul class="text-left text-sm text-gray-700 space-y-2 flex-grow">
+                    <li>毎日5回まで問題を相談可能</li>
+                    <li>基本的なヒントの提供</li>
+                    <li>過去1年間の相談履歴</li>
+                </ul>
+                <button class="mt-4 bg-gray-100 text-black py-2 px-4 rounded hover:bg-gray-200">はじめる</button>
+            </div>
+
+            <!-- Card: Pro -->
+            <div class="bg-white rounded-lg shadow-lg p-6 w-60 text-center flex flex-col">
+                <h2 class="text-xl font-bold text-primary">Pro</h2>
+                <p class="text-gray-500">個人向け</p>
+                <p class="text-lg font-bold my-4">
+                    <span class="amount">314円</span>/<span class="term">月</span>
+                </p>
+                <ul class="text-left text-sm text-gray-700 space-y-2 flex-grow">
+                    <li>無制限の問題相談</li>
+                    <li>詳細なステップ解説</li>
+                    <li>永年の相談履歴</li>
+                    <li>類題の紹介</li>
+                    <li>広告の非表示</li>
+                    <li>学習進捗の記録</li>
+                    <li>ユーザの習熟度に合わせた回答の提供</li>
+                </ul>
+                <button class="mt-4 bg-primary text-white py-2 px-4 rounded hover:bg-blue-600">購入する</button>
+            </div>
+
+            <!-- Card: School -->
+            <div class="bg-white rounded-lg shadow-lg p-6 w-60 text-center flex flex-col">
+                <h2 class="text-xl font-bold text-primary">School</h2>
+                <p class="text-gray-500">20人から</p>
+                <p class="text-lg font-bold my-4">
+                    <span class="amount">271円</span>/<span class="term">月</span>/<span class="user">人</span>
+                </p>
+                <ul class="text-left text-sm text-gray-700 space-y-2 flex-grow">
+                    <li>Proプランのすべての機能</li>
+                    <li>教材との連携機能</li>
+                    <li>一括アカウント管理</li>
+                    <li>カスタムコンテンツの追加</li>
+                </ul>
+                <button class="mt-4 bg-primary text-white py-2 px-4 rounded hover:bg-blue-600">購入する</button>
+            </div>
+        </div>
+
+        <!-- Case Studies -->
+        <section class="my-20">
+            <h2 class="text-center text-2xl font-bold mb-10">導入事例</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-bold mb-3">青空高等学校</h3>
+                    <p class="text-gray-600 mb-4">数学科の授業でMathCompassを活用し、生徒一人一人の理解度に合わせた個別指導を実現。教員の負担を軽減しながら、生徒の学習意欲と成績の向上に成功しました。</p>
+                    <div class="flex justify-between text-center">
+                        <div>
+                            <p class="text-xl font-bold text-primary">32%</p>
+                            <p class="text-gray-500 text-sm">成績向上率</p>
+                        </div>
+                        <div>
+                            <p class="text-xl font-bold text-primary">450</p>
+                            <p class="text-gray-500 text-sm">利用生徒数</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-bold mb-3">さくら進学塾</h3>
+                    <p class="text-gray-600 mb-4">個別指導塾での復習授業にMathCompassを導入。AIによる解説で講師の指導時間効率化し、より多くの生徒へのきめ細かなサポートが可能になりました。</p>
+                    <div class="flex justify-between text-center">
+                        <div>
+                            <p class="text-xl font-bold text-primary">45%</p>
+                            <p class="text-gray-500 text-sm">指導時間削減</p>
+                        </div>
+                        <div>
+                            <p class="text-xl font-bold text-primary">180</p>
+                            <p class="text-gray-500 text-sm">月間利用者数</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-bold mb-3">みらい学習会</h3>
+                    <p class="text-gray-600 mb-4">放課後の自習室でMathCompassを活用。生徒が自主的に学習を進められる環境を整備し、学習意欲の向上と効率的な進度管理を実現しています。</p>
+                    <div class="flex justify-between text-center">
+                        <div>
+                            <p class="text-xl font-bold text-primary">28%</p>
+                            <p class="text-gray-500 text-sm">学習時間増加</p>
+                        </div>
+                        <div>
+                            <p class="text-xl font-bold text-primary">250</p>
+                            <p class="text-gray-500 text-sm">生徒数</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 mt-10 py-6">
+        <div class="container mx-auto text-center text-sm text-gray-500">
+            <div class="flex justify-center gap-10 mb-4">
+                <div>
+                    <h3 class="font-bold">製品</h3>
+                    <ul>
+                        <li><a href="#" class="hover:text-black">機能</a></li>
+                        <li><a href="#" class="hover:text-black">料金プラン</a></li>
+                        <li><a href="#" class="hover:text-black">アップデート情報</a></li>
+                        <li><a href="#" class="hover:text-black">ダウンロード</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold">サポート</h3>
+                    <ul>
+                        <li><a href="#" class="hover:text-black">ドキュメント</a></li>
+                        <li><a href="#" class="hover:text-black">フォーラム</a></li>
+                        <li><a href="#" class="hover:text-black">よくある質問</a></li>
+                        <li><a href="#" class="hover:text-black">お問い合わせ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold">会社情報</h3>
+                    <ul>
+                        <li><a href="#" class="hover:text-black">会社概要</a></li>
+                        <li><a href="#" class="hover:text-black">ブログ</a></li>
+                        <li><a href="#" class="hover:text-black">採用情報</a></li>
+                        <li><a href="#" class="hover:text-black">利用規約</a></li>
+                        <li><a href="#" class="hover:text-black">プライバシーポリシー</a></li>
+                    </ul>
+                </div>
+            </div>
+            <p>© 2024 MathCompass. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const monthlyButton = document.getElementById('billing-monthly');
+            const yearlyButton = document.getElementById('billing-yearly');
+            const cards = document.querySelectorAll('.card');
+
+            const PRICES = {
+                'Pro': { monthly: '314円', yearly: '3141円' },
+                'School': { monthly: '271円', yearly: '2718円' }
+            };
+
+            const updatePricing = (isYearly) => {
+                cards.forEach(card => {
+                    const name = card.querySelector('.name');
+                    const title = name.textContent;
+                    if (title === 'Basic') return;
+
+                    const amount = card.querySelector('.amount');
+                    const term = card.querySelector('.term');
+
+                    if (isYearly) {
+                        amount.textContent = PRICES[title].yearly;
+                        term.textContent = '年';
+                    } else {
+                        amount.textContent = PRICES[title].monthly;
+                        term.textContent = '月';
+                    }
+                });
+            };
+
+            monthlyButton.addEventListener('click', () => {
+                monthlyButton.classList.add('bg-primary', 'text-white');
+                yearlyButton.classList.remove('bg-secondary', 'text-white');
+                updatePricing(false);
+            });
+
+            yearlyButton.addEventListener('click', () => {
+                yearlyButton.classList.add('bg-secondary', 'text-white');
+                monthlyButton.classList.remove('bg-primary', 'text-white');
+                updatePricing(true);
+            });
+        });
+    </script>
+</body>
+</html>
