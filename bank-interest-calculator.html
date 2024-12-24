@@ -189,7 +189,7 @@
                 const interestRate = parseFloat(document.getElementById(`interestRate${i}`).value) / 100;
                 
                 const initialAmount = deposit;
-                const finalAmount = Math.floor(deposit * (1 + interestRate * (1 - taxRate))) * years;
+                const finalAmount = deposit + Math.floor(deposit * interestRate * (1 - taxRate)) * years;
                 
                 totalInitial += initialAmount;
                 totalFinal += finalAmount;
