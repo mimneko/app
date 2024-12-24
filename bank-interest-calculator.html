@@ -122,8 +122,8 @@
         <h1>銀行預金利息計算機</h1>
         <div id="bankInputs"></div>
         <div class="controls">
-            <button id="addBank">銀行を追加</button>
-            <button id="removeBank">銀行を削除</button>
+            <button id="addBank">口座を追加</button>
+            <button id="removeBank">口座を削除</button>
         </div>
         <div class="bank-input">
             <div class="input-group horizontal">
@@ -139,6 +139,7 @@
         </div>
         <button id="calculate">計算する</button>
         <div id="results"></div>
+        <p>口座の利息計算方法によっては、表示と異なる場合があります。</p>
     </div>
 
     <script>
@@ -188,7 +189,7 @@
                 const interestRate = parseFloat(document.getElementById(`interestRate${i}`).value) / 100;
                 
                 const initialAmount = deposit;
-                const finalAmount = Math.floor(deposit * Math.pow(1 + interestRate * (1 - taxRate), years));
+                const finalAmount = Math.floor(deposit * (1 + interestRate) * (1 - taxRate)) * years;
                 
                 totalInitial += initialAmount;
                 totalFinal += finalAmount;
