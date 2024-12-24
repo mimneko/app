@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>銀行預金利息計算機</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef2f7; /* 明るい背景色で統一 */
+            color: #333;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 700px;
+            margin: 40px auto; /* 上下の余白を追加 */
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* 柔らかい影を追加 */
+            border-radius: 8px; /* 角を少し丸める */
+        }
+
+        h1 {
+            color: #1e293b;
+            text-align: center;
+            font-size: 1.8em; /* 少し大きめに調整 */
+            margin-bottom: 20px;
+        }
+
+        .bank-input {
+            background-color: #f9fbff; /* 控えめな青系背景 */
+            padding: 20px; /* パディングを増やす */
+            margin-bottom: 20px; /* 間隔を広げる */
+            border-radius: 6px; /* 角を滑らかに */
+            border: 1px solid #d1d5db; /* 薄い枠線を追加 */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px; /* ラベルと入力欄の距離を広げる */
+            font-size: 0.9em;
+            color: #374151;
+        }
+
+        input[type="number"] {
+            padding: 10px; /* 内側の余白を増やす */
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            background-color: #f1f5f9; /* より明るい背景 */
+            font-size: 1em;
+            color: #111827;
+        }
+
+        button {
+            display: inline-block;
+            background-color: #2563eb; /* ボタン色を濃く */
+            color: #ffffff;
+            padding: 12px 20px; /* ボタンを大きく */
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 1em;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8; /* ホバー時の色を調整 */
+            transform: translateY(-2px); /* ホバー時の浮き上がり効果 */
+        }
+
+        .controls {
+            margin-bottom: 30px; /* 余白を増やして目立たせる */
+        }
+
+        #results {
+            margin-top: 30px; /* 上部に余白を追加 */
+        }
+
+        .result-item {
+            background-color: #f8fafc;
+            padding: 20px; /* 内側の余白を増やす */
+            margin-bottom: 15px; /* 各結果間の余白を広げる */
+            border-radius: 6px;
+            border: 1px solid #e2e8f0; /* 結果の枠線を追加 */
+        }
+
+        .total {
+            background-color: #e0f2fe; /* 合計部分を青色に */
+            border-color: #bae6fd;
+            color: #0c4a6e; /* 文字を濃い青に */
+        }
+
+        .horizontal {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px; /* 入力欄間のスペースを一定化 */
+        }
+
+        .input-subgroup {
+            width: 48%;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .result-label {
+            text-align: left;
+        }
+        .result-value {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>銀行預金利息計算機</h1>
+        <div id="bankInputs"></div>
+        <div class="controls">
+            <button id="addBank">銀行を追加</button>
+            <button id="removeBank">銀行を削除</button>
+        </div>
+        <div class="bank-input">
+            <div class="input-group horizontal">
+                <div class="input-subgroup">
+                    <label for="taxRate">税率 (%)</label>
+                    <input type="number" id="taxRate" min="0" max="100" step="0.1" value="20.315">
+                </div>
+                <div class="input-subgroup">
+                    <label for="years">計算年数</label>
+                    <input type="number" id="years" min="1" value="1">
+                </div>
+            </div>
+        </div>
+        <button id="calculate">計算する</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let bankCount = 1;
+
+        function createBankInput(index, deposit = 1, interestRate = 0.3) {
+            return `
+                <div class="bank-input">
+                    <h3>銀行 ${index + 1}</h3>
+                    <div class="input-group horizontal">
+                        <div class="input-subgroup">
+                            <label for="deposit${index}">預金額 (万円)</label>
+                            <input type="number" id="deposit${index}" min="0" step="1" value="${deposit}">
+                        </div>
+                        <div class="input-subgroup">
+                            <label for="interestRate${index}">年利 (%)</label>
+                            <input type="number" id="interestRate${index}" min="0" step="0.1" value="${interestRate}">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateBankInputs() {
+            const bankInputs = document.getElementById('bankInputs');
+            let newHTML = '';
+            for (let i = 0; i < bankCount; i++) {
+                const depositElement = document.getElementById(`deposit${i}`);
+                const interestRateElement = document.getElementById(`interestRate${i}`);
+                const deposit = depositElement ? depositElement.value : 100;
+                const interestRate = interestRateElement ? interestRateElement.value : 0.4;
+                newHTML += createBankInput(i, deposit, interestRate);
+            }
+            bankInputs.innerHTML = newHTML;
+        }
+
+        function calculateInterest() {
+            const taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
+            const years = parseInt(document.getElementById('years').value);
+            let totalInitial = 0;
+            let totalFinal = 0;
+            let results = '';
+            let bankResults = '';
+
+            for (let i = 0; i < bankCount; i++) {
+                const deposit = Math.floor(parseFloat(document.getElementById(`deposit${i}`).value) * 10000); // 万円から円に変換し、切り捨て
+                const interestRate = parseFloat(document.getElementById(`interestRate${i}`).value) / 100;
+                
+                const initialAmount = deposit;
+                const finalAmount = Math.floor(deposit * Math.pow(1 + interestRate * (1 - taxRate), years));
+                
+                totalInitial += initialAmount;
+                totalFinal += finalAmount;
+
+                bankResults += `
+                    <div class="result-item">
+                        <h3>銀行 ${i + 1}</h3>
+                        <div class="result-row">
+                            <span class="result-label">初期預金額</span>
+                            <span class="result-value">${initialAmount.toLocaleString()} 円</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">${years}年後の預金額</span>
+                            <span class="result-value">${finalAmount.toLocaleString()} 円</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">利息 (税引後)</span>
+                            <span class="result-value">${(finalAmount - initialAmount).toLocaleString()} 円</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            results = `
+                <div class="result-item total">
+                    <h3>合計</h3>
+                    <div class="result-row">
+                        <span class="result-label">初期預金総額</span>
+                        <span class="result-value">${totalInitial.toLocaleString()} 円</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">${years}年後の預金総額</span>
+                        <span class="result-value">${totalFinal.toLocaleString()} 円</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">利息総額 (税引後)</span>
+                        <span class="result-value">${(totalFinal - totalInitial).toLocaleString()} 円</span>
+                    </div>
+                </div>
+                ${bankResults}
+            `;
+
+            document.getElementById('results').innerHTML = results;
+        }
+
+        document.getElementById('addBank').addEventListener('click', () => {
+            if (bankCount < 20) {
+                bankCount++;
+                updateBankInputs();
+            }
+        });
+
+        document.getElementById('removeBank').addEventListener('click', () => {
+            if (bankCount > 1) {
+                bankCount--;
+                updateBankInputs();
+            }
+        });
+
+        document.getElementById('calculate').addEventListener('click', calculateInterest);
+
+        updateBankInputs();
+    </script>
+</body>
+</html>
+
