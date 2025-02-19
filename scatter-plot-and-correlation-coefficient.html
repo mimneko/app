@@ -32,6 +32,9 @@
             width: 100%;
             height: 24px;
         }
+        .toggle-container {
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -44,7 +47,7 @@
             <canvas id="scatterChart" width="600" height="600"></canvas>
         </div>
         <div class="slider-container">
-            <input type="range" id="correlationSlider" min="-1" max="1" step="0.1" value="0" oninput="updateChart()" list="my-datalist">
+            <input type="range" id="correlationSlider" min="-1" max="1" step="0.1" value="0" oninput="updateChart(true)" list="my-datalist">
             <datalist id="my-datalist">
                 <option value="-1.0"></option>
                 <option value="-0.9"></option>
@@ -68,6 +71,12 @@
                 <option value="0.9"></option>
                 <option value="1.0"></option>
             </datalist>
+        </div>
+        <div class="toggle-container">
+            <label>
+                <input type="checkbox" id="meanLinesToggle" onchange="updateChart(false)">
+                平均の線を表示
+            </label>
         </div>
     </main>
     <script>
@@ -104,26 +113,6 @@
                     label: 'データ点',
                     data: initialData,
                     backgroundColor: 'blue'
-                },
-                {
-                    type: 'line',
-                    data: [
-                        { x: initialMeans.xMean, y: 0 },
-                        { x: initialMeans.xMean, y: 100 }
-                    ],
-                    borderColor: 'red',
-                    borderWidth: 1,
-                    pointRadius: 0
-                },
-                {
-                    type: 'line',
-                    data: [
-                        { x: 0, y: initialMeans.yMean },
-                        { x: 100, y: initialMeans.yMean }
-                    ],
-                    borderColor: 'green',
-                    borderWidth: 1,
-                    pointRadius: 0
                 }]
             },
             options: {
@@ -135,43 +124,51 @@
                     legend: {
                         display: false
                     }
+                },
+                animation: {
+                    duration: 0 // アニメーションを削除
                 }
             }
         });
         
-        function updateChart() {
+        function updateChart(reGenerateData) {
             let correlation = parseFloat(document.getElementById('correlationSlider').value);
             document.getElementById('correlationValue').innerText = correlation.toFixed(2);
-            let newData = generateData(correlation);
+            let newData = reGenerateData ? generateData(correlation) : scatterChart.data.datasets[0].data;
             const means = calculateMeans(newData);
+            let meanLinesVisible = document.getElementById('meanLinesToggle').checked;
 
-            scatterChart.data.datasets = [{
+            let newDatasets = [{
                 label: 'データ点',
                 data: newData,
                 backgroundColor: 'blue'
-            },
-            {
-                type: 'line',
-                data: [
-                    { x: means.xMean, y: 0 },
-                    { x: means.xMean, y: 100 }
-                ],
-                borderColor: 'red',
-                borderWidth: 1,
-                pointRadius: 0
-            },
-            {
-                type: 'line',
-                data: [
-                    { x: 0, y: means.yMean },
-                    { x: 100, y: means.yMean }
-                ],
-                borderColor: 'green',
-                borderWidth: 1,
-                pointRadius: 0
             }];
 
-            scatterChart.update();
+            if (meanLinesVisible) {
+                newDatasets.push({
+                    type: 'line',
+                    data: [
+                        { x: means.xMean, y: 0 },
+                        { x: means.xMean, y: 100 }
+                    ],
+                    borderColor: 'red',
+                    borderWidth: 1,
+                    pointRadius: 0
+                },
+                {
+                    type: 'line',
+                    data: [
+                        { x: 0, y: means.yMean },
+                        { x: 100, y: means.yMean }
+                    ],
+                    borderColor: 'green',
+                    borderWidth: 1,
+                    pointRadius: 0
+                });
+            }
+
+            scatterChart.data.datasets = newDatasets;
+            scatterChart.update({ duration: 0 }); // アニメーションを削除
         }
     </script>
 </body>
