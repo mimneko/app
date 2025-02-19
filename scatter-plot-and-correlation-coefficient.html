@@ -22,14 +22,14 @@
         }
         .chart-container {
             width: 100%;
-            margin: 20px 0; /* 散布図の上下に余白を設定 */
+            margin: 20px 0;
         }
         .slider-container {
-            width: 100%; /* スライダーの幅を100%に設定 */
+            width: 100%;
         }
         #correlationSlider {
-            width: 100%; /* スライダーの幅を100%に設定 */
-            height: 24px; /* スライダーの高さを24pxに設定 */
+            width: 100%;
+            height: 24px;
         }
     </style>
 </head>
@@ -74,9 +74,8 @@
             const n = 100;
             const data = [];
             for (let i = 0; i < n; i++) {
-                const x = Math.random() * 100; // 0から100の範囲
+                const x = Math.random() * 100;
                 let y;
-                // rが1から-1の間の場合、連続的に変化
                 const slope = correlation * 100;
                 const intercept = (1 - correlation) * 50;
                 y = slope * (x / 100) + intercept + (Math.random() - 0.5) * (100 - Math.abs(slope));
@@ -84,25 +83,56 @@
             }
             return data;
         }
+
+        function calculateMeans(data) {
+            const xSum = data.reduce((sum, point) => sum + point.x, 0);
+            const ySum = data.reduce((sum, point) => sum + point.y, 0);
+            return {
+                xMean: xSum / data.length,
+                yMean: ySum / data.length
+            };
+        }
         
+        let initialData = generateData(0);
+        let initialMeans = calculateMeans(initialData);
         let ctx = document.getElementById('scatterChart').getContext('2d');
         let scatterChart = new Chart(ctx, {
             type: 'scatter',
             data: {
                 datasets: [{
                     label: 'データ点',
-                    data: generateData(0),
+                    data: initialData,
                     backgroundColor: 'blue'
+                },
+                {
+                    type: 'line',
+                    data: [
+                        { x: initialMeans.xMean, y: 0 },
+                        { x: initialMeans.xMean, y: 100 }
+                    ],
+                    borderColor: 'red',
+                    borderWidth: 1,
+                    pointRadius: 0
+                },
+                {
+                    type: 'line',
+                    data: [
+                        { x: 0, y: initialMeans.yMean },
+                        { x: 100, y: initialMeans.yMean }
+                    ],
+                    borderColor: 'green',
+                    borderWidth: 1,
+                    pointRadius: 0
                 }]
             },
             options: {
                 scales: {
-                    x: { type: 'linear', position: 'bottom', min: 0, max: 100 }, // 最小値と最大値を0と100に設定
-                    y: { min: 0, max: 100 } // 最小値と最大値を0と100に設定
+                    x: { type: 'linear', position: 'bottom', min: 0, max: 100 },
+                    y: { min: 0, max: 100 }
                 },
                 plugins: {
                     legend: {
-                        display: false // 凡例を表示しない
+                        display: false
                     }
                 }
             }
@@ -112,7 +142,34 @@
             let correlation = parseFloat(document.getElementById('correlationSlider').value);
             document.getElementById('correlationValue').innerText = correlation.toFixed(2);
             let newData = generateData(correlation);
-            scatterChart.data.datasets[0].data = newData;
+            const means = calculateMeans(newData);
+
+            scatterChart.data.datasets = [{
+                label: 'データ点',
+                data: newData,
+                backgroundColor: 'blue'
+            },
+            {
+                type: 'line',
+                data: [
+                    { x: means.xMean, y: 0 },
+                    { x: means.xMean, y: 100 }
+                ],
+                borderColor: 'red',
+                borderWidth: 1,
+                pointRadius: 0
+            },
+            {
+                type: 'line',
+                data: [
+                    { x: 0, y: means.yMean },
+                    { x: 100, y: means.yMean }
+                ],
+                borderColor: 'green',
+                borderWidth: 1,
+                pointRadius: 0
+            }];
+
             scatterChart.update();
         }
     </script>
