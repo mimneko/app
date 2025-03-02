@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>15パズル</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .game-container {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      border: 2px solid #000;
+      box-sizing: content-box;
+    }
+
+    .puzzle {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      width: 100%;
+      height: 100%;
+    }
+
+    .tile {
+      position: relative;
+      border: 1px solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+      overflow: hidden;
+    }
+
+    .tile-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .tile-pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+      z-index: 0;
+    }
+
+    .pattern-cell {
+      background-color: #ccc;
+    }
+
+    .tile[data-value="0"] .pattern-cell {
+      background-color: #e0e0e0;
+    }
+
+    .tile-number {
+      position: relative;
+      z-index: 1;
+    }
+
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      height: 24px;
+    }
+
+    .move-history {
+      margin-top: 10px;
+      font-size: 16px;
+			max-width: 80%;
+    }
+  </style>
+</head>
+<body>
+  <h1>15パズル</h1>
+  <div class="game-container">
+    <div class="puzzle" id="puzzle"></div>
+  </div>
+  <div class="controls">
+    <button id="reset">リセット</button>
+  </div>
+  <div class="message" id="message"></div>
+	<h2>0の移動履歴</h2>
+  <div class="move-history" id="move-history"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const puzzleContainer = document.getElementById('puzzle');
+      const resetButton = document.getElementById('reset');
+      const messageElement = document.getElementById('message');
+      const moveHistoryElement = document.getElementById('move-history');
+      let moveHistory = [];
+
+			// パターンの定義（0と1の配置）
+			const patterns = [
+        [
+          [0,0,1,0,0], // 0
+          [0,1,1,1,0],
+          [0,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,0,0,0]
+        ],
+        [
+          [0,0,0,0,0], // 1
+          [0,1,1,1,0],
+          [1,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,0,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 2
+          [0,1,1,1,0],
+          [1,1,1,1,0],
+          [0,1,1,1,0],
+          [0,0,1,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 3
+          [0,1,1,1,0],
+          [1,1,1,1,0],
+          [0,1,1,1,0],
+          [0,0,1,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 4
+          [0,1,1,1,0],
+          [0,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,1,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 5
+          [0,1,1,1,0],
+          [1,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,0,0,0]
+        ],
+        [
+          [0,0,0,0,0], // 6
+          [0,1,1,1,0],
+          [1,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,0,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 7
+          [0,1,1,1,0],
+          [1,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,1,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 8
+          [0,1,1,1,0],
+          [0,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,1,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 9
+          [0,1,1,1,0],
+          [0,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,1,0,0]
+        ],
+        [
+          [0,0,0,0,0], // 10
+          [0,1,1,1,0],
+          [1,1,1,1,0],
+          [0,1,1,1,0],
+          [0,0,1,0,0]
+        ],
+        [
+          [0,0,0,0,0], // 11
+          [0,1,1,1,0],
+          [1,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,1,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 12
+          [0,1,1,1,0],
+          [0,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,1,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 13
+          [0,1,1,1,0],
+          [1,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,0,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 14
+          [0,1,1,1,0],
+          [0,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,0,0,0]
+        ],
+        [
+          [0,0,1,0,0], // 15
+          [0,1,1,1,0],
+          [1,1,1,1,0],
+          [0,1,1,1,0],
+          [0,0,0,0,0]
+        ]
+      ];
+
+      // 各数字の色（淡い色に調整）
+      const colors = [
+        '#F9FFFE', // 0: 白色
+        '#F9801D', // 1: 橙色
+        '#C74EBD', // 2: 赤紫色
+        '#3AB3DA', // 3: 空色
+        '#FED83D', // 4: 黄色
+        '#80C71F', // 5: 黄緑色
+        '#F38BAA', // 6: 桃色
+        '#474F52', // 7: 灰色
+        '#9D9D97', // 8: 薄灰色
+        '#169C9C', // 9: 青緑色
+        '#8932B8', // 10: 紫色
+        '#3C44AA', // 11: 青色
+        '#835432', // 12: 茶色
+        '#5E7C16', // 13: 緑色
+        '#B02E26', // 14: 赤色
+        '#1D1D21'  // 15: 黒色
+      ];
+
+      // 初期配置（画像に合わせた配置）
+      const initialState = [0, 1, 2, 11, 9, 10, 13, 4, 3, 14, 5, 6, 8, 15, 7, 12];
+      let currentState = [...initialState];
+      let emptyTileIndex = currentState.indexOf(0);
+
+      // 正解の状態
+      const solvedState = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+
+      // パズルの初期化
+      function initializePuzzle() {
+        puzzleContainer.innerHTML = '';
+				moveHistoryElement.textContent = moveHistory.join(', ');
+				
+        for (let i = 0; i < 16; i++) {
+          const tileValue = currentState[i];
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.dataset.index = i;
+          tile.dataset.value = tileValue;
+          
+          const tileInner = document.createElement('div');
+          tileInner.className = 'tile-inner';
+          
+          // パターンの作成
+          const tilePattern = document.createElement('div');
+          tilePattern.className = 'tile-pattern';
+          
+          for (let row = 0; row < 5; row++) {
+            for (let col = 0; col < 5; col++) {
+              const patternCell = document.createElement('div');
+              patternCell.className = 'pattern-cell';
+              if (patterns[tileValue][row][col]) {
+                patternCell.style.backgroundColor = colors[tileValue];
+              }
+              tilePattern.appendChild(patternCell);
+            }
+          }
+          
+          const tileNumber = document.createElement('div');
+          tileNumber.className = 'tile-number';
+          tileNumber.textContent = tileValue;
+          
+          tileInner.appendChild(tilePattern);
+          tileInner.appendChild(tileNumber);
+          tile.appendChild(tileInner);
+          
+          tile.addEventListener('click', () => moveTile(i));
+          
+          puzzleContainer.appendChild(tile);
+        }
+      }
+
+      // タイルの移動
+      function moveTile(index) {
+        if (!isAdjacent(index, emptyTileIndex)) return;
+        
+        const direction = getMoveDirection(index, emptyTileIndex);
+        moveHistory.push(direction);
+        
+        // タイルの値を入れ替え
+        currentState[emptyTileIndex] = currentState[index];
+        currentState[index] = 0;
+        emptyTileIndex = index;
+        
+        // パズルを再描画
+        initializePuzzle();
+        
+        // 勝利判定
+        if (isWin()) {
+          messageElement.textContent = 'おめでとうございます！パズルを解きました！';
+        }
+      }
+
+      // 隣接しているかチェック
+      function isAdjacent(index1, index2) {
+        const row1 = Math.floor(index1 / 4);
+        const col1 = index1 % 4;
+        const row2 = Math.floor(index2 / 4);
+        const col2 = index2 % 4;
+        
+        return (
+          (Math.abs(row1 - row2) === 1 && col1 === col2) ||
+          (Math.abs(col1 - col2) === 1 && row1 === row2)
+        );
+      }
+
+      // 移動方向を取得
+      function getMoveDirection(index1, index2) {
+        const rowDiff = Math.floor(index1 / 4) - Math.floor(index2 / 4);
+        const colDiff = (index1 % 4) - (index2 % 4);
+        if (rowDiff === 1) return '下';
+        if (rowDiff === -1) return '上';
+        if (colDiff === 1) return '右';
+        if (colDiff === -1) return '左';
+        return '';
+      }
+
+      // 勝利判定
+      function isWin() {
+        return currentState.every((value, index) => value === solvedState[index]);
+      }
+
+      // パズルをリセット
+      function resetPuzzle() {
+        currentState = [...initialState];
+        emptyTileIndex = currentState.indexOf(0);
+        moveHistory = []; // 移動履歴をリセット
+        initializePuzzle();
+        messageElement.textContent = '';
+      }
+
+      // イベントリスナーの設定
+      resetButton.addEventListener('click', resetPuzzle);
+
+      // 初期化
+      initializePuzzle();
+    });
+  </script>
+</body>
+</html>
