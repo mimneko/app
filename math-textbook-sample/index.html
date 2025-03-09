@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>関数の増減と極大・極小</title>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('word').forEach((elem, index) => {
+                const checkboxId = `term${index}`;
+                elem.outerHTML = `<input type="checkbox" id="${checkboxId}" class="toggle-input"><label for="${checkboxId}" class="term-hidden">${elem.innerHTML}</label>`;
+            });
+        });
+    </script>
+    <style>
+        /* チェックボックスは非表示 */
+        .toggle-input {
+            display: none;
+        }
+
+        /* 付箋 */
+        .term-hidden {
+            display: inline-block;
+            background-color: #333;
+            color: #333;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            position: relative;
+            cursor: pointer;
+
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* チェックされたとき */
+        .toggle-input:checked + .term-hidden {
+            color: #ff7300;
+            font-weight: bold;
+            background-color: transparent; /* 背景色を透明に設定 */
+            border: 1px solid #333;
+            
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+
+        body {
+            font-size: 25px;
+        }
+        /* mainを画面幅中央800pxに設定 */
+        main {
+            width: 1000px;
+            margin: 0 auto 100px;
+        }
+
+        .box {
+            background-color: #b3e5fc; /* 淡い水色 */
+            border-radius: 10px; /* 角の丸い四角 */
+            padding: 20px; /* 内側の余白 */
+            margin-bottom: 20px; /* 下の余白 */
+        }
+
+        h1 {
+            margin: 7em 0;
+        }
+
+        h2 {
+            margin-top: 3em;
+        }
+
+        h3 {
+            margin-top: 1.5em;
+        }
+
+        .columns {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .column {
+            flex: 1;
+            padding: 10px;
+        }
+
+        details {
+            border: 1px solid #ccc; /* 細い灰色の線 */
+            padding: 10px; /* 内側の余白 */
+            margin: 10px 0; /* 上下の余白 */
+            cursor: pointer; /* カーソルを指に変更 */
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            border-right: 3px double #ccc;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>p.197<br>第2節　関数の値の変化<br>４　関数の増減と極大・極小</h1>
+
+        <h2>グラフの特徴</h2>
+        <h3>クイズ</h3>
+        <p>次の関数のグラフを描け。</p>
+        <div class="columns">
+            <div class="column">
+                <h3>(1)　$y=x+2$</h3>
+                <img src="img1-1.png" alt="関数のグラフ" width="300">
+            </div>
+            <div class="column">
+                <h3>(2)　$y=x^2$</h3>
+                <img src="img1-1.png" alt="関数のグラフ" width="300">
+            </div>
+            <div class="column">
+                <h3>(3)　$y=x^3-3x$</h3>
+                <img src="img1-1.png" alt="関数のグラフ" width="300">
+            </div>
+        </div>
+
+        <h3>関数と接線</h3>
+        <p>関数のグラフ上の点Aに近いところでは、<br>
+            関数のグラフはAにおける<word>接線</word>とほぼ一致している。</p>
+        <p>すなわち、関数の増減は<word>接線の傾き</word>で調べられる</p>
+
+        <h3>前時の復習</h3>
+        <details>
+            <summary>接線の方程式(省略)</summary>
+            <p>$$y-f(a)=f'(a)(x-a)$$</p>
+        </details>
+
+        <h2>本時の目標</h2>
+        <div class="box">
+            <p>導関数を使って関数の増減を調べてグラフを描こう</p>
+        </div>
+
+        <h2>関数の増減と導関数</h2>
+        <h3>$f(x)=x^2-4x$のグラフ</h3>
+        <p>$f(x)$の導関数は$f'(x)=$<word>$2x-4=2(x-2)$</word></p>
+        <p>よって、$y=f(x)$のグラフ上の点A$(a,f(a))$における接線の傾きは</p>
+        <p><word>$f'(a)=2(a-2)$</word></p>
+        <div class="columns">
+            <img src="img4.png" alt="関数のグラフ" width="300">
+            <div class="column">
+                <ol>
+                    <li>
+                        <p>$a&gt;2$では$f'(a)$<word>&gt;</word>$0$</p>
+                        <p>点Aにおけるグラフの接線は<word>右上がり</word>で、<br>
+                            関数は<word>増加</word>している。</p>
+                    </li>
+                    <li>
+                        <p>$a&lt;2$では$f'(a)$<word>&lt;</word>$0$</p>
+                        <p>点Aにおけるグラフの接線は<word>右下がり</word>で、<br>
+                            関数は<word>減少</word>している。</p>
+                    </li>
+                    <li>
+                        <p>$a=2$では$f'(a)$<word>&#61;</word>$0$</p>
+                        <p>点Aにおけるグラフの接線は<word>$x$軸に平行</word>で、<br>
+                            関数の値は<word>$-4$</word>である。</p>
+                    </li>
+                </ol>
+            </div>
+        </div>
+        <div class="box">
+            <h3>関数$f(x)$の増減と導関数$f'(x)$の符号</h3>
+            <div>
+                <ul>
+                    <li>$f'(x)&gt;0$となる$x$の範囲では、$f(x)$は<word>増加</word></li>
+                    <li>$f'(x)&lt;0$となる$x$の範囲では、$f(x)$は<word>減少</word></li>
+                    <li>$f'(x)=0$となる$x$の範囲では、$f(x)$は<word>一定の値</word></li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>例８　関数$f(x)=x^3-3x$の増減を調べる。</h3>
+        <p>$f'(x)=$<word>$3x^2-3=3(x+1)(x-1)$</word></p>
+        <p>$f'(x)=0$とすると、<word>$x=-1,1$</word></p>
+        <p>$f'(x)&gt;0$を解くと、<word>$x&lt;-1,1&lt;x$</word></p>
+        <p>$f'(x)&lt;0$を解くと、<word>$-1&lt;x&lt;1$</word></p>
+        <p>よって、$f(x)$の増減は、次のような表で表される。</p>
+        <img src="img5.jpg" alt="関数のグラフ" width="500">
+        <!--
+        <table>
+            <tr>
+                <th>$x$</th>
+                <td>$\cdots$</td>
+                <td>$-1$</td>
+                <td>$\cdots$</td>
+                <td>$1$</td>
+                <td>$\cdots$</td>
+            </tr>
+            <tr>
+                <th>$f'(x)$</th>
+                <td>$+$</td>
+                <td>$0$</td>
+                <td>$-$</td>
+                <td>$0$</td>
+                <td>$+$</td>
+            </tr>
+            <tr>
+                <th>$f(x)$</th>
+                <td>$\nearrow$</td>
+                <td>$2$</td>
+                <td>$\searrow$</td>
+                <td>$-2$</td>
+                <td>$\nearrow$</td>
+            </tr>
+        </table>
+        -->
+        <p>したがって、$f(x)$は</p>
+        <p><word>$x\leqq -1,1\leqq x$</word>で<word>増加</word>し、<word>$-1\leqq x \leqq 1$</word>で<word>減少</word>する。</p>
+        <details class="box">
+            <summary>この表はどういう意味？</summary>
+            <p>このような表を<word>増減表</word>という。</p>
+            <ul>
+                <li>$f'(x)$が$+$のとき$f(x)$は$\nearrow$となって、その範囲で関数が増加すること</li>
+                <li>$f'(x)$が$-$のとき$f(x)$は$\searrow$となって、その範囲で関数が減少すること</li>
+            </ul>
+            <p>を示す。</p>
+        </details>
+
+        <h3>練習15　次の関数の増減を調べよ。</h3>
+        <ol>
+            <li>$f(x)=x^3-6x^2+5$</li>
+            <li>$f(x)=-2x^3-3x^2+12x+1$</li>
+        </ol>
+    </main>
+</body>
+</html>
