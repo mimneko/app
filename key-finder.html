@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chord to Key Finder</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .key-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .key-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .chords-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chord-row {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .chord-type-label {
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        .chords-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .chord {
+            background-color: #ecf0f1;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+        }
+        .highlighted {
+            background-color: #3498db;
+            color: white;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #fadbd8;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .empty-results {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+        }
+        .chord-notes {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #edf7ff;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .chord-types {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 8px;
+        }
+        .chord-type-item {
+            background-color: #ecf0f1;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .chord-type-item:hover {
+            background-color: #d4e6f1;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: #34495e;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 100;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #34495e transparent transparent transparent;
+        }
+        .chord:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chord to Key Finder</h1>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>Available Chord Types</h2>
+            <p>Click on a chord type to use it in your search:</p>
+            <div id="availableChords" class="chord-types"></div>
+        </div>
+        
+        <div class="input-section">
+            <label for="chordInput">Enter Chord Symbol (e.g., Cmaj7, F#m7, Ebdim, G#sus4):</label>
+            <input type="text" id="chordInput" placeholder="Enter chord symbol...">
+            <button id="findKeysBtn">Find Keys</button>
+            <div id="error" class="error" style="display: none;"></div>
+            
+            <div id="chordInfo" class="chord-notes" style="display: none;">
+                <h3>Chord Information:</h3>
+                <p><strong>Chord Symbol:</strong> <span id="displayedChord"></span></p>
+                <p><strong>Notes:</strong> <span id="chordNotes"></span></p>
+            </div>
+        </div>
+        
+        <div id="resultsContainer" class="results">
+            <div id="combinedResults">
+                <div class="empty-results">Enter a chord above to find possible keys</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chordInput = document.getElementById('chordInput');
+            const findKeysBtn = document.getElementById('findKeysBtn');
+            const combinedResultsDiv = document.getElementById('combinedResults');
+            const errorDiv = document.getElementById('error');
+            const chordInfoDiv = document.getElementById('chordInfo');
+            const displayedChordSpan = document.getElementById('displayedChord');
+            const chordNotesSpan = document.getElementById('chordNotes');
+            const availableChordsDiv = document.getElementById('availableChords');
+
+            // Define all notes with enharmonic equivalents
+            const allNotes = [
+                ['C'],
+                ['C#', 'Db'],
+                ['D'],
+                ['D#', 'Eb'],
+                ['E'],
+                ['F'],
+                ['F#', 'Gb'],
+                ['G'],
+                ['G#', 'Ab'],
+                ['A'],
+                ['A#', 'Bb'],
+                ['B']
+            ];
+
+            // Define all chord quality suffixes with their intervals
+            const chordQualities = {
+                // Major family
+                "": [0, 4, 7], // Major triad
+                "maj": [0, 4, 7], // Major triad
+                "M": [0, 4, 7], // Major triad
+                "maj7": [0, 4, 7, 11], // Major seventh
+                "M7": [0, 4, 7, 11], // Major seventh
+                "maj9": [0, 4, 7, 11, 14], // Major ninth
+                "M9": [0, 4, 7, 11, 14], // Major ninth
+                "maj6": [0, 4, 7, 9], // Major sixth
+                "6": [0, 4, 7, 9], // Major sixth
+                "6/9": [0, 4, 7, 9, 14], // Major sixth/ninth
+                "add9": [0, 4, 7, 14], // Major add ninth
+                "maj13": [0, 4, 7, 11, 14, 21], // Major thirteenth
+                
+                // Minor family
+                "m": [0, 3, 7], // Minor triad
+                "min": [0, 3, 7], // Minor triad
+                "-": [0, 3, 7], // Minor triad
+                "m7": [0, 3, 7, 10], // Minor seventh
+                "min7": [0, 3, 7, 10], // Minor seventh
+                "m9": [0, 3, 7, 10, 14], // Minor ninth
+                "min9": [0, 3, 7, 10, 14], // Minor ninth
+                "m6": [0, 3, 7, 9], // Minor sixth
+                "min6": [0, 3, 7, 9], // Minor sixth
+                "m11": [0, 3, 7, 10, 14, 17], // Minor eleventh
+                "min11": [0, 3, 7, 10, 14, 17], // Minor eleventh
+                "madd9": [0, 3, 7, 14], // Minor add ninth
+                "minadd9": [0, 3, 7, 14], // Minor add ninth
+                "m13": [0, 3, 7, 10, 14, 21], // Minor thirteenth
+                "min13": [0, 3, 7, 10, 14, 21], // Minor thirteenth
+                "m-maj7": [0, 3, 7, 11], // Minor-major seventh
+                "mM7": [0, 3, 7, 11], // Minor-major seventh
+                
+                // Dominant family
+                "7": [0, 4, 7, 10], // Dominant seventh
+                "9": [0, 4, 7, 10, 14], // Dominant ninth
+                "11": [0, 4, 7, 10, 14, 17], // Dominant eleventh
+                "13": [0, 4, 7, 10, 14, 21], // Dominant thirteenth
+                "7sus4": [0, 5, 7, 10], // Dominant seventh suspended fourth
+                "7sus": [0, 5, 7, 10], // Dominant seventh suspended
+                
+                // Diminished and half-diminished
+                "dim": [0, 3, 6], // Diminished triad
+                "°": [0, 3, 6], // Diminished triad
+                "dim7": [0, 3, 6, 9], // Diminished seventh
+                "°7": [0, 3, 6, 9], // Diminished seventh
+                "m7b5": [0, 3, 6, 10], // Half-diminished seventh
+                "ø": [0, 3, 6, 10], // Half-diminished seventh
+                "m7(b5)": [0, 3, 6, 10], // Half-diminished seventh
+                
+                // Augmented
+                "aug": [0, 4, 8], // Augmented triad
+                "+": [0, 4, 8], // Augmented triad
+                "aug7": [0, 4, 8, 10], // Augmented seventh
+                "+7": [0, 4, 8, 10], // Augmented seventh
+                "maj7#5": [0, 4, 8, 11], // Major seventh augmented fifth
+                
+                // Suspended
+                "sus4": [0, 5, 7], // Suspended fourth
+                "sus2": [0, 2, 7], // Suspended second
+                "sus": [0, 5, 7], // Suspended
+                
+                // Extensions and alterations
+                "7b9": [0, 4, 7, 10, 13], // Dominant seventh flat ninth
+                "7#9": [0, 4, 7, 10, 15], // Dominant seventh sharp ninth
+                "7#5": [0, 4, 8, 10], // Dominant seventh sharp fifth
+                "7b5": [0, 4, 6, 10], // Dominant seventh flat fifth
+                "7#11": [0, 4, 7, 10, 18], // Dominant seventh sharp eleventh
+                "maj7#11": [0, 4, 7, 11, 18], // Major seventh sharp eleventh
+                "m7b9": [0, 3, 7, 10, 13], // Minor seventh flat ninth
+                "7b13": [0, 4, 7, 10, 20], // Dominant seventh flat thirteenth
+                "9#11": [0, 4, 7, 10, 14, 18], // Dominant ninth sharp eleventh
+                
+                // Power chord
+                "5": [0, 7] // Power chord (root and fifth)
+            };
+
+            // Populate available chord types
+            for (const quality in chordQualities) {
+                const chordItem = document.createElement('div');
+                chordItem.className = 'chord-type-item';
+                chordItem.textContent = quality || 'Major (no suffix)';
+                chordItem.addEventListener('click', function() {
+                    const currentValue = chordInput.value.trim();
+                    const rootMatch = currentValue.match(/^[A-G][#b]?/);
+                    const rootPart = rootMatch ? rootMatch[0] : 'C';
+                    
+                    chordInput.value = rootPart + quality;
+                    chordInput.focus();
+                });
+                availableChordsDiv.appendChild(chordItem);
+            }
+
+            // Define scale patterns (intervals from root)
+            const scalePatterns = {
+                'major': [0, 2, 4, 5, 7, 9, 11],
+                'natural minor': [0, 2, 3, 5, 7, 8, 10],
+                'melodic minor': [0, 2, 3, 5, 7, 9, 11],
+                'harmonic minor': [0, 2, 3, 5, 7, 8, 11]
+            };
+
+            // Define chord types for each scale degree (7th chords)
+            const scaleChords7th = {
+                'major': [
+                    "maj7", // I
+                    "m7", // ii
+                    "m7", // iii
+                    "maj7", // IV
+                    "7", // V
+                    "m7", // vi
+                    "m7b5" // vii
+                ],
+                'natural minor': [
+                    "m7", // i
+                    "m7b5", // ii
+                    "maj7", // III
+                    "m7", // iv
+                    "m7", // v
+                    "maj7", // VI
+                    "7" // VII
+                ],
+                'melodic minor': [
+                    "m-maj7", // i
+                    "m7", // ii
+                    "maj7#5", // III+
+                    "7", // IV
+                    "7", // V
+                    "m7b5", // vi
+                    "m7b5" // vii
+                ],
+                'harmonic minor': [
+                    "m-maj7", // i
+                    "m7b5", // ii
+                    "maj7#5", // III+
+                    "m7", // iv
+                    "7", // V
+                    "maj7", // VI
+                    "dim7" // vii°
+                ]
+            };
+
+            // Define chord types for each scale degree (triads)
+            const scaleChords3rd = {
+                'major': [
+                    "", // I
+                    "m", // ii
+                    "m", // iii
+                    "", // IV
+                    "", // V
+                    "m", // vi
+                    "dim" // vii
+                ],
+                'natural minor': [
+                    "m", // i
+                    "dim", // ii
+                    "", // III
+                    "m", // iv
+                    "m", // v
+                    "", // VI
+                    "" // VII
+                ],
+                'melodic minor': [
+                    "m", // i
+                    "m", // ii
+                    "aug", // III+
+                    "", // IV
+                    "", // V
+                    "dim", // vi
+                    "dim" // vii
+                ],
+                'harmonic minor': [
+                    "m", // i
+                    "dim", // ii
+                    "aug", // III+
+                    "m", // iv
+                    "", // V
+                    "", // VI
+                    "dim" // vii°
+                ]
+            };
+
+            // Parse chord symbol into root and quality
+            function parseChordSymbol(chordSymbol) {
+                // Find the root note
+                let root = '';
+                let i = 0;
+                
+                if (i < chordSymbol.length) {
+                    root += chordSymbol[i++];
+                    
+                    // Check for sharp or flat
+                    if (i < chordSymbol.length && (chordSymbol[i] === '#' || chordSymbol[i] === 'b')) {
+                        root += chordSymbol[i++];
+                    }
+                }
+                
+                // The rest is the quality
+                const quality = chordSymbol.substring(i);
+                
+                return { root, quality };
+            }
+
+            // Get note index from note name
+            function getNoteIndex(noteName) {
+                for (let i = 0; i < allNotes.length; i++) {
+                    if (allNotes[i].includes(noteName)) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+
+            // Get note name from index
+            function getNoteName(index, preferSharp = true) {
+                const normalizedIndex = ((index % 12) + 12) % 12;
+                return preferSharp ? allNotes[normalizedIndex][0] : 
+                    (allNotes[normalizedIndex].length > 1 ? allNotes[normalizedIndex][1] : allNotes[normalizedIndex][0]);
+            }
+
+            // Generate all 7th chords for a given key
+            function generateKeyChords7th(rootIndex, scaleType) {
+                const scale = scalePatterns[scaleType].map(interval => (rootIndex + interval) % 12);
+                const chords = [];
+                
+                for (let i = 0; i < scale.length; i++) {
+                    const chordType = scaleChords7th[scaleType][i];
+                    const rootNote = getNoteName(scale[i]);
+                    chords.push(rootNote + chordType);
+                }
+                
+                return chords;
+            }
+
+            // Generate all triads for a given key
+            function generateKeyChords3rd(rootIndex, scaleType) {
+                const scale = scalePatterns[scaleType].map(interval => (rootIndex + interval) % 12);
+                const chords = [];
+                
+                for (let i = 0; i < scale.length; i++) {
+                    const chordType = scaleChords3rd[scaleType][i];
+                    const rootNote = getNoteName(scale[i]);
+                    chords.push(rootNote + chordType);
+                }
+                
+                return chords;
+            }
+
+            // Check if a chord belongs to a key
+            function chordBelongsToKey(chordRoot, chordIntervals, keyRoot, scaleType) {
+                const scale = scalePatterns[scaleType].map(interval => (keyRoot + interval) % 12);
+                
+                // Convert chord intervals to absolute note indices
+                const chordRootIndex = getNoteIndex(chordRoot);
+                if (chordRootIndex === -1) return false;
+                
+                const chordNotes = chordIntervals.map(interval => (chordRootIndex + interval) % 12);
+                
+                // Check if all chord notes are in the scale
+                return chordNotes.every(note => scale.includes(note));
+            }
+
+            // Find all keys that contain the given chord
+            function findKeysForChord(chordRoot, chordQuality) {
+                const possibleKeys = [];
+                const chordRootIndex = getNoteIndex(chordRoot);
+                
+                if (chordRootIndex === -1 || !chordQualities[chordQuality]) {
+                    return [];
+                }
+                
+                const chordIntervals = chordQualities[chordQuality];
+                
+                // Check all possible keys
+                for (let rootIndex = 0; rootIndex < 12; rootIndex++) {
+                    for (const scaleType in scalePatterns) {
+                        if (chordBelongsToKey(chordRoot, chordIntervals, rootIndex, scaleType)) {
+                            const keyRoot = getNoteName(rootIndex);
+                            const keyName = `${keyRoot} ${scaleType}`;
+                            
+                            // Get triads and 7th chords
+                            const keyChords3rd = generateKeyChords3rd(rootIndex, scaleType);
+                            const keyChords7th = generateKeyChords7th(rootIndex, scaleType);
+                            
+                            possibleKeys.push({
+                                name: keyName,
+                                triads: keyChords3rd,
+                                sevenths: keyChords7th,
+                                inputChord: chordRoot + chordQuality
+                            });
+                        }
+                    }
+                }
+                
+                return possibleKeys;
+            }
+
+            // Display combined results
+            function displayCombinedResults(keys, inputChord) {
+                combinedResultsDiv.innerHTML = '';
+                
+                if (keys.length === 0) {
+                    combinedResultsDiv.innerHTML = `<div class="empty-results">No keys found containing the chord ${inputChord}</div>`;
+                    return;
+                }
+                
+                for (const key of keys) {
+                    const keyCard = createCombinedKeyCard(key);
+                    combinedResultsDiv.appendChild(keyCard);
+                }
+            }
+            
+            // Create a combined key card element with both triad and 7th chords
+            function createCombinedKeyCard(key) {
+                const keyCard = document.createElement('div');
+                keyCard.className = 'key-card';
+                
+                const keyName = document.createElement('div');
+                keyName.className = 'key-name';
+                keyName.textContent = key.name;
+                keyCard.appendChild(keyName);
+                
+                const chordsContainer = document.createElement('div');
+                chordsContainer.className = 'chords-container';
+                
+                // Create the triads row
+                const triadRow = document.createElement('div');
+                triadRow.className = 'chord-row';
+                
+                const triadLabel = document.createElement('div');
+                triadLabel.className = 'chord-type-label';
+                triadLabel.textContent = 'Triads:';
+                triadRow.appendChild(triadLabel);
+                
+                const triadsList = document.createElement('div');
+                triadsList.className = 'chords-list';
+                
+                for (const chord of key.triads) {
+                    const chordSpan = document.createElement('div');
+                    chordSpan.className = 'chord';
+                    chordSpan.textContent = chord;
+                    
+                    // Add tooltip with chord notes
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = getChordNotes(parseChordSymbol(chord).root, parseChordSymbol(chord).quality);
+                    chordSpan.appendChild(tooltip);
+                    
+                    // Highlight the input chord
+                    if (areEquivalentChords(chord, key.inputChord)) {
+                        chordSpan.classList.add('highlighted');
+                    }
+                    
+                    triadsList.appendChild(chordSpan);
+                }
+                
+                triadRow.appendChild(triadsList);
+                chordsContainer.appendChild(triadRow);
+                
+                // Create the 7th chords row
+                const seventhRow = document.createElement('div');
+                seventhRow.className = 'chord-row';
+                
+                const seventhLabel = document.createElement('div');
+                seventhLabel.className = 'chord-type-label';
+                seventhLabel.textContent = '7th Chords:';
+                seventhRow.appendChild(seventhLabel);
+                
+                const seventhsList = document.createElement('div');
+                seventhsList.className = 'chords-list';
+                
+                for (const chord of key.sevenths) {
+                    const chordSpan = document.createElement('div');
+                    chordSpan.className = 'chord';
+                    chordSpan.textContent = chord;
+                    
+                    // Add tooltip with chord notes
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = getChordNotes(parseChordSymbol(chord).root, parseChordSymbol(chord).quality);
+                    chordSpan.appendChild(tooltip);
+                    
+                    // Highlight the input chord
+                    if (areEquivalentChords(chord, key.inputChord)) {
+                        chordSpan.classList.add('highlighted');
+                    }
+                    
+                    seventhsList.appendChild(chordSpan);
+                }
+                
+                seventhRow.appendChild(seventhsList);
+                chordsContainer.appendChild(seventhRow);
+                
+                keyCard.appendChild(chordsContainer);
+                return keyCard;
+            }
+
+            // Check if two chords are equivalent (considering enharmonic equivalents)
+            function areEquivalentChords(chord1, chord2) {
+                const { root: root1, quality: quality1 } = parseChordSymbol(chord1);
+                const { root: root2, quality: quality2 } = parseChordSymbol(chord2);
+                
+                const rootIndex1 = getNoteIndex(root1);
+                const rootIndex2 = getNoteIndex(root2);
+                
+                return rootIndex1 === rootIndex2 && 
+                      (quality1 === quality2 || 
+                       (chordQualities[quality1] && chordQualities[quality2] && 
+                        JSON.stringify(chordQualities[quality1]) === JSON.stringify(chordQualities[quality2])));
+            }
+            
+            // Get chord notes as string
+            function getChordNotes(root, quality) {
+                const rootIndex = getNoteIndex(root);
+                if (rootIndex === -1 || !chordQualities[quality]) {
+                    return "";
+                }
+                
+                const intervals = chordQualities[quality];
+                const noteNames = intervals.map(interval => getNoteName((rootIndex + interval) % 12));
+                
+                return noteNames.join(", ");
+            }
+
+            // Handle the button click
+            findKeysBtn.addEventListener('click', function() {
+                const chordSymbol = chordInput.value.trim();
+                
+                if (!chordSymbol) {
+                    errorDiv.textContent = "Please enter a chord symbol";
+                    errorDiv.style.display = "block";
+                    chordInfoDiv.style.display = "none";
+                    return;
+                }
+                
+                // Parse the chord symbol
+                const { root, quality } = parseChordSymbol(chordSymbol);
+                
+                if (getNoteIndex(root) === -1) {
+                    errorDiv.textContent = `Invalid root note: ${root}`;
+                    errorDiv.style.display = "block";
+                    chordInfoDiv.style.display = "none";
+                    return;
+                }
+                
+                if (!chordQualities[quality]) {
+                    errorDiv.textContent = `Unknown chord quality: ${quality}`;
+                    errorDiv.style.display = "block";
+                    chordInfoDiv.style.display = "none";
+                    return;
+                }
+                
+                errorDiv.style.display = "none";
+                
+                // Display chord information
+                displayedChordSpan.textContent = chordSymbol;
+                chordNotesSpan.textContent = getChordNotes(root, quality);
+                chordInfoDiv.style.display = "block";
+                
+                // Find keys for the chord
+                const keys = findKeysForChord(root, quality);
+                displayCombinedResults(keys, chordSymbol);
+            });
+
+            // Also trigger search on Enter key
+            chordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    findKeysBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
