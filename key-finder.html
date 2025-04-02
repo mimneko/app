@@ -1,177 +1,333 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chord to Key Finder</title>
+    <title>コードからキーを探す</title>
     <style>
+        :root {
+            --primary: #5b78c7;
+            --primary-light: #eef2ff;
+            --primary-dark: #3b5998;
+            --text: #2d3748;
+            --text-light: #4a5568;
+            --background: #f7fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --highlight: #2b6cb0;
+            --highlight-bg: #ebf8ff;
+            --error: #e53e3e;
+            --error-bg: #fff5f5;
+            --success: #38a169;
+            --radius: 10px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1000px;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+            padding: 2rem 1rem;
         }
+
         h1, h2, h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
+            color: var(--text);
+            font-weight: 600;
+            line-height: 1.25;
         }
+
         h1 {
+            font-size: 2.25rem;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 0;
+            background: linear-gradient(to right, var(--primary-dark), var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
         .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            height: fit-content;
+        }
+
+        .input-section {
+            grid-column: 1 / -1;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 1rem;
         }
-        .panel {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .input-section {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
         }
+
         input {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition);
         }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(91, 120, 199, 0.2);
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
         button {
-            background-color: #3498db;
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
+            border-radius: var(--radius);
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
+
         button:hover {
-            background-color: #2980b9;
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
         }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .error {
+            color: var(--error);
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            background-color: var(--error-bg);
+            border-radius: var(--radius);
+            border-left: 4px solid var(--error);
+        }
+
         .results {
-            margin-top: 20px;
+            grid-column: 1 / -1;
         }
+
         .key-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
         }
+
+        .key-card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
         .key-name {
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 18px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 1.25rem;
+            padding: 1rem 1.5rem;
+            background-color: #f8fafc;
+            border-bottom: 1px solid var(--border);
         }
+
         .chords-container {
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 1.25rem;
         }
+
         .chord-row {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 0.5rem;
         }
+
+        @media (min-width: 768px) {
+            .chord-row {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+        }
+
         .chord-type-label {
-            font-weight: bold;
-            color: #7f8c8d;
-            margin-right: 10px;
-            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            width: 80px;
+            flex-shrink: 0;
         }
+
         .chords-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 0.5rem;
+            flex: 1;
         }
+
         .chord {
-            background-color: #ecf0f1;
-            padding: 5px 10px;
-            border-radius: 4px;
-            display: inline-block;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.95rem;
             position: relative;
             cursor: pointer;
+            border: 1px solid rgba(91, 120, 199, 0.1);
+            transition: var(--transition);
         }
+
+        .chord:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(91, 120, 199, 0.2);
+        }
+
         .highlighted {
-            background-color: #3498db;
+            background-color: var(--primary);
             color: white;
+            font-weight: 600;
         }
-        .error {
-            color: #e74c3c;
-            font-weight: bold;
-            padding: 10px;
-            background-color: #fadbd8;
-            border-radius: 4px;
-            margin-top: 10px;
+
+        .highlighted:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
         }
+
+        .chord-notes {
+            margin: 1rem 0;
+            padding: 1.25rem;
+            background-color: var(--highlight-bg);
+            border-radius: var(--radius);
+            border: 1px solid rgba(43, 108, 176, 0.2);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .chord-notes {
+                grid-template-columns: auto 1fr;
+                align-items: center;
+            }
+        }
+
+        .chord-notes strong {
+            color: var(--highlight);
+            font-weight: 600;
+        }
+
+        .chord-notes-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         .empty-results {
             text-align: center;
-            padding: 30px;
-            color: #7f8c8d;
+            padding: 3rem 1.5rem;
+            color: var(--text-light);
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            font-size: 1.1rem;
         }
-        .chord-notes {
-            margin: 15px 0;
-            padding: 15px;
-            background-color: #edf7ff;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
-        }
+
         .chord-types {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 10px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border-radius: var(--radius);
+            background-color: #f8fafc;
+            border: 1px solid var(--border);
         }
+
         .chord-type-item {
-            background-color: #ecf0f1;
-            padding: 5px 10px;
-            border-radius: 4px;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: background-color 0.2s;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid rgba(91, 120, 199, 0.1);
         }
+
         .chord-type-item:hover {
-            background-color: #d4e6f1;
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(91, 120, 199, 0.2);
         }
+
         .tooltip {
             position: absolute;
-            background-color: #34495e;
+            background-color: var(--text);
             color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 14px;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
             z-index: 100;
-            bottom: 100%;
+            bottom: 120%;
             left: 50%;
             transform: translateX(-50%);
-            margin-bottom: 8px;
             white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.2s, visibility 0.2s;
+            transition: var(--transition);
+            pointer-events: none;
         }
+
         .tooltip::after {
             content: '';
             position: absolute;
@@ -180,40 +336,135 @@
             margin-left: -5px;
             border-width: 5px;
             border-style: solid;
-            border-color: #34495e transparent transparent transparent;
+            border-color: var(--text) transparent transparent transparent;
         }
+
         .chord:hover .tooltip {
             opacity: 1;
             visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        #minorScaleToggle {
+            display: none;
+        }
+
+        .toggle-label {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+            background-color: #cbd5e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin: 0;
+        }
+
+        .toggle-label span {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: var(--transition);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        #minorScaleToggle:checked + .toggle-label {
+            background-color: var(--primary);
+        }
+
+        #minorScaleToggle:checked + .toggle-label span {
+            transform: translateX(24px);
+        }
+
+        .toggle-text {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* Styling for scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        /* App header */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
         }
     </style>
 </head>
 <body>
-    <h1>Chord to Key Finder</h1>
+    <div class="app-header">
+        <h1>コードからキーを探す</h1>
+    </div>
     
-    <div class="container">
+    <div class="container">        
         <div class="panel">
-            <h2>Available Chord Types</h2>
-            <p>Click on a chord type to use it in your search:</p>
+            <h2>利用可能なコードタイプ</h2>
+            <p>検索に使用するコードタイプをクリックしてください：</p>
             <div id="availableChords" class="chord-types"></div>
         </div>
-        
-        <div class="input-section">
-            <label for="chordInput">Enter Chord Symbol (e.g., Cmaj7, F#m7, Ebdim, G#sus4):</label>
-            <input type="text" id="chordInput" placeholder="Enter chord symbol...">
-            <button id="findKeysBtn">Find Keys</button>
+
+        <div class="input-section panel">
+            <div>
+                <label for="chordInput">コードシンボルを入力してください：</label>
+                <input type="text" id="chordInput" value="C" placeholder="例：CM7, F#m7, Ebdim, G#sus4">
+            </div>
+            
+            <div class="input-actions">
+                <button id="findKeysBtn">キーを探す</button>
+                <div class="toggle-container">
+                    <input type="checkbox" id="minorScaleToggle" checked />
+                    <label for="minorScaleToggle" class="toggle-label">
+                        <span></span>
+                    </label>
+                    <span class="toggle-text">拡張マイナースケール</span>
+                </div>
+            </div>
+            
             <div id="error" class="error" style="display: none;"></div>
             
             <div id="chordInfo" class="chord-notes" style="display: none;">
-                <h3>Chord Information:</h3>
-                <p><strong>Chord Symbol:</strong> <span id="displayedChord"></span></p>
-                <p><strong>Notes:</strong> <span id="chordNotes"></span></p>
+                <div class="chord-notes-item"><strong>コードシンボル：</strong></div>
+                <div id="displayedChord"></div>
+                <div class="chord-notes-item"><strong>構成音：</strong></div>
+                <div id="chordNotes"></div>
             </div>
         </div>
         
         <div id="resultsContainer" class="results">
             <div id="combinedResults">
-                <div class="empty-results">Enter a chord above to find possible keys</div>
+                <div class="empty-results">上にコードシンボルを入力して、候補となるキーを探してください</div>
             </div>
         </div>
     </div>
@@ -228,8 +479,14 @@
             const displayedChordSpan = document.getElementById('displayedChord');
             const chordNotesSpan = document.getElementById('chordNotes');
             const availableChordsDiv = document.getElementById('availableChords');
+            const minorScaleToggle = document.getElementById('minorScaleToggle');
+            // トグルの初期状態は拡張マイナースケールON（true）
+            let searchAllMinor = true;
+            minorScaleToggle.addEventListener('change', function() {
+                searchAllMinor = this.checked;
+            });
 
-            // Define all notes with enharmonic equivalents
+            // 全ての音（同音異名を含む）を定義
             const allNotes = [
                 ['C'],
                 ['C#', 'Db'],
@@ -245,211 +502,228 @@
                 ['B']
             ];
 
-            // Define all chord quality suffixes with their intervals
+            // 全てのコードクオリティの接尾辞とそのインターバルを定義
             const chordQualities = {
-                // Major family
-                "": [0, 4, 7], // Major triad
-                "maj": [0, 4, 7], // Major triad
-                "M": [0, 4, 7], // Major triad
-                "maj7": [0, 4, 7, 11], // Major seventh
-                "M7": [0, 4, 7, 11], // Major seventh
-                "maj9": [0, 4, 7, 11, 14], // Major ninth
-                "M9": [0, 4, 7, 11, 14], // Major ninth
-                "maj6": [0, 4, 7, 9], // Major sixth
-                "6": [0, 4, 7, 9], // Major sixth
-                "6/9": [0, 4, 7, 9, 14], // Major sixth/ninth
-                "add9": [0, 4, 7, 14], // Major add ninth
-                "maj13": [0, 4, 7, 11, 14, 21], // Major thirteenth
+                // メジャー・ファミリー
+                "": [0, 4, 7], // メジャー・トライアド
+                "maj": [0, 4, 7], // メジャー・トライアド
+                "M": [0, 4, 7], // メジャー・トライアド
+                "M7": [0, 4, 7, 11], // メジャー7th
+                "maj7": [0, 4, 7, 11], // メジャー7th
+                "M9": [0, 4, 7, 11, 14], // メジャー9th
+                "maj9": [0, 4, 7, 11, 14], // メジャー9th
+                "6": [0, 4, 7, 9], // メジャー6th
+                "maj6": [0, 4, 7, 9], // メジャー6th
+                "6/9": [0, 4, 7, 9, 14], // 6/9（メジャー6th/9th）
+                "add9": [0, 4, 7, 14], // メジャーに9thを追加
+                "M13": [0, 4, 7, 11, 14, 21], // メジャー13th
+                "maj13": [0, 4, 7, 11, 14, 21], // メジャー13th
                 
-                // Minor family
-                "m": [0, 3, 7], // Minor triad
-                "min": [0, 3, 7], // Minor triad
-                "-": [0, 3, 7], // Minor triad
-                "m7": [0, 3, 7, 10], // Minor seventh
-                "min7": [0, 3, 7, 10], // Minor seventh
-                "m9": [0, 3, 7, 10, 14], // Minor ninth
-                "min9": [0, 3, 7, 10, 14], // Minor ninth
-                "m6": [0, 3, 7, 9], // Minor sixth
-                "min6": [0, 3, 7, 9], // Minor sixth
-                "m11": [0, 3, 7, 10, 14, 17], // Minor eleventh
-                "min11": [0, 3, 7, 10, 14, 17], // Minor eleventh
-                "madd9": [0, 3, 7, 14], // Minor add ninth
-                "minadd9": [0, 3, 7, 14], // Minor add ninth
-                "m13": [0, 3, 7, 10, 14, 21], // Minor thirteenth
-                "min13": [0, 3, 7, 10, 14, 21], // Minor thirteenth
-                "m-maj7": [0, 3, 7, 11], // Minor-major seventh
-                "mM7": [0, 3, 7, 11], // Minor-major seventh
+                // マイナー・ファミリー
+                "m": [0, 3, 7], // マイナー・トライアド
+                "min": [0, 3, 7], // マイナー・トライアド
+                "-": [0, 3, 7], // マイナー・トライアド
+                "m7": [0, 3, 7, 10], // マイナー7th
+                "min7": [0, 3, 7, 10], // マイナー7th
+                "m9": [0, 3, 7, 10, 14], // マイナー9th
+                "min9": [0, 3, 7, 10, 14], // マイナー9th
+                "m6": [0, 3, 7, 9], // マイナー6th
+                "min6": [0, 3, 7, 9], // マイナー6th
+                "m11": [0, 3, 7, 10, 14, 17], // マイナー11th
+                "min11": [0, 3, 7, 10, 14, 17], // マイナー11th
+                "madd9": [0, 3, 7, 14], // マイナーに9thを追加
+                "minadd9": [0, 3, 7, 14], // マイナーに9thを追加
+                "m13": [0, 3, 7, 10, 14, 21], // マイナー13th
+                "min13": [0, 3, 7, 10, 14, 21], // マイナー13th
+                "m-maj7": [0, 3, 7, 11], // マイナー/メジャー7th
+                "mM7": [0, 3, 7, 11], // マイナー/メジャー7th
                 
-                // Dominant family
-                "7": [0, 4, 7, 10], // Dominant seventh
-                "9": [0, 4, 7, 10, 14], // Dominant ninth
-                "11": [0, 4, 7, 10, 14, 17], // Dominant eleventh
-                "13": [0, 4, 7, 10, 14, 21], // Dominant thirteenth
-                "7sus4": [0, 5, 7, 10], // Dominant seventh suspended fourth
-                "7sus": [0, 5, 7, 10], // Dominant seventh suspended
+                // ドミナント・ファミリー
+                "7": [0, 4, 7, 10], // ドミナント7th
+                "9": [0, 4, 7, 10, 14], // ドミナント9th
+                "11": [0, 4, 7, 10, 14, 17], // ドミナント11th
+                "13": [0, 4, 7, 10, 14, 21], // ドミナント13th
+                "7sus4": [0, 5, 7, 10], // サスペンデッド4付きドミナント7th
+                "7sus": [0, 5, 7, 10], // サスペンデッドドミナント7th
                 
-                // Diminished and half-diminished
-                "dim": [0, 3, 6], // Diminished triad
-                "°": [0, 3, 6], // Diminished triad
-                "dim7": [0, 3, 6, 9], // Diminished seventh
-                "°7": [0, 3, 6, 9], // Diminished seventh
-                "m7b5": [0, 3, 6, 10], // Half-diminished seventh
-                "ø": [0, 3, 6, 10], // Half-diminished seventh
-                "m7(b5)": [0, 3, 6, 10], // Half-diminished seventh
+                // ディミニッシュとハーフ・ディミニッシュ
+                "dim": [0, 3, 6], // ディミニッシュ・トライアド
+                "°": [0, 3, 6], // ディミニッシュ・トライアド
+                "dim7": [0, 3, 6, 9], // ディミニッシュ7th
+                "°7": [0, 3, 6, 9], // ディミニッシュ7th
+                "m7b5": [0, 3, 6, 10], // ハーフ・ディミニッシュ7th
+                "m7-5": [0, 3, 6, 10], // ハーフ・ディミニッシュ7th
+                "ø": [0, 3, 6, 10], // ハーフ・ディミニッシュ7th
+                "m7(b5)": [0, 3, 6, 10], // ハーフ・ディミニッシュ7th
                 
-                // Augmented
-                "aug": [0, 4, 8], // Augmented triad
-                "+": [0, 4, 8], // Augmented triad
-                "aug7": [0, 4, 8, 10], // Augmented seventh
-                "+7": [0, 4, 8, 10], // Augmented seventh
-                "maj7#5": [0, 4, 8, 11], // Major seventh augmented fifth
+                // オーギュメント（増三和音）
+                "aug": [0, 4, 8], // オーギュメント・トライアド
+                "+": [0, 4, 8], // オーギュメント・トライアド
+                "aug7": [0, 4, 8, 10], // オーギュメント7th
+                "+7": [0, 4, 8, 10], // オーギュメント7th
+                "maj7#5": [0, 4, 8, 11], // メジャー7th（シャープ5）
                 
-                // Suspended
-                "sus4": [0, 5, 7], // Suspended fourth
-                "sus2": [0, 2, 7], // Suspended second
-                "sus": [0, 5, 7], // Suspended
+                // サスペンデッド
+                "sus4": [0, 5, 7], // サスペンデッド4
+                "sus2": [0, 2, 7], // サスペンデッド2
+                "sus": [0, 5, 7], // サスペンデッド
                 
-                // Extensions and alterations
-                "7b9": [0, 4, 7, 10, 13], // Dominant seventh flat ninth
-                "7#9": [0, 4, 7, 10, 15], // Dominant seventh sharp ninth
-                "7#5": [0, 4, 8, 10], // Dominant seventh sharp fifth
-                "7b5": [0, 4, 6, 10], // Dominant seventh flat fifth
-                "7#11": [0, 4, 7, 10, 18], // Dominant seventh sharp eleventh
-                "maj7#11": [0, 4, 7, 11, 18], // Major seventh sharp eleventh
-                "m7b9": [0, 3, 7, 10, 13], // Minor seventh flat ninth
-                "7b13": [0, 4, 7, 10, 20], // Dominant seventh flat thirteenth
-                "9#11": [0, 4, 7, 10, 14, 18], // Dominant ninth sharp eleventh
+                // 拡張・アルターネーション
+                "7b9": [0, 4, 7, 10, 13], // ドミナント7th（フラット9）
+                "7#9": [0, 4, 7, 10, 15], // ドミナント7th（シャープ9）
+                "7#5": [0, 4, 8, 10], // ドミナント7th（シャープ5）
+                "7b5": [0, 4, 6, 10], // ドミナント7th（フラット5）
+                "7#11": [0, 4, 7, 10, 18], // ドミナント7th（シャープ11）
+                "maj7#11": [0, 4, 7, 11, 18], // メジャー7th（シャープ11）
+                "m7b9": [0, 3, 7, 10, 13], // マイナー7th（フラット9）
+                "7b13": [0, 4, 7, 10, 20], // ドミナント7th（フラット13）
+                "9#11": [0, 4, 7, 10, 14, 18], // ドミナント9th（シャープ11）
                 
-                // Power chord
-                "5": [0, 7] // Power chord (root and fifth)
+                // パワーコード
+                "5": [0, 7] // パワーコード（ルートと5度）
             };
 
-            // Populate available chord types
+            // コードの構成音ごとに利用可能なコードタイプをグループ化して表示
+            const groupedQualities = {};
             for (const quality in chordQualities) {
+                // JSON.stringifyを使って配列の内容をキーに変換
+                const intervals = chordQualities[quality];
+                const key = JSON.stringify(intervals);
+                if (groupedQualities[key]) {
+                    groupedQualities[key].push(quality);
+                } else {
+                    groupedQualities[key] = [quality];
+                }
+            }
+
+            for (const key in groupedQualities) {
+                const group = groupedQualities[key];
+                // 空文字の場合は 'Major (no suffix)' と表示（コメントはそのまま）
+                const displayText = group.map(q => q === "" ? "" : q).join(", ");
                 const chordItem = document.createElement('div');
                 chordItem.className = 'chord-type-item';
-                chordItem.textContent = quality || 'Major (no suffix)';
+                chordItem.textContent = displayText;
                 chordItem.addEventListener('click', function() {
                     const currentValue = chordInput.value.trim();
                     const rootMatch = currentValue.match(/^[A-G][#b]?/);
                     const rootPart = rootMatch ? rootMatch[0] : 'C';
-                    
-                    chordInput.value = rootPart + quality;
+                    // グループの先頭の品質のみを入力
+                    chordInput.value = rootPart + group[0];
                     chordInput.focus();
                 });
                 availableChordsDiv.appendChild(chordItem);
             }
 
-            // Define scale patterns (intervals from root)
+            // ルートからのインターバルによるスケールパターンを定義
             const scalePatterns = {
-                'major': [0, 2, 4, 5, 7, 9, 11],
-                'natural minor': [0, 2, 3, 5, 7, 8, 10],
-                'melodic minor': [0, 2, 3, 5, 7, 9, 11],
-                'harmonic minor': [0, 2, 3, 5, 7, 8, 11]
+                'メジャー': [0, 2, 4, 5, 7, 9, 11],
+                'ナチュラルマイナー': [0, 2, 3, 5, 7, 8, 10],
+                'メロディックマイナー': [0, 2, 3, 5, 7, 9, 11],
+                'ハーモニックマイナー': [0, 2, 3, 5, 7, 8, 11]
             };
 
-            // Define chord types for each scale degree (7th chords)
+            // 各スケール度に対する四和音を定義
             const scaleChords7th = {
-                'major': [
-                    "maj7", // I
+                'メジャー': [
+                    "M7", // I
                     "m7", // ii
                     "m7", // iii
-                    "maj7", // IV
-                    "7", // V
+                    "M7", // IV
+                    "7",  // V
                     "m7", // vi
-                    "m7b5" // vii
+                    "m7-5" // vii
                 ],
-                'natural minor': [
-                    "m7", // i
-                    "m7b5", // ii
-                    "maj7", // III
-                    "m7", // iv
-                    "m7", // v
-                    "maj7", // VI
-                    "7" // VII
+                'ナチュラルマイナー': [
+                    "m7",   // i
+                    "m7-5", // ii
+                    "M7",   // III
+                    "m7",   // iv
+                    "m7",   // v
+                    "M7",   // VI
+                    "7"     // VII
                 ],
-                'melodic minor': [
-                    "m-maj7", // i
-                    "m7", // ii
-                    "maj7#5", // III+
-                    "7", // IV
-                    "7", // V
-                    "m7b5", // vi
-                    "m7b5" // vii
+                'メロディックマイナー': [
+                    "mM7", // i
+                    "m7",   // ii
+                    "M7#5", // III+
+                    "7",    // IV
+                    "7",    // V
+                    "m7-5", // vi
+                    "m7-5"  // vii
                 ],
-                'harmonic minor': [
-                    "m-maj7", // i
-                    "m7b5", // ii
-                    "maj7#5", // III+
-                    "m7", // iv
-                    "7", // V
-                    "maj7", // VI
+                'ハーモニックマイナー': [
+                    "mM7",  // i
+                    "m7-5",// ii
+                    "M7#5",// III+
+                    "m7",  // iv
+                    "7",   // V
+                    "M7",  // VI
                     "dim7" // vii°
                 ]
             };
 
-            // Define chord types for each scale degree (triads)
+            // 各スケール度に対する三和音（トライアド）を定義
             const scaleChords3rd = {
-                'major': [
-                    "", // I
-                    "m", // ii
-                    "m", // iii
-                    "", // IV
-                    "", // V
-                    "m", // vi
+                'メジャー': [
+                    "",   // I
+                    "m",  // ii
+                    "m",  // iii
+                    "",   // IV
+                    "",   // V
+                    "m",  // vi
                     "dim" // vii
                 ],
-                'natural minor': [
-                    "m", // i
-                    "dim", // ii
-                    "", // III
-                    "m", // iv
-                    "m", // v
-                    "", // VI
-                    "" // VII
+                'ナチュラルマイナー': [
+                    "m",  // i
+                    "dim",// ii
+                    "",   // III
+                    "m",  // iv
+                    "m",  // v
+                    "",   // VI
+                    ""    // VII
                 ],
-                'melodic minor': [
-                    "m", // i
-                    "m", // ii
+                'メロディックマイナー': [
+                    "m",   // i
+                    "m",   // ii
                     "aug", // III+
-                    "", // IV
-                    "", // V
+                    "",    // IV
+                    "",    // V
                     "dim", // vi
-                    "dim" // vii
+                    "dim"  // vii
                 ],
-                'harmonic minor': [
-                    "m", // i
+                'ハーモニックマイナー': [
+                    "m",   // i
                     "dim", // ii
                     "aug", // III+
-                    "m", // iv
-                    "", // V
-                    "", // VI
-                    "dim" // vii°
+                    "m",   // iv
+                    "",    // V
+                    "",    // VI
+                    "dim"  // vii°
                 ]
             };
 
-            // Parse chord symbol into root and quality
+            // コードシンボルをルートとクオリティに分割
             function parseChordSymbol(chordSymbol) {
-                // Find the root note
+                // ルートノートを検出
                 let root = '';
                 let i = 0;
                 
                 if (i < chordSymbol.length) {
                     root += chordSymbol[i++];
                     
-                    // Check for sharp or flat
+                    // シャープまたはフラットのチェック
                     if (i < chordSymbol.length && (chordSymbol[i] === '#' || chordSymbol[i] === 'b')) {
                         root += chordSymbol[i++];
                     }
                 }
                 
-                // The rest is the quality
+                // 残りがクオリティ
                 const quality = chordSymbol.substring(i);
                 
                 return { root, quality };
             }
 
-            // Get note index from note name
+            // 音名から音のインデックスを取得
             function getNoteIndex(noteName) {
                 for (let i = 0; i < allNotes.length; i++) {
                     if (allNotes[i].includes(noteName)) {
@@ -459,14 +733,14 @@
                 return -1;
             }
 
-            // Get note name from index
+            // インデックスから音名を取得
             function getNoteName(index, preferSharp = true) {
                 const normalizedIndex = ((index % 12) + 12) % 12;
                 return preferSharp ? allNotes[normalizedIndex][0] : 
                     (allNotes[normalizedIndex].length > 1 ? allNotes[normalizedIndex][1] : allNotes[normalizedIndex][0]);
             }
 
-            // Generate all 7th chords for a given key
+            // 指定されたキーに対する四和音を全て生成
             function generateKeyChords7th(rootIndex, scaleType) {
                 const scale = scalePatterns[scaleType].map(interval => (rootIndex + interval) % 12);
                 const chords = [];
@@ -480,7 +754,7 @@
                 return chords;
             }
 
-            // Generate all triads for a given key
+            // 指定されたキーに対する三和音を全て生成
             function generateKeyChords3rd(rootIndex, scaleType) {
                 const scale = scalePatterns[scaleType].map(interval => (rootIndex + interval) % 12);
                 const chords = [];
@@ -494,21 +768,21 @@
                 return chords;
             }
 
-            // Check if a chord belongs to a key
+            // コードが指定されたキーに属するかを確認
             function chordBelongsToKey(chordRoot, chordIntervals, keyRoot, scaleType) {
                 const scale = scalePatterns[scaleType].map(interval => (keyRoot + interval) % 12);
                 
-                // Convert chord intervals to absolute note indices
+                // コードのインターバルを絶対的な音のインデックスに変換
                 const chordRootIndex = getNoteIndex(chordRoot);
                 if (chordRootIndex === -1) return false;
                 
                 const chordNotes = chordIntervals.map(interval => (chordRootIndex + interval) % 12);
                 
-                // Check if all chord notes are in the scale
+                // すべてのコードの音がスケールに含まれているかを確認
                 return chordNotes.every(note => scale.includes(note));
             }
 
-            // Find all keys that contain the given chord
+            // 指定されたコードを含むすべてのキーを検索
             function findKeysForChord(chordRoot, chordQuality) {
                 const possibleKeys = [];
                 const chordRootIndex = getNoteIndex(chordRoot);
@@ -519,14 +793,18 @@
                 
                 const chordIntervals = chordQualities[chordQuality];
                 
-                // Check all possible keys
+                // すべての可能なキーをチェック
                 for (let rootIndex = 0; rootIndex < 12; rootIndex++) {
                     for (const scaleType in scalePatterns) {
+                        // マイナー系（メジャー以外）の場合、検索対象をトグル設定に応じてフィルタリング
+                        if (scaleType !== 'メジャー' && (!searchAllMinor && scaleType !== 'ナチュラルマイナー')) {
+                            continue;
+                        }
                         if (chordBelongsToKey(chordRoot, chordIntervals, rootIndex, scaleType)) {
                             const keyRoot = getNoteName(rootIndex);
                             const keyName = `${keyRoot} ${scaleType}`;
                             
-                            // Get triads and 7th chords
+                            // 三和音と四和音を取得
                             const keyChords3rd = generateKeyChords3rd(rootIndex, scaleType);
                             const keyChords7th = generateKeyChords7th(rootIndex, scaleType);
                             
@@ -543,12 +821,12 @@
                 return possibleKeys;
             }
 
-            // Display combined results
+            // 結合結果を表示
             function displayCombinedResults(keys, inputChord) {
                 combinedResultsDiv.innerHTML = '';
                 
                 if (keys.length === 0) {
-                    combinedResultsDiv.innerHTML = `<div class="empty-results">No keys found containing the chord ${inputChord}</div>`;
+                    combinedResultsDiv.innerHTML = `<div class="empty-results">指定したコード ${inputChord} を含むキーは見つかりませんでした</div>`;
                     return;
                 }
                 
@@ -558,7 +836,7 @@
                 }
             }
             
-            // Create a combined key card element with both triad and 7th chords
+            // 三和音と四和音の両方を含むキーカード要素を作成
             function createCombinedKeyCard(key) {
                 const keyCard = document.createElement('div');
                 keyCard.className = 'key-card';
@@ -571,13 +849,13 @@
                 const chordsContainer = document.createElement('div');
                 chordsContainer.className = 'chords-container';
                 
-                // Create the triads row
+                // 三和音（トライアド）の列を作成
                 const triadRow = document.createElement('div');
                 triadRow.className = 'chord-row';
                 
                 const triadLabel = document.createElement('div');
                 triadLabel.className = 'chord-type-label';
-                triadLabel.textContent = 'Triads:';
+                triadLabel.textContent = '三和音：';
                 triadRow.appendChild(triadLabel);
                 
                 const triadsList = document.createElement('div');
@@ -588,13 +866,13 @@
                     chordSpan.className = 'chord';
                     chordSpan.textContent = chord;
                     
-                    // Add tooltip with chord notes
+                    // コードの音をツールチップとして追加
                     const tooltip = document.createElement('div');
                     tooltip.className = 'tooltip';
                     tooltip.textContent = getChordNotes(parseChordSymbol(chord).root, parseChordSymbol(chord).quality);
                     chordSpan.appendChild(tooltip);
                     
-                    // Highlight the input chord
+                    // 入力されたコードをハイライト
                     if (areEquivalentChords(chord, key.inputChord)) {
                         chordSpan.classList.add('highlighted');
                     }
@@ -605,13 +883,13 @@
                 triadRow.appendChild(triadsList);
                 chordsContainer.appendChild(triadRow);
                 
-                // Create the 7th chords row
+                // 四和音の列を作成
                 const seventhRow = document.createElement('div');
                 seventhRow.className = 'chord-row';
                 
                 const seventhLabel = document.createElement('div');
                 seventhLabel.className = 'chord-type-label';
-                seventhLabel.textContent = '7th Chords:';
+                seventhLabel.textContent = '四和音：';
                 seventhRow.appendChild(seventhLabel);
                 
                 const seventhsList = document.createElement('div');
@@ -622,13 +900,13 @@
                     chordSpan.className = 'chord';
                     chordSpan.textContent = chord;
                     
-                    // Add tooltip with chord notes
+                    // コードの音をツールチップとして追加
                     const tooltip = document.createElement('div');
                     tooltip.className = 'tooltip';
                     tooltip.textContent = getChordNotes(parseChordSymbol(chord).root, parseChordSymbol(chord).quality);
                     chordSpan.appendChild(tooltip);
                     
-                    // Highlight the input chord
+                    // 入力されたコードをハイライト
                     if (areEquivalentChords(chord, key.inputChord)) {
                         chordSpan.classList.add('highlighted');
                     }
@@ -643,7 +921,7 @@
                 return keyCard;
             }
 
-            // Check if two chords are equivalent (considering enharmonic equivalents)
+            // 二つのコードが同等かどうか（同音異名を考慮して）を確認
             function areEquivalentChords(chord1, chord2) {
                 const { root: root1, quality: quality1 } = parseChordSymbol(chord1);
                 const { root: root2, quality: quality2 } = parseChordSymbol(chord2);
@@ -657,7 +935,7 @@
                         JSON.stringify(chordQualities[quality1]) === JSON.stringify(chordQualities[quality2])));
             }
             
-            // Get chord notes as string
+            // コードの音を文字列として取得
             function getChordNotes(root, quality) {
                 const rootIndex = getNoteIndex(root);
                 if (rootIndex === -1 || !chordQualities[quality]) {
@@ -670,29 +948,29 @@
                 return noteNames.join(", ");
             }
 
-            // Handle the button click
+            // ボタンがクリックされたときの処理
             findKeysBtn.addEventListener('click', function() {
                 const chordSymbol = chordInput.value.trim();
                 
                 if (!chordSymbol) {
-                    errorDiv.textContent = "Please enter a chord symbol";
+                    errorDiv.textContent = "コードシンボルを入力してください";
                     errorDiv.style.display = "block";
                     chordInfoDiv.style.display = "none";
                     return;
                 }
                 
-                // Parse the chord symbol
+                // コードシンボルを解析
                 const { root, quality } = parseChordSymbol(chordSymbol);
                 
                 if (getNoteIndex(root) === -1) {
-                    errorDiv.textContent = `Invalid root note: ${root}`;
+                    errorDiv.textContent = `無効なルート音： ${root}`;
                     errorDiv.style.display = "block";
                     chordInfoDiv.style.display = "none";
                     return;
                 }
                 
                 if (!chordQualities[quality]) {
-                    errorDiv.textContent = `Unknown chord quality: ${quality}`;
+                    errorDiv.textContent = `不明なコードクオリティ： ${quality}`;
                     errorDiv.style.display = "block";
                     chordInfoDiv.style.display = "none";
                     return;
@@ -700,17 +978,17 @@
                 
                 errorDiv.style.display = "none";
                 
-                // Display chord information
+                // コード情報を表示
                 displayedChordSpan.textContent = chordSymbol;
                 chordNotesSpan.textContent = getChordNotes(root, quality);
                 chordInfoDiv.style.display = "block";
                 
-                // Find keys for the chord
+                // コードに対応するキーを検索
                 const keys = findKeysForChord(root, quality);
                 displayCombinedResults(keys, chordSymbol);
             });
 
-            // Also trigger search on Enter key
+            // Enterキーでも検索を実行
             chordInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     findKeysBtn.click();
