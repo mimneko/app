@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>料金プラン - MathCompass</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ribeye+Marrow&display=swap&text=MathCompass" rel="stylesheet">
     <style>
         /* 共通 */
         :root {
@@ -15,6 +12,7 @@
             --accent-color: #ea5506;
             --accent-hover-color: #c94400;
             --text-white-color: #fff;
+            --transition: all 0.3s ease;
         }
 
         /* ライトモード */
@@ -69,13 +67,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 40px;
+            padding: 15px 40px;
             border-bottom: var(--header-line);
         }
 
         .header-logo-section {
             font-size: 20px;
-            font-family: "Ribeye Marrow", serif;
+            font-family: "Comic Sans MS", "Ribeye Marrow", serif;
             font-weight: 400;
             text-decoration: none;
             height: 28px;
@@ -88,7 +86,7 @@
         .header-logo-section a {
             color: var(--text-main-color);
             text-decoration: none;
-            transition: background-color 0.3s, color 0.3s;
+            transition: var(--transition);
         }
 
         .header-logo-section a:hover {
@@ -104,11 +102,29 @@
         .nav-link {
             text-decoration: none;
             color: var(--text-main-color);
-            transition: background-color 0.3s, color 0.3s;
+            transition: var(--transition);
+            position: relative;
         }
 
         .nav-link:hover {
             color: var(--base-hover-color);
+        }
+        
+        .nav-link::after {
+            position: absolute;
+            left: 0;
+            content: '';
+            width: 100%;
+            height: 2px;
+            background: var(--base-hover-color);
+            bottom: -3px;
+            transform: scale(0, 1);
+            transform-origin: center top; /*変形（アンダーラインの伸長）の原点がaタグ（各メニュー）の右端*/
+            transition: var(--transition);
+        }
+
+        .nav-link:hover::after {
+            transform: scale(1, 1); /*ホバー後、x軸方向に1（相対値）伸長*/
         }
 
         #avatar-btn {
@@ -117,13 +133,14 @@
             border: none;
             cursor: pointer;
             color: var(--base-color);
-            transition: background-color 0.3s, color 0.3s;
+            transition: var(--transition);
             padding: 0;
             margin-bottom: -5px;
         }
 
         #avatar-btn:hover {
             color: var(--base-hover-color);
+            transform: scale(1.1);
         }
 
         /* メインコンテンツ */
@@ -200,7 +217,7 @@
         .footer-column a {
             text-decoration: none;
             color: var(--text-pale-color);
-            transition: background-color 0.3s, color 0.3s;
+            transition: var(--transition);
         }
 
         .footer-column a:hover {
@@ -295,7 +312,7 @@
             color: var(--text-pale-color);
             font-size: 16px;
             outline: none;
-            transition: background-color 0.3s, color 0.3s;
+            transition: var(--transition);
             border-radius: 0;
             cursor: pointer;
             border: var(--button-border);
@@ -419,7 +436,7 @@
             padding: 10px 19px 12px 20px;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s, color 0.3s;
+            transition: var(--transition);
             background-color: var(--bg-card-button-color);
         }
 
@@ -560,6 +577,127 @@
         .pricing-table td:first-child {
             font-weight: bold;
             text-align: left;
+        }
+    </style>
+    <style>
+        .account-popover {
+            position: absolute;
+            top: 60px;
+            right: 40px;
+            width: 280px;
+            background-color: var(--bg-card-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+                    
+        .account-popover.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+                    
+        .popover-header {
+            padding: 16px;
+            border-bottom: var(--card-line);
+        }
+                    
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+                    
+        .user-avatar {
+            margin-right: 12px;
+            color: var(--base-color);
+            font-size: 36px;
+        }
+                    
+        .user-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+                    
+        .user-email {
+            font-size: 14px;
+            color: var(--text-pale-color);
+        }
+                    
+        .popover-body {
+            padding: 8px 0;
+        }
+                    
+        .popover-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+                    
+        .popover-menu-item {
+            padding: 0;
+            margin: 0;
+        }
+                    
+        .popover-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: var(--text-main-color);
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+                    
+        .popover-menu-link:hover {
+            background-color: var(--bg-button-hover-color);
+            text-decoration: none;
+        }
+                    
+        .popover-menu-link i {
+            margin-right: 12px;
+            width: 16px;
+            text-align: center;
+        }
+                    
+        .popover-footer {
+            padding: 12px 16px;
+            border-top: var(--card-line);
+        }
+                    
+        .logout-button {
+            display: flex;
+            align-items: center;
+            color: var(--text-pale-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+                    
+        .logout-button:hover {
+            color: var(--text-main-color);
+            text-decoration: none;
+        }
+                    
+        .logout-button i {
+            margin-right: 8px;
+        }
+                    
+        /* モバイル対応 */
+        @media (max-width: 768px) {
+            .account-popover {
+                top: 120px;
+                right: 50%;
+                transform: translateX(50%) translateY(-10px);
+                width: 90%;
+                max-width: 300px;
+            }
+                        
+            .account-popover.active {
+                transform: translateX(50%) translateY(0);
+            }
         }
     </style>
     <!-- Font Awesome の読み込み -->
@@ -824,13 +962,51 @@
         </div>
         <div class="copyright">© 2024-2025 MathCompass. All Rights Reserved.</div>
     </footer>
-
+    <div id="account-popover" class="account-popover">
+        <div class="popover-header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fa-solid fa-circle-user"></i>
+                </div>
+                <div class="user-details">
+                    <div class="user-name">一二三数</div>
+                    <div class="user-email">hihumi.su@example.com</div>
+                </div>
+            </div>
+        </div>
+        <div class="popover-body">
+            <ul class="popover-menu">
+                <li class="popover-menu-item">
+                    <a href="#" class="popover-menu-link">
+                        <i class="fa-solid fa-user"></i>アカウント情報
+                    </a>
+                </li>
+                <li class="popover-menu-item">
+                    <a href="#" class="popover-menu-link">
+                        <i class="fa-solid fa-gear"></i>設定
+                    </a>
+                </li>
+                <li class="popover-menu-item">
+                    <a href="#" class="popover-menu-link">
+                        <i class="fa-solid fa-credit-card"></i>プランと課金
+                    </a>
+                </li>
+                <li class="popover-menu-item">
+                    <a href="#" class="popover-menu-link">
+                        <i class="fa-solid fa-comment-dots"></i>フィードバック
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="popover-footer">
+            <a href="#" class="logout-button">
+                <i class="fa-solid fa-right-from-bracket"></i>ログアウト
+            </a>
+        </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const monthlyButton = document.getElementById('billing-monthly');
-            const yearlyButton = document.getElementById('billing-yearly');
-            const cards = document.querySelectorAll('#pricing-cards > .card');
-        
+            // 定数定義
             const PRICES = {
                 'Pro': {
                     monthly: '314円',
@@ -841,58 +1017,99 @@
                     yearly: '2718円'
                 }
             };
-        
-            const updatePricing = (isYearly) => {
-                // カード内の料金更新
+
+            // 要素の取得
+            const monthlyButton = document.getElementById('billing-monthly');
+            const yearlyButton = document.getElementById('billing-yearly');
+            const cards = document.querySelectorAll('#pricing-cards > .card');
+
+            // カード内の料金を更新する関数
+            const updateCardPricing = (isYearly) => {
                 cards.forEach(card => {
-                    const name = card.querySelector('.name');
-                    const title = name.textContent;
+                    const nameElem = card.querySelector('.name');
+                    const title = nameElem.textContent;
                     if (title === 'Hobby') return;
-                    const amount = card.querySelector('.amount');
-                    const term = card.querySelector('.term');
-                    const button = card.querySelector('button');
-        
+                    const amountElem = card.querySelector('.amount');
+                    const termElem = card.querySelector('.term');
+                    const buttonElem = card.querySelector('button');
+
                     if (isYearly) {
-                        amount.textContent = PRICES[title].yearly;
-                        term.textContent = '年';
-                        name.classList.remove('monthly-name');
-                        name.classList.add('yearly-name');
-                        button.classList.remove('monthly-btn');
-                        button.classList.add('yearly-btn');
+                        amountElem.textContent = PRICES[title].yearly;
+                        termElem.textContent = '年';
+                        nameElem.classList.replace('monthly-name', 'yearly-name');
+                        buttonElem.classList.replace('monthly-btn', 'yearly-btn');
                     } else {
-                        amount.textContent = PRICES[title].monthly;
-                        term.textContent = '月';
-                        name.classList.remove('yearly-name');
-                        name.classList.add('monthly-name');
-                        button.classList.remove('yearly-btn');
-                        button.classList.add('monthly-btn');
+                        amountElem.textContent = PRICES[title].monthly;
+                        termElem.textContent = '月';
+                        nameElem.classList.replace('yearly-name', 'monthly-name');
+                        buttonElem.classList.replace('yearly-btn', 'monthly-btn');
                     }
                 });
-        
-                // テーブル内の料金更新
+            };
+
+            // テーブル内の料金を更新する関数
+            const updateTablePricing = (isYearly) => {
                 const priceCells = document.querySelectorAll('.price-cell');
                 priceCells.forEach(cell => {
                     const plan = cell.getAttribute('data-plan');
                     if (plan === 'Hobby') return;
-                    if (isYearly) {
-                        cell.innerHTML = "<span class='amount'>" + PRICES[plan].yearly + "</span>/<span class='term'>年</span>" + (plan === "School" ? "/<span class='user'>人</span>" : "");
-                    } else {
-                        cell.innerHTML = "<span class='amount'>" + PRICES[plan].monthly + "</span>/<span class='term'>月</span>" + (plan === "School" ? "/<span class='user'>人</span>" : "");
-                    }
+                    const price = isYearly ? PRICES[plan].yearly : PRICES[plan].monthly;
+                    const term = isYearly ? '年' : '月';
+                    const userSuffix = (plan === 'School') ? "/<span class='user'>人</span>" : "";
+                    cell.innerHTML = `<span class='amount'>${price}</span>/<span class='term'>${term}</span>${userSuffix}`;
                 });
             };
-        
+
+            // カードとテーブル両方の料金を更新する関数
+            const updatePricing = (isYearly) => {
+                updateCardPricing(isYearly);
+                updateTablePricing(isYearly);
+            };
+
+            // 料金プラン切替ボタンのイベント登録
             monthlyButton.addEventListener('click', () => {
                 monthlyButton.classList.add('active');
                 yearlyButton.classList.remove('active');
                 updatePricing(false);
             });
-        
+
             yearlyButton.addEventListener('click', () => {
                 yearlyButton.classList.add('active');
                 monthlyButton.classList.remove('active');
                 updatePricing(true);
             });
+
+            // 背景スクロール制御用の関数
+            const preventScroll = (e) => e.preventDefault();
+            const disableBackgroundScroll = () => {
+                window.addEventListener('wheel', preventScroll, { passive: false });
+                window.addEventListener('touchmove', preventScroll, { passive: false });
+            };
+            const enableBackgroundScroll = () => {
+                window.removeEventListener('wheel', preventScroll, { passive: false });
+                window.removeEventListener('touchmove', preventScroll, { passive: false });
+            };
+
+            // ポップオーバーの処理
+            const avatarBtn = document.getElementById('avatar-btn');
+            const popover = document.getElementById('account-popover');
+
+            if (avatarBtn && popover) {
+                const togglePopover = (e) => {
+                    e.stopPropagation();
+                    const isActive = popover.classList.toggle('active');
+                    isActive ? disableBackgroundScroll() : enableBackgroundScroll();
+                };
+
+                avatarBtn.addEventListener('click', togglePopover);
+
+                document.addEventListener('click', (e) => {
+                    if (popover.classList.contains('active') && !popover.contains(e.target)) {
+                        popover.classList.remove('active');
+                        enableBackgroundScroll();
+                    }
+                });
+            }
         });
     </script>
 </body>
