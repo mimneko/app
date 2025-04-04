@@ -146,21 +146,35 @@
         .new-chat-btn {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background-color: var(--base-color);
-            color: white;
+            background-color: transparent;
             border: none;
-            border-radius: 5px;
-            padding: 8px 16px;
+            padding: 8px 0;
             cursor: pointer;
             font-size: 14px;
-            transition: var(--transition);
+            color: var(--text-main-color);
             width: 100%;
-            justify-content: center;
+            justify-content: flex-start;
+            transition: var(--transition);
         }
 
         .new-chat-btn:hover {
-            background-color: var(--base-hover-color);
+            background-color: var(--sidebar-hover);
+        }
+
+        .new-chat-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--base-color);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+        }
+
+        .new-chat-text {
+            font-weight: normal;
         }
 
         /* details/summaryスタイル */
@@ -509,8 +523,8 @@
             <!-- 新規チャットボタン -->
             <div class="sidebar-header">
                 <button class="new-chat-btn">
-                    <i class="fa-solid fa-plus"></i>
-                    新規チャット
+                    <span class="new-chat-icon"><i class="fa-solid fa-plus"></i></span>
+                    <span class="new-chat-text">新規チャット</span>
                 </button>
             </div>
             
