@@ -136,11 +136,11 @@
         }
 
         .sidebar-header {
-            padding: 16px;
-            border-bottom: var(--header-line);
+            padding: 16px 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 10px var(--bg-color);
         }
 
         .new-chat-btn {
@@ -148,13 +148,14 @@
             align-items: center;
             background-color: transparent;
             border: none;
-            padding: 8px 0;
+            padding: 8px;
             cursor: pointer;
             font-size: 14px;
             color: var(--text-main-color);
             width: 100%;
             justify-content: flex-start;
             transition: var(--transition);
+            border-radius: 8px;
         }
 
         .new-chat-btn:hover {
@@ -171,6 +172,11 @@
             width: 24px;
             height: 24px;
             margin-right: 12px;
+        }
+
+        .new-chat-btn:hover .new-chat-icon {
+            transform: scale(1.1);
+            transition: var(--transition);
         }
 
         .new-chat-text {
@@ -193,6 +199,7 @@
             align-items: center;
             transition: var(--transition);
             list-style: none;
+            border-radius: 8px;
         }
         
         summary::-webkit-details-marker {
@@ -201,6 +208,10 @@
         
         summary:hover {
             background-color: var(--sidebar-hover);
+        }
+        
+        summary:hover i {
+            transform: scale(1.1);
         }
         
         summary .history-icon {
@@ -226,6 +237,8 @@
             transition: var(--transition);
             display: flex;
             align-items: center;
+            border-radius: 8px;
+            margin-bottom: 1px;
         }
 
         .history-item:hover {
@@ -234,7 +247,8 @@
 
         .history-item.active {
             background-color: var(--sidebar-active);
-            border-left: 3px solid var(--base-color);
+            color: var(--base-color);
+            font-weight: bold;
         }
 
         .history-icon {
@@ -256,11 +270,11 @@
         }
 
         .sidebar-footer {
-            border-top: var(--header-line);
             padding: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 -4px 10px var(--bg-color);
         }
 
         .user-avatar {
@@ -447,6 +461,11 @@
         .history-container ol {
             margin-block-start: 0;
             margin-block-end: 0;
+            padding: 0;
+        }
+
+        .history-wrapper {
+            margin: 0 .5em;
         }
     </style>
     <style>
@@ -530,104 +549,106 @@
             
             <!-- 折りたたみ可能なチャットリスト -->
             <div class="history-container">
-                <!-- 保存したチャット - details/summary 使用 -->
-                <details open>
-                    <summary>
+                <div class="history-wrapper">
+                    <!-- 保存したチャット - details/summary 使用 -->
+                    <details open>
+                        <summary>
+                            <div>
+                                <i class="fa-solid fa-bookmark history-icon"></i>
+                                保存したチャット
+                            </div>
+                            <i class="fa-solid fa-chevron-down chevron"></i>
+                        </summary>
                         <div>
-                            <i class="fa-solid fa-bookmark history-icon"></i>
-                            保存したチャット
+                            <ul class="history-saved">
+                                <li class="history-item">
+                                    <div class="history-title">二次関数のグラフ</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">微分の基本公式</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">複素数の極形式</div>
+                                </li>
+                            </ul>
                         </div>
-                        <i class="fa-solid fa-chevron-down chevron"></i>
-                    </summary>
-                    <div>
-                        <ul class="history-saved">
-                            <li class="history-item">
-                                <div class="history-title">二次関数のグラフ</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">微分の基本公式</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">複素数の極形式</div>
-                            </li>
-                        </ul>
-                    </div>
-                </details>
-                
-                <!-- チャット履歴 - details/summary 使用 -->
-                <details open>
-                    <summary>
+                    </details>
+                    
+                    <!-- チャット履歴 - details/summary 使用 -->
+                    <details open>
+                        <summary>
+                            <div>
+                                <i class="fa-regular fa-comment history-icon"></i>
+                                チャット履歴
+                            </div>
+                            <i class="fa-solid fa-chevron-down chevron"></i>
+                        </summary>
                         <div>
-                            <i class="fa-regular fa-comment history-icon"></i>
-                            チャット履歴
+                            <ol class="history-normal">
+                                <li class="history-item active">
+                                    <div class="history-title">二次方程式の解の公式</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">積分の計算方法</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">ベクトルの内積と外積の意味、また成分表示について</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">確率分布の期待値</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">微分方程式の解法</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">三角関数の公式</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">複素数平面</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">行列の固有値</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">円の方程式</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">極限の計算</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">一次方程式の解法</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">不等式の解法</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">連立方程式の解法</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">比例と反比例</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">指数関数の性質</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">対数関数の基本</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">三角比の応用</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">円周角の定理</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">合同条件の判定</div>
+                                </li>
+                                <li class="history-item">
+                                    <div class="history-title">相似形の性質</div>
+                                </li>
+                            </ol>
                         </div>
-                        <i class="fa-solid fa-chevron-down chevron"></i>
-                    </summary>
-                    <div>
-                        <ol class="history-normal">
-                            <li class="history-item active">
-                                <div class="history-title">二次方程式の解の公式</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">積分の計算方法</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">ベクトルの内積と外積の意味、また成分表示について</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">確率分布の期待値</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">微分方程式の解法</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">三角関数の公式</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">複素数平面</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">行列の固有値</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">円の方程式</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">極限の計算</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">一次方程式の解法</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">不等式の解法</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">連立方程式の解法</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">比例と反比例</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">指数関数の性質</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">対数関数の基本</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">三角比の応用</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">円周角の定理</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">合同条件の判定</div>
-                            </li>
-                            <li class="history-item">
-                                <div class="history-title">相似形の性質</div>
-                            </li>
-                        </ol>
-                    </div>
-                </details>
+                    </details>
+                </div>
             </div>
         </div>
         
