@@ -123,7 +123,7 @@
 
         .logo {
             font-size: 20px;
-            font-family: "Comic Sans MS", "Ribeye Marrow", serif;
+            font-family: "Comic Sans MS", serif;
             font-weight: 400;
             color: var(--text-main-color);
         }
@@ -174,15 +174,6 @@
             margin-right: 12px;
         }
 
-        .new-chat-btn:hover .new-chat-icon {
-            transform: scale(1.1);
-            transition: var(--transition);
-        }
-
-        .new-chat-text {
-            font-weight: normal;
-        }
-
         /* details/summaryスタイル */
         details {
             margin-bottom: 8px;
@@ -210,10 +201,6 @@
             background-color: var(--sidebar-hover);
         }
         
-        summary:hover i {
-            transform: scale(1.1);
-        }
-        
         summary .history-icon {
             margin-right: 8px;
         }
@@ -226,10 +213,6 @@
         details[open] summary .chevron {
             transform: rotate(180deg);
         }
-        
-        details > div {
-            transition: opacity 0.3s ease;
-        }
 
         .history-item {
             padding: 10px 16px;
@@ -238,7 +221,7 @@
             display: flex;
             align-items: center;
             border-radius: 8px;
-            margin-bottom: 1px;
+            margin-top: 1px;
         }
 
         .history-item:hover {
@@ -537,15 +520,16 @@
             <span class="logo">MathCompass</span>
         </div>
         
+        <!-- 新規チャットボタン -->
+        <div class="sidebar-header">
+            <button class="new-chat-btn">
+                <span class="new-chat-icon"><i class="fa-solid fa-plus"></i></span>
+                <span class="new-chat-text">新規チャット</span>
+            </button>
+        </div>
+
         <!-- サイドバーのメインコンテンツ -->
         <div class="sidebar-content">
-            <!-- 新規チャットボタン -->
-            <div class="sidebar-header">
-                <button class="new-chat-btn">
-                    <span class="new-chat-icon"><i class="fa-solid fa-plus"></i></span>
-                    <span class="new-chat-text">新規チャット</span>
-                </button>
-            </div>
             
             <!-- 折りたたみ可能なチャットリスト -->
             <div class="history-container">
