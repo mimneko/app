@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メロディプレーヤー</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .settings {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f0f4f8;
+            border-radius: 6px;
+        }
+        .setting-group {
+            display: flex;
+            align-items: center;
+        }
+        label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        input[type="number"], input[type="text"], select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .play-btn {
+            background-color: #27ae60;
+            color: white;
+        }
+        .play-btn:hover {
+            background-color: #2ecc71;
+        }
+        .stop-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .stop-btn:hover {
+            background-color: #f5594e;
+        }
+        .add-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        .add-btn:hover {
+            background-color: #4aa3df;
+        }
+        .export-btn {
+            background-color: #8e44ad;
+            color: white;
+        }
+        .export-btn:hover {
+            background-color: #9b59b6;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        thead {
+            background-color: #34495e;
+            color: white;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        tr:nth-child(even) td {
+            background-color: #f9f9f9;
+        }
+        .note-row input {
+            width: 80px;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        .delete-btn:hover {
+            background-color: #f5594e;
+        }
+        .insert-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 5px 10px;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        .insert-btn:hover {
+            background-color: #4aa3df;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .playing {
+            background-color: #d5f5e3;
+            color: #27ae60;
+        }
+        .stopped {
+            background-color: #fadbd8;
+            color: #e74c3c;
+        }
+        .note-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            font-size: 14px;
+        }
+        .current-playing td {
+            background-color: #d5f5e3!important;
+        }
+        .midi-number {
+            font-size: 12px;
+            color: #777;
+            margin-top: 4px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>メロディプレーヤー</h1>
+        
+        <div class="settings">
+            <div class="setting-group">
+                <label for="bpm">BPM:</label>
+                <input type="number" id="bpm" value="120" min="40" max="300">
+            </div>
+            <div class="setting-group">
+                <label for="timeSignature">拍子:</label>
+                <input type="text" id="timeSignature" value="4/4" placeholder="例: 4/4">
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="playButton" class="play-btn">再生</button>
+            <button id="stopButton" class="stop-btn">停止</button>
+            <button id="addNoteButton" class="add-btn">音符を追加</button>
+            <button id="exportMp3Button" class="export-btn">MP3出力</button>
+        </div>
+        
+        <div id="status" class="status">準備完了</div>
+        
+        <div class="melody-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>音高 (例: C, D# と 4, 5を分けて入力)</th>
+                        <th>音価 (4分音符=320)</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="noteTableBody">
+                    <!-- 初期行 -->
+                    <tr class="note-row">
+                        <td>
+                            <select class="note-letter">
+                                <option value="C" selected>C</option>
+                                <option value="C#">C#</option>
+                                <option value="D">D</option>
+                                <option value="D#">D#</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="F#">F#</option>
+                                <option value="G">G</option>
+                                <option value="G#">G#</option>
+                                <option value="A">A</option>
+                                <option value="A#">A#</option>
+                                <option value="B">B</option>
+                            </select>
+                            <input type="number" class="note-octave" value="4" min="0" style="width:50px; margin-left:5px;">
+                            <div class="midi-number">MIDI: <span class="midi-display">60</span></div>
+                            <input type="hidden" class="note-pitch" value="60">
+                        </td>
+                        <td>
+                            <input type="number" class="note-duration" value="320" min="0" step="160">
+                        </td>
+                        <td>
+                            <button class="insert-btn">挿入</button>
+                            <button class="delete-btn">削除</button>
+                        </td>
+                    </tr>
+                    <tr class="note-row">
+                        <td>
+                            <select class="note-letter">
+                                <option value="C">C</option>
+                                <option value="C#">C#</option>
+                                <option value="D" selected>D</option>
+                                <option value="D#">D#</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="F#">F#</option>
+                                <option value="G">G</option>
+                                <option value="G#">G#</option>
+                                <option value="A">A</option>
+                                <option value="A#">A#</option>
+                                <option value="B">B</option>
+                            </select>
+                            <input type="number" class="note-octave" value="4" min="0" style="width:50px; margin-left:5px;">
+                            <div class="midi-number">MIDI: <span class="midi-display">62</span></div>
+                            <input type="hidden" class="note-pitch" value="62">
+                        </td>
+                        <td>
+                            <input type="number" class="note-duration" value="320" min="0" step="160">
+                        </td>
+                        <td>
+                            <button class="insert-btn">挿入</button>
+                            <button class="delete-btn">削除</button>
+                        </td>
+                    </tr>
+                    <tr class="note-row">
+                        <td>
+                            <select class="note-letter">
+                                <option value="C">C</option>
+                                <option value="C#">C#</option>
+                                <option value="D">D</option>
+                                <option value="D#">D#</option>
+                                <option value="E" selected>E</option>
+                                <option value="F">F</option>
+                                <option value="F#">F#</option>
+                                <option value="G">G</option>
+                                <option value="G#">G#</option>
+                                <option value="A">A</option>
+                                <option value="A#">A#</option>
+                                <option value="B">B</option>
+                            </select>
+                            <input type="number" class="note-octave" value="4" min="0" style="width:50px; margin-left:5px;">
+                            <div class="midi-number">MIDI: <span class="midi-display">64</span></div>
+                            <input type="hidden" class="note-pitch" value="64">
+                        </td>
+                        <td>
+                            <input type="number" class="note-duration" value="320" min="0" step="160">
+                        </td>
+                        <td>
+                            <button class="insert-btn">挿入</button>
+                            <button class="delete-btn">削除</button>
+                        </td>
+                    </tr>
+                    <tr class="note-row">
+                        <td>
+                            <select class="note-letter">
+                                <option value="C">C</option>
+                                <option value="C#">C#</option>
+                                <option value="D">D</option>
+                                <option value="D#">D#</option>
+                                <option value="E">E</option>
+                                <option value="F" selected>F</option>
+                                <option value="F#">F#</option>
+                                <option value="G">G</option>
+                                <option value="G#">G#</option>
+                                <option value="A">A</option>
+                                <option value="A#">A#</option>
+                                <option value="B">B</option>
+                            </select>
+                            <input type="number" class="note-octave" value="4" min="0" style="width:50px; margin-left:5px;">
+                            <div class="midi-number">MIDI: <span class="midi-display">65</span></div>
+                            <input type="hidden" class="note-pitch" value="65">
+                        </td>
+                        <td>
+                            <input type="number" class="note-duration" value="320" min="0" step="160">
+                        </td>
+                        <td>
+                            <button class="insert-btn">挿入</button>
+                            <button class="delete-btn">削除</button>
+                        </td>
+                    </tr>
+                    <tr class="note-row">
+                        <td>
+                            <select class="note-letter">
+                                <option value="C">C</option>
+                                <option value="C#">C#</option>
+                                <option value="D">D</option>
+                                <option value="D#">D#</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="F#">F#</option>
+                                <option value="G" selected>G</option>
+                                <option value="G#">G#</option>
+                                <option value="A">A</option>
+                                <option value="A#">A#</option>
+                                <option value="B">B</option>
+                            </select>
+                            <input type="number" class="note-octave" value="4" min="0" style="width:50px; margin-left:5px;">
+                            <div class="midi-number">MIDI: <span class="midi-display">67</span></div>
+                            <input type="hidden" class="note-pitch" value="67">
+                        </td>
+                        <td>
+                            <input type="number" class="note-duration" value="640" min="0" step="160">
+                        </td>
+                        <td>
+                            <button class="insert-btn">挿入</button>
+                            <button class="delete-btn">削除</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="note-info">
+            <p><strong>使い方:</strong></p>
+            <p>・音高: 例として、音名（C、D#など）とオクターブ（4、5など）を個別に入力してください</p>
+            <p>・音価: 4分音符を320として相対的な長さを指定（320=4分音符, 160=8分音符, 640=2分音符）</p>
+            <p>・表の行を追加・削除してメロディを編集し、BPMを設定して再生ボタンを押してください</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Web Audio APIのコンテキストを作成
+            let audioContext;
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                document.getElementById('status').textContent = 'お使いのブラウザはWeb Audio APIに対応していません。';
+                document.getElementById('status').className = 'status stopped';
+                document.getElementById('playButton').disabled = true;
+                return;
+            }
+            
+            const playButton = document.getElementById('playButton');
+            const stopButton = document.getElementById('stopButton');
+            const addNoteButton = document.getElementById('addNoteButton');
+            const exportMp3Button = document.getElementById('exportMp3Button');
+            const noteTableBody = document.getElementById('noteTableBody');
+            const statusDisplay = document.getElementById('status');
+            const bpmInput = document.getElementById('bpm');
+            const timeSignatureInput = document.getElementById('timeSignature');
+            
+            let isPlaying = false;
+            let currentNoteIndex = -1;
+            let stopRequested = false;
+            
+            // 音名からMIDIノートナンバーへの変換
+            function noteNameToMidi(noteName) {
+                if (!noteName) return null;
+                const notePattern = /^([A-Ga-g])([#b])?(\d+)$/;
+                const match = noteName.match(notePattern);
+                
+                if (!match) return null;
+                
+                const note = match[1].toUpperCase();
+                const accidental = match[2] || '';
+                const octave = parseInt(match[3]);
+                
+                // 基本的なノート番号（C=0, D=2, E=4, F=5, G=7, A=9, B=11）
+                const noteValues = {
+                    'C': 0,
+                    'D': 2,
+                    'E': 4,
+                    'F': 5,
+                    'G': 7,
+                    'A': 9,
+                    'B': 11
+                };
+                
+                let value = noteValues[note];
+                
+                // 臨時記号の調整
+                if (accidental === '#') value += 1;
+                if (accidental === 'b') value -= 1;
+                
+                // オクターブ調整とMIDI基準点（C4=60）に変換
+                return value + (octave + 1) * 12;
+            }
+            
+            // MIDIノートナンバーから音名への変換
+            function midiToNoteName(midiNote) {
+                const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const octave = Math.floor(midiNote / 12) - 1;
+                const note = noteNames[midiNote % 12];
+                return note + octave;
+            }
+            
+            // MIDIノートナンバーを周波数（Hz）に変換する関数
+            function midiNoteToFrequency(note) {
+                return 440 * Math.pow(2, (note - 69) / 12);
+            }
+            
+            // 音価から実際の再生時間（ミリ秒）に変換する関数
+            function durationToMs(duration, bpm) {
+                // BPMから四分音符1つあたりの長さをミリ秒で計算
+                const quarterNoteMs = 60000 / bpm;
+                // 音価の相対値から実際の時間を計算（4分音符=320の場合）
+                return (duration / 320) * quarterNoteMs;
+            }
+            
+            // 分割された音名入力フィールド（音名とオクターブ）のイベントハンドラを設定
+            function setupNoteInputs(row) {
+                const noteLetterInput = row.querySelector('.note-letter');
+                const noteOctaveInput = row.querySelector('.note-octave');
+                const midiDisplay = row.querySelector('.midi-display');
+                const hiddenPitchInput = row.querySelector('.note-pitch');
+                
+                function update() {
+                    const noteStr = noteLetterInput.value.trim() + noteOctaveInput.value.trim();
+                    const midiValue = noteNameToMidi(noteStr);
+                    if (midiValue !== null) {
+                        hiddenPitchInput.value = midiValue;
+                        midiDisplay.textContent = midiValue;
+                        noteLetterInput.style.color = 'black';
+                        noteOctaveInput.style.color = 'black';
+                    } else {
+                        noteLetterInput.style.color = 'red';
+                        noteOctaveInput.style.color = 'red';
+                    }
+                }
+                
+                noteLetterInput.addEventListener('input', update);
+                noteLetterInput.addEventListener('change', update);
+                noteOctaveInput.addEventListener('input', update);
+                update();
+            }
+            
+            // 初期行の入力フィールドにイベントハンドラを設定
+            document.querySelectorAll('.note-row').forEach(setupNoteInputs);
+            
+            // 音を再生する関数
+            function playNote(frequency, durationMs) {
+                return new Promise((resolve, reject) => {
+                    if (stopRequested) {
+                        stopRequested = false;
+                        reject(new Error('再生が停止されました'));
+                        return;
+                    }
+                    
+                    // オシレーターとゲインノードを作成
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    // オシレーターの設定
+                    oscillator.type = 'sine'; // 正弦波
+                    oscillator.frequency.value = frequency;
+                    
+                    // エンベロープの設定（アタックとリリース）
+                    const attackTime = Math.min(0.1, durationMs / 1000 * 0.1); // 10%をアタックタイム
+                    const releaseTime = Math.min(0.1, durationMs / 1000 * 0.2); // 20%をリリースタイム
+                    
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + attackTime);
+                    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime + (durationMs / 1000) - releaseTime);
+                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + (durationMs / 1000));
+                    
+                    // 接続
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    // 再生開始
+                    oscillator.start();
+                    
+                    // 指定時間後に停止
+                    setTimeout(() => {
+                        oscillator.stop();
+                        resolve();
+                    }, durationMs);
+                });
+            }
+            
+            // メロディデータを取得する関数
+            function getMelodyData() {
+                const rows = noteTableBody.querySelectorAll('.note-row');
+                const melodyData = [];
+                
+                rows.forEach(row => {
+                    const hiddenPitchInput = row.querySelector('.note-pitch');
+                    const noteLetterInput = row.querySelector('.note-letter');
+                    const noteOctaveInput = row.querySelector('.note-octave');
+                    const durationInput = row.querySelector('.note-duration');
+                    
+                    let noteStr = noteLetterInput.value.trim() + noteOctaveInput.value.trim();
+                    let pitch = parseInt(hiddenPitchInput.value);
+                    if (isNaN(pitch) || pitch === 0) {
+                        const midiValue = noteNameToMidi(noteStr);
+                        if (midiValue !== null) {
+                            pitch = midiValue;
+                        } else {
+                            return; // 無効な音名はスキップ
+                        }
+                    }
+                    
+                    const duration = parseInt(durationInput.value);
+                    
+                    if (!isNaN(pitch) && !isNaN(duration)) {
+                        melodyData.push({
+                            pitch: pitch,
+                            noteName: noteStr,
+                            duration: duration
+                        });
+                    }
+                });
+                
+                return melodyData;
+            }
+            
+            // メロディを再生する関数
+            async function playMelody() {
+                if (isPlaying) return;
+                
+                // AudioContextの再開（ユーザージェスチャが必要なブラウザ向け）
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                isPlaying = true;
+                stopRequested = false;
+                
+                const melodyData = getMelodyData();
+                if (melodyData.length === 0) {
+                    statusDisplay.textContent = 'メロディデータがありません。';
+                    statusDisplay.className = 'status stopped';
+                    isPlaying = false;
+                    return;
+                }
+                
+                const bpm = parseInt(bpmInput.value) || 120;
+                const rows = noteTableBody.querySelectorAll('.note-row');
+                
+                statusDisplay.textContent = '再生中...';
+                statusDisplay.className = 'status playing';
+                
+                try {
+                    for (let i = 0; i < melodyData.length; i++) {
+                        if (stopRequested) {
+                            break;
+                        }
+                        
+                        const note = melodyData[i];
+                        const frequency = midiNoteToFrequency(note.pitch);
+                        const durationMs = durationToMs(note.duration, bpm);
+                        
+                        // 再生中の行をハイライト
+                        currentNoteIndex = i;
+                        highlightCurrentNote();
+                        
+                        // statusに情報表示
+                        statusDisplay.textContent = `再生中: ${note.noteName} (MIDI: ${note.pitch}, 音価: ${note.duration}) - ${i + 1}/${melodyData.length}`;
+                        
+                        // 音符を再生して完了を待つ
+                        await playNote(frequency, durationMs);
+                    }
+                    
+                    // 再生完了
+                    statusDisplay.textContent = '再生完了';
+                    currentNoteIndex = -1;
+                    highlightCurrentNote();
+                } catch (error) {
+                    if (error.message === '再生が停止されました') {
+                        statusDisplay.textContent = '再生停止';
+                    } else {
+                        statusDisplay.textContent = 'エラーが発生しました: ' + error.message;
+                    }
+                    currentNoteIndex = -1;
+                    highlightCurrentNote();
+                } finally {
+                    isPlaying = false;
+                    statusDisplay.className = 'status stopped';
+                }
+            }
+            
+            // 再生中の音符をハイライト表示
+            function highlightCurrentNote() {
+                const rows = noteTableBody.querySelectorAll('.note-row');
+                rows.forEach((row, index) => {
+                    if (index === currentNoteIndex) {
+                        row.classList.add('current-playing');
+                    } else {
+                        row.classList.remove('current-playing');
+                    }
+                });
+            }
+            
+            // 再生を停止する関数
+            function stopPlayback() {
+                if (isPlaying) {
+                    stopRequested = true;
+                    statusDisplay.textContent = '停止中...';
+                }
+            }
+            
+            // 音符の行を追加する関数（挿入も可能）
+            function addNoteRow(afterRow) {
+                const newRow = document.createElement('tr');
+                newRow.className = 'note-row';
+                
+                newRow.innerHTML = `
+                    <td>
+                        <select class="note-letter">
+                            <option value="C" selected>C</option>
+                            <option value="C#">C#</option>
+                            <option value="D">D</option>
+                            <option value="D#">D#</option>
+                            <option value="E">E</option>
+                            <option value="F">F</option>
+                            <option value="F#">F#</option>
+                            <option value="G">G</option>
+                            <option value="G#">G#</option>
+                            <option value="A">A</option>
+                            <option value="A#">A#</option>
+                            <option value="B">B</option>
+                        </select>
+                        <input type="number" class="note-octave" value="4" min="0" style="width:50px; margin-left:5px;">
+                        <div class="midi-number">MIDI: <span class="midi-display">60</span></div>
+                        <input type="hidden" class="note-pitch" value="60">
+                    </td>
+                    <td>
+                        <input type="number" class="note-duration" value="320" min="0" step="160">
+                    </td>
+                    <td>
+                        <button class="insert-btn">挿入</button>
+                        <button class="delete-btn">削除</button>
+                    </td>
+                `;
+                
+                if (afterRow && afterRow.nextSibling) {
+                    noteTableBody.insertBefore(newRow, afterRow.nextSibling);
+                } else {
+                    noteTableBody.appendChild(newRow);
+                }
+                
+                setupNoteInputs(newRow);
+                
+                // 削除ボタンのイベントリスナーを設定
+                const deleteBtn = newRow.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', function() {
+                    if (!isPlaying && noteTableBody.querySelectorAll('.note-row').length > 1) {
+                        newRow.remove();
+                    } else if (isPlaying) {
+                        alert('再生中は削除できません。');
+                    } else {
+                        alert('少なくとも1つの音符が必要です。');
+                    }
+                });
+                
+                // 挿入ボタンのイベントリスナーを設定
+                const insertBtn = newRow.querySelector('.insert-btn');
+                insertBtn.addEventListener('click', function() {
+                    addNoteRow(newRow);
+                });
+            }
+            
+            // MP3を出力する関数
+            function exportMp3() {
+                const melodyData = getMelodyData();
+                if (melodyData.length === 0) {
+                    alert('メロディデータがありません。');
+                    return;
+                }
+                const bpm = parseInt(bpmInput.value) || 120;
+                let totalDurationMs = 0;
+                melodyData.forEach(note => {
+                    totalDurationMs += durationToMs(note.duration, bpm);
+                });
+                const totalDurationSec = totalDurationMs / 1000;
+                const sampleRate = audioContext.sampleRate;
+                const offlineContext = new OfflineAudioContext(1, Math.ceil(sampleRate * totalDurationSec), sampleRate);
+                
+                let currentTime = 0;
+                melodyData.forEach(note => {
+                    const frequency = midiNoteToFrequency(note.pitch);
+                    const durationMs = durationToMs(note.duration, bpm);
+                    const durationSec = durationMs / 1000;
+                    
+                    const oscillator = offlineContext.createOscillator();
+                    const gainNode = offlineContext.createGain();
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(frequency, currentTime);
+                    
+                    const attackTime = Math.min(0.1, durationSec * 0.1);
+                    const releaseTime = Math.min(0.1, durationSec * 0.2);
+                    
+                    gainNode.gain.setValueAtTime(0, currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.5, currentTime + attackTime);
+                    gainNode.gain.setValueAtTime(0.5, currentTime + durationSec - releaseTime);
+                    gainNode.gain.linearRampToValueAtTime(0, currentTime + durationSec);
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(offlineContext.destination);
+                    
+                    oscillator.start(currentTime);
+                    oscillator.stop(currentTime + durationSec);
+                    
+                    currentTime += durationSec;
+                });
+                
+                statusDisplay.textContent = 'MP3レンダリング中...';
+                statusDisplay.className = 'status playing';
+                
+                offlineContext.startRendering().then(function(renderedBuffer) {
+                    const channelData = renderedBuffer.getChannelData(0);
+                    function floatTo16BitPCM(input) {
+                        const output = new Int16Array(input.length);
+                        for (let i = 0; i < input.length; i++) {
+                            let s = Math.max(-1, Math.min(1, input[i]));
+                            output[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                        }
+                        return output;
+                    }
+                    const pcmData = floatTo16BitPCM(channelData);
+                    
+                    const mp3encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
+                    const blockSize = 1152;
+                    let mp3Data = [];
+                    for (let i = 0; i < pcmData.length; i += blockSize) {
+                        const sampleChunk = pcmData.subarray(i, i + blockSize);
+                        const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
+                        if (mp3buf.length > 0) {
+                            mp3Data.push(new Int8Array(mp3buf));
+                        }
+                    }
+                    const mp3buf = mp3encoder.flush();
+                    if (mp3buf.length > 0) {
+                        mp3Data.push(new Int8Array(mp3buf));
+                    }
+                    
+                    const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                    const url = URL.createObjectURL(mp3Blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'melody.mp3';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    statusDisplay.textContent = 'MP3出力完了';
+                    statusDisplay.className = 'status stopped';
+                }).catch(function(err) {
+                    statusDisplay.textContent = 'MP3レンダリングエラー: ' + err.message;
+                    statusDisplay.className = 'status stopped';
+                });
+            }
+            
+            playButton.addEventListener('click', playMelody);
+            stopButton.addEventListener('click', stopPlayback);
+            addNoteButton.addEventListener('click', function() {
+                addNoteRow();
+            });
+            exportMp3Button.addEventListener('click', exportMp3);
+            
+            // 初期の削除・挿入ボタンのイベントリスナーを設定
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!isPlaying && noteTableBody.querySelectorAll('.note-row').length > 1) {
+                        this.closest('.note-row').remove();
+                    } else if (isPlaying) {
+                        alert('再生中は削除できません。');
+                    } else {
+                        alert('少なくとも1つの音符が必要です。');
+                    }
+                });
+            });
+            document.querySelectorAll('.insert-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const currentRow = this.closest('.note-row');
+                    addNoteRow(currentRow);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

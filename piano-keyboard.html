@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ピアノ</title>
+    <style>
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        .piano {
+            background-color: #222;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            overflow-x: auto;
+            max-width: 100vw;
+        }
+
+        /* 新たに追加：鍵盤全体（見えている部分）を画面いっぱいに広げ、中央寄せにする */
+        .keys-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .keys {
+            display: flex;
+            position: relative;
+            width: 926px; /* 白鍵14個分：各60px＋両側のマージン */
+        }
+
+        .white-key {
+            flex: 0 0 60px; /* 幅は固定 */
+            height: 200px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 0 0 5px 5px;
+            margin: 0 2px;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+        }
+
+        .black-key {
+            width: 40px;
+            height: 120px;
+            background-color: black;
+            border-radius: 0 0 5px 5px;
+            cursor: pointer;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .white-key:active, .white-key.active {
+            background-color: #f0f0f0;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1);
+        }
+
+        .black-key:active, .black-key.active {
+            background-color: #333;
+            box-shadow: inset 0 -3px 6px rgba(255,255,255,0.1);
+        }
+
+        .title {
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .instructions {
+            margin-top: 30px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .note-name {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">
+        <h1>ピアノ</h1>
+    </div>
+    
+    <div class="piano">
+        <div class="keys-wrapper">
+            <div class="keys">
+                <!-- 1オクターブ目 (C3-B3) -->
+                <div class="white-key" data-note="C3"><div class="note-name">C3</div></div>
+                <div class="white-key" data-note="D3"><div class="note-name">D3</div></div>
+                <div class="white-key" data-note="E3"><div class="note-name">E3</div></div>
+                <div class="white-key" data-note="F3"><div class="note-name">F3</div></div>
+                <div class="white-key" data-note="G3"><div class="note-name">G3</div></div>
+                <div class="white-key" data-note="A3"><div class="note-name">A3</div></div>
+                <div class="white-key" data-note="B3"><div class="note-name">B3</div></div>
+                
+                <!-- 2オクターブ目 (C4-B4) -->
+                <div class="white-key" data-note="C4"><div class="note-name">C4</div></div>
+                <div class="white-key" data-note="D4"><div class="note-name">D4</div></div>
+                <div class="white-key" data-note="E4"><div class="note-name">E4</div></div>
+                <div class="white-key" data-note="F4"><div class="note-name">F4</div></div>
+                <div class="white-key" data-note="G4"><div class="note-name">G4</div></div>
+                <div class="white-key" data-note="A4"><div class="note-name">A4</div></div>
+                <div class="white-key" data-note="B4"><div class="note-name">B4</div></div>
+                                
+                <!-- 1オクターブ目の黒鍵-->
+                <div class="black-key" data-note="C#3" style="left: 46px;"></div>
+                <div class="black-key" data-note="D#3" style="left: 112px;"></div>
+                <div class="black-key" data-note="F#3" style="left: 242px;"></div>
+                <div class="black-key" data-note="G#3" style="left: 310px;"></div>
+                <div class="black-key" data-note="A#3" style="left: 376px;"></div>
+                
+                <!-- 2オクターブ目の黒鍵-->
+                <div class="black-key" data-note="C#4" style="left: 508px;"></div>
+                <div class="black-key" data-note="D#4" style="left: 574px;"></div>
+                <div class="black-key" data-note="F#4" style="left: 706px;"></div>
+                <div class="black-key" data-note="G#4" style="left: 774px;"></div>
+                <div class="black-key" data-note="A#4" style="left: 840px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <p>鍵盤をクリックして演奏してみよう</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // AudioContextの作成
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            
+            // 音の周波数マッピング（2オクターブ）
+            const noteFrequency = {
+                // 1オクターブ目 (C3-B3)
+                'C3': 130.81, 'C#3': 138.59,
+                'D3': 146.83, 'D#3': 155.56,
+                'E3': 164.81,
+                'F3': 174.61, 'F#3': 185.00,
+                'G3': 196.00, 'G#3': 207.65,
+                'A3': 220.00, 'A#3': 233.08,
+                'B3': 246.94,
+                
+                // 2オクターブ目 (C4-B4)
+                'C4': 261.63, 'C#4': 277.18,
+                'D4': 293.66, 'D#4': 311.13,
+                'E4': 329.63,
+                'F4': 349.23, 'F#4': 369.99,
+                'G4': 392.00, 'G#4': 415.30,
+                'A4': 440.00, 'A#4': 466.16,
+                'B4': 493.88,
+            };
+            
+            // 音を再生する関数
+            function playNote(note) {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'triangle';
+                oscillator.frequency.value = noteFrequency[note];
+                
+                gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.5);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 1.5);
+                
+                return oscillator;
+            }
+            
+            // 鍵盤のクリックイベント
+            const keys = document.querySelectorAll('.white-key, .black-key');
+            keys.forEach(key => {
+                key.addEventListener('click', function() {
+                    // AudioContextの自動再生ポリシー対応
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    
+                    const note = this.getAttribute('data-note');
+                    playNote(note);
+                    
+                    // アクティブ状態の視覚効果
+                    this.classList.add('active');
+                    setTimeout(() => {
+                        this.classList.remove('active');
+                    }, 300);
+                });
+                
+                // タッチデバイス対応
+                key.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    
+                    const note = this.getAttribute('data-note');
+                    playNote(note);
+                    
+                    this.classList.add('active');
+                });
+                
+                key.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('active');
+                });
+            });
+            
+            // キーボードでの操作
+            const keyMap = {
+                // 1オクターブ目
+                'z': 'C3', 's': 'C#3',
+                'x': 'D3', 'd': 'D#3',
+                'c': 'E3',
+                'v': 'F3', 'g': 'F#3',
+                'b': 'G3', 'h': 'G#3',
+                'n': 'A3', 'j': 'A#3',
+                'm': 'B3',
+                
+                // 2オクターブ目
+                'q': 'C4', '2': 'C#4',
+                'w': 'D4', '3': 'D#4',
+                'e': 'E4',
+                'r': 'F4', '5': 'F#4',
+                't': 'G4', '6': 'G#4',
+                'y': 'A4', '7': 'A#4',
+                'u': 'B4'
+            };
+            
+            document.addEventListener('keydown', function(event) {
+                const key = event.key.toLowerCase();
+                if (keyMap[key] && !event.repeat) {
+                    // AudioContextの自動再生ポリシー対応
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    
+                    const note = keyMap[key];
+                    playNote(note);
+                    
+                    // 対応する鍵盤をハイライト
+                    const keyElement = document.querySelector(`[data-note="${note}"]`);
+                    if (keyElement) {
+                        keyElement.classList.add('active');
+                        setTimeout(() => {
+                            keyElement.classList.remove('active');
+                        }, 300);
+                    }
+                }
+            });
+            
+            document.addEventListener('keyup', function(event) {
+                const key = event.key.toLowerCase();
+                if (keyMap[key]) {
+                    const note = keyMap[key];
+                    const keyElement = document.querySelector(`[data-note="${note}"]`);
+                    if (keyElement) {
+                        keyElement.classList.remove('active');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
