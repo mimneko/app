@@ -570,7 +570,7 @@
                         <div>
                             <ol class="history-normal">
                                 <li class="history-item active">
-                                    <div class="history-title">二次方程式の解の公式</div>
+                                    <div class="history-title">数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項</div>
                                 </li>
                                 <li class="history-item">
                                     <div class="history-title">積分の計算方法</div>
@@ -650,7 +650,7 @@
     <!-- メインチャットエリア -->
     <div class="chat-area">
         <div class="chat-header">
-            <div class="chat-title">二次方程式の解の公式</div>
+            <div class="chat-title">数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項</div>
             <div class="chat-actions">
                 <button class="chat-action-btn" title="保存">
                     <i class="fa-solid fa-bookmark"></i>
@@ -669,105 +669,123 @@
                 <!-- ユーザーのメッセージ -->
                 <div class="message user-message">
                     <div class="message-content">
-                        二次方程式 $ax^2 + bx + c = 0$ の解の公式を教えてください。
+                        この問題を教えてください。<br>
+                        次の条件によって定められる数列${a_n}$の一般項を求めよ。$$a_1=1, a_{n+1}=2\sqrt{a_n}$$
                     </div>
                 </div>
                 
                 <!-- AIの返信 -->
                 <div class="message ai-message">
                     <div class="message-content">
-                        二次方程式 $ax^2 + bx + c = 0$ の解の公式は以下のとおりです：<br><br>
-                        $$ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$<br><br>
-                        ここで、<br>
-                        • $a$, $b$, $c$ は方程式の係数です<br>
-                        • $\pm$ は「プラスマイナス」を表し、2つの解があることを意味します<br><br>
-                        解の公式の導出方法について知りたいですか？
+                        <ol>
+                            <li>次の項が前の項の平方根を含む形になっている点に注目しましょう。平方根を含む漸化式では、$a_n$を別の変数で置き換えると整理できる場合があります。</li>
+                            <li>実際に $a_{n+1}$ と $a_n$ の関係を見ていると、指数や対数の考え方を使うと見通しがよくなるかもしれません。</li>
+                            <li>「漸化式を解く」一般的な方法として、数列の各項を何らかの指数関数や対数関数の形に変換してみるという手段があります（例：$b_n = \log(a_n)$ のように置いてみる）。</li>
+                            <li>最初の数項を具体的に書いてみると、どのような変化が起きているかのパターンを見つけやすいでしょう。特に、指数や乗数に注目すると規則性を発見できるかもしれません。</li>
+                        </ol>
+                        上のポイントを確かめながら、数列を変形していくと最終的に一般項の式が得られるはずです。まずは変数の置き換えや最初の数項の様子を丁寧に観察してみてください。
                     </div>
                 </div>
-                
-                <!-- ユーザーのメッセージ -->
-                <div class="message user-message">
-                    <div class="message-content">
-                        はい、解の公式の導出方法を教えてください。
-                    </div>
-                </div>
-                
-                <!-- AIの返信 -->
-                <div class="message ai-message">
-                    <div class="message-content">
-                        二次方程式の解の公式の導出方法を説明します。<br><br>
-                        <strong>Step 1: 標準形に整える</strong><br>
-                        $$ ax^2 + bx + c = 0 $$<br>
-                        
-                        <strong>Step 2: 両辺を $a$ で割る</strong><br>
-                        $$ x^2 + \frac{b}{a}x + \frac{c}{a} = 0 $$<br>
-                        
-                        <strong>Step 3: 平方完成を行う</strong><br>
-                        まず、$\left(\frac{b}{2a}\right)^2$ を加減して式を変形します：<br>
-                        $$ x^2 + \frac{b}{a}x + \left(\frac{b}{2a}\right)^2 - \left(\frac{b}{2a}\right)^2 + \frac{c}{a} = 0 $$<br>
-                        
-                        これを整理すると：<br>
-                        $$ \left(x+\frac{b}{2a}\right)^2 = \left(\frac{b}{2a}\right)^2 - \frac{c}{a} $$<br>
-                        
-                        さらに計算すると：<br>
-                        $$ \left(x+\frac{b}{2a}\right)^2 = \frac{b^2}{4a^2} - \frac{c}{a} = \frac{b^2-4ac}{4a^2} $$<br>
-                        
-                        <strong>Step 4: 平方根を取る</strong><br>
-                        $$ x+\frac{b}{2a} = \pm \frac{\sqrt{b^2-4ac}}{2a} $$<br>
-                        
-                        <strong>Step 5: $x$ について解く</strong><br>
-                        $$ x = -\frac{b}{2a} \pm \frac{\sqrt{b^2-4ac}}{2a} $$
-                        $$ x = \frac{-b\pm \sqrt{b^2-4ac}}{2a} $$<br>
-                        
-                        これが二次方程式の解の公式です。判別式 $b^2-4ac$ の値によって解の性質が決まります：<br>
-                        • $b^2-4ac > 0$ の場合：2つの異なる実数解<br>
-                        • $b^2-4ac = 0$ の場合：重解（同じ値の解が2つ）<br>
-                        • $b^2-4ac < 0$ の場合：2つの複素数解<br><br>
-                        
-                        具体的な例で試してみますか？
-                    </div>
-                </div>
-                
-                <!-- ユーザーのメッセージ -->
-                <div class="message user-message">
-                    <div class="message-content">
-                        はい、$x^2 - 4x + 3 = 0$ を解いてみてください。
-                    </div>
-                </div>
-                
-                <!-- AIの返信 -->
-                <div class="message ai-message">
-                    <div class="message-content">
-                        $x^2 - 4x + 3 = 0$ を解の公式を使って解いてみましょう。<br><br>
-                        
-                        まず、この方程式の係数を確認します：<br>
-                        $a = 1$, $b = -4$, $c = 3$<br><br>
-                        
-                        解の公式 $x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}$ に代入します：<br>
-                        $$\begin{aligned}
-                            x &= \frac{-(-4) \pm \sqrt{(-4)^2 - 4\cdot 1\cdot 3} }{2\cdot 1} \\
-                            &= \frac{4 \pm \sqrt{16-12}}{2} \\
-                            &= \frac{4 \pm \sqrt{4}}{2} \\
-                            &= \frac{4 \pm 2}{2}
-                        \end{aligned}$$<br>
 
-                        
-                        よって、<br>
-                        $$ x = \frac{4+2}{2} = \frac{6}{2} = 3 $$
-                        または<br>
-                        $$ x = \frac{4-2}{2} = \frac{2}{2} = 1 $$<br>
-                        
-                        確認のため、これらの値を元の方程式に代入してみましょう：<br>
-                        
-                        x = 1 のとき：<br>
-                        $$ 1^2 - 4\cdot 1 + 3 = 0 $$
-                        
-                        x = 3 のとき：<br>
-                        $$ 3^2 - 4\cdot 3 + 3 = 0 $$<br>
-                        
-                        両方の解が元の方程式を満たしていることが確認できました.
+                <!-- ユーザーのメッセージ -->
+                <div class="message user-message">
+                    <div class="message-content">
+                        そのヒントを参考に、問題を解いてください。
                     </div>
                 </div>
+                
+                <!-- AIの返信 -->
+                <div class="message ai-message">
+                    <div class="message-content">
+                        以下では、高校で学習する対数の考え方を用いて、与えられた漸化式を整理して一般項を求めます。
+
+                        まず、数列が  
+                        $$
+                        a_1 = 1, \quad a_{n+1} = 2\sqrt{a_n}
+                        $$
+                        を満たすとき、対数（ここでは底を2とします）を用いるために、
+                        $$b_n = \log_2 \bigl(a_n\bigr)$$
+                        とおきます。すると、
+                        $$
+                        \begin{aligned}
+                        a_{n+1} &= 2\sqrt{a_n} \\
+                        \log_2(a_{n+1}) &= \log_2\!\bigl(2\sqrt{a_n}\bigr) \\
+                        b_{n+1} &= \log_2(2) + \log_2\!\bigl(\sqrt{a_n}\bigr) \\
+                        &= 1 + \tfrac12 \log_2(a_n) \\
+                        &= 1 + \tfrac12 b_n
+                        \end{aligned}
+                        $$
+                        となります。  
+                        また、初項については
+                        $$
+                        b_1 = \log_2(a_1) = \log_2(1) = 0
+                        $$
+                        です。
+                        
+                        ここで、新しい数列 $b_n$ は
+                        $$
+                        b_{n+1} = 1 + \tfrac12 b_n
+                        $$
+                        および
+                        $$
+                        b_1 = 0
+                        $$
+                        を満たします。この漸化式をたどっていくと、
+                        $$
+                        b_2 = 1 + \tfrac12 b_1 = 1, \quad
+                        b_3 = 1 + \tfrac12 b_2 = 1 + \tfrac12 \cdot 1 = \tfrac32, \quad
+                        b_4 = 1 + \tfrac12 \cdot \tfrac32 = 1 + \tfrac34 = \tfrac74, \dots
+                        $$
+                        というように値が決まっていきます。一般に解を求めると、
+                        $$
+                        b_n = 2 - \tfrac{1}{2^{\,n-2}}
+                        $$
+                        という形になることがわかります（実際に計算を進めるか、あるいは等比数列の考え方を用いて示すことができます）。
+                        
+                        したがって元の数列 $a_n$ は、
+                        $$
+                        a_n = 2^{\,b_n} = 2^{\,\bigl(2 - \tfrac{1}{2^{\,n-2}}\bigr)}
+                        $$
+                        となります。これが数列 $\,\{a_n\}\,$ の一般項です。
+                        
+                        よって、求める一般項は  
+                        $$
+                        \displaystyle a_n = 2^{\,2 \;-\; \tfrac{1}{2^{\,n-2}}}
+                        $$
+                        となります。
+                    </div>
+                </div>
+                
+                <!-- ユーザーのメッセージ -->
+                <div class="message user-message">
+                    <div class="message-content">
+                        問題集の答えには
+                        $$
+                        \displaystyle a_n = 2^{2-2^{2-n}}
+                        $$
+                        と書いてありました。どちらが正しいのですか？
+                    </div>
+                </div>
+                
+                <!-- AIの返信 -->
+                <div class="message ai-message">
+                    <div class="message-content">
+                        両方とも同じ式を別の形で表しているだけなので、どちらも正しいです。実際、分数の形を指数の形に直すと、
+                        $$
+                        \frac{1}{2^{n-2}} = 2^{-(n-2)} = 2^{2-n}
+                        $$
+                        となります。よって、
+                        $$
+                        2^{\,2 - \tfrac{1}{2^{\,n-2}}}
+                        $$
+                        は
+                        $$
+                        2^{2 - 2^{2-n}}
+                        $$
+                        とまったく同じ値を表しています。どちらを使っても同じ数列の一般項になりますので安心してください。
+                    </div>
+                </div>
+
             </div>
         </div>
 
