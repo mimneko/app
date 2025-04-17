@@ -245,6 +245,7 @@
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
+            cursor: pointer;
         }
 
         .history-item:hover .history-title {
@@ -303,11 +304,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 27px;
         }
 
         .chat-title {
             font-weight: bold;
             font-size: 16px;
+            cursor: pointer;
+        }
+
+        .chat-last-update {
+            color: #aaa;
+            font-size: 12px;
+            margin-left: 10px;
         }
 
         .chat-actions {
@@ -546,13 +555,13 @@
                         <div>
                             <ul class="history-saved">
                                 <li class="history-item">
-                                    <div class="history-title">二次関数のグラフ</div>
+                                    <div class="history-title" data-raw-title="二次関数のグラフ">二次関数のグラフ</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">微分の基本公式</div>
+                                    <div class="history-title" data-raw-title="微分の基本公式">微分の基本公式</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">複素数の極形式</div>
+                                    <div class="history-title" data-raw-title="複素数の極形式">複素数の極形式</div>
                                 </li>
                             </ul>
                         </div>
@@ -570,64 +579,64 @@
                         <div>
                             <ol class="history-normal">
                                 <li class="history-item active">
-                                    <div class="history-title">数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項</div>
+                                    <div class="history-title" data-raw-title="数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項">数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">積分の計算方法</div>
+                                    <div class="history-title" data-raw-title="積分の計算方法">積分の計算方法</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">ベクトルの内積と外積の意味、また成分表示について</div>
+                                    <div class="history-title" data-raw-title="ベクトルの内積と外積の意味、また成分表示について">ベクトルの内積と外積の意味、また成分表示について</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">確率分布の期待値</div>
+                                    <div class="history-title" data-raw-title="確率分布の期待値">確率分布の期待値</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">微分方程式の解法</div>
+                                    <div class="history-title" data-raw-title="微分方程式の解法">微分方程式の解法</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">三角関数の公式</div>
+                                    <div class="history-title" data-raw-title="三角関数の公式">三角関数の公式</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">複素数平面</div>
+                                    <div class="history-title" data-raw-title="複素数平面">複素数平面</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">行列の固有値</div>
+                                    <div class="history-title" data-raw-title="行列の固有値">行列の固有値</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">円の方程式</div>
+                                    <div class="history-title" data-raw-title="円の方程式">円の方程式</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">極限の計算</div>
+                                    <div class="history-title" data-raw-title="極限の計算">極限の計算</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">一次方程式の解法</div>
+                                    <div class="history-title" data-raw-title="一次方程式の解法">一次方程式の解法</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">不等式の解法</div>
+                                    <div class="history-title" data-raw-title="不等式の解法">不等式の解法</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">連立方程式の解法</div>
+                                    <div class="history-title" data-raw-title="連立方程式の解法">連立方程式の解法</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">比例と反比例</div>
+                                    <div class="history-title" data-raw-title="比例と反比例">比例と反比例</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">指数関数の性質</div>
+                                    <div class="history-title" data-raw-title="指数関数の性質">指数関数の性質</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">対数関数の基本</div>
+                                    <div class="history-title" data-raw-title="対数関数の基本">対数関数の基本</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">三角比の応用</div>
+                                    <div class="history-title" data-raw-title="三角比の応用">三角比の応用</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">円周角の定理</div>
+                                    <div class="history-title" data-raw-title="円周角の定理">円周角の定理</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">合同条件の判定</div>
+                                    <div class="history-title" data-raw-title="合同条件の判定">合同条件の判定</div>
                                 </li>
                                 <li class="history-item">
-                                    <div class="history-title">相似形の性質</div>
+                                    <div class="history-title" data-raw-title="相似形の性質">相似形の性質</div>
                                 </li>
                             </ol>
                         </div>
@@ -650,8 +659,9 @@
     <!-- メインチャットエリア -->
     <div class="chat-area">
         <div class="chat-header">
-            <div class="chat-title">数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項</div>
+            <div class="chat-title" data-raw-title="数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項">数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項</div>
             <div class="chat-actions">
+                <span class="chat-last-update">最終更新日：2025-04-15</span>
                 <button class="chat-action-btn" title="保存">
                     <i class="fa-solid fa-bookmark"></i>
                 </button>
@@ -734,7 +744,7 @@
                         $$
                         b_2 = 1 + \tfrac12 b_1 = 1, \quad
                         b_3 = 1 + \tfrac12 b_2 = 1 + \tfrac12 \cdot 1 = \tfrac32, \quad
-                        b_4 = 1 + \tfrac12 \cdot \tfrac32 = 1 + \tfrac34 = \tfrac74, \dots
+                        b_4 = 1 + \tfrac12 \cdot \tfrac3 2 = 1 + \tfrac34 = \tfrac74, \dots
                         $$
                         というように値が決まっていきます。一般に解を求めると、
                         $$
@@ -937,6 +947,109 @@
             // 各機能の初期化呼び出し
             const imageUploadData = initImageUpload();
             initSendMessage(imageUploadData);
+            
+            // タイトル編集機能 (入力欄を用いたインライン編集かつKaTeX記法に対応)
+            const chatTitleEl = document.querySelector('.chat-title');
+            const historyTitleEls = document.querySelectorAll('.history-title');
+
+            // 既に保存されているタイトル（KaTeX記法を含む）をdata属性に保持
+            if (chatTitleEl && !chatTitleEl.dataset.rawTitle) {
+                chatTitleEl.dataset.rawTitle = chatTitleEl.innerHTML;
+            }
+            historyTitleEls.forEach(function(el) {
+                if (!el.dataset.rawTitle) {
+                    el.dataset.rawTitle = el.innerHTML;
+                }
+            });
+
+            function syncTitle(newTitle, targetElement) {
+                if (targetElement === chatTitleEl) {
+                    chatTitleEl.innerHTML = newTitle;
+                    chatTitleEl.dataset.rawTitle = newTitle;
+                    // 更新対象の .history-title.active があれば更新する
+                    const activeHistory = document.querySelector('.history-item.active .history-title');
+                    if (activeHistory) {
+                        activeHistory.innerHTML = newTitle;
+                        activeHistory.dataset.rawTitle = newTitle;
+                    }
+                } else {
+                    targetElement.innerHTML = newTitle;
+                    targetElement.dataset.rawTitle = newTitle;
+                    // 編集されたhistoryタイトルがactiveならchat-titleも更新する
+                    if (targetElement.closest('.history-item') && targetElement.closest('.history-item').classList.contains('active') && chatTitleEl) {
+                        chatTitleEl.innerHTML = newTitle;
+                        chatTitleEl.dataset.rawTitle = newTitle;
+                    }
+                }
+            }
+
+            function startEditTitle(targetElement) {
+                // rawなタイトル（KaTeX記法含む）を取得
+                const currentTitle = targetElement.dataset.rawTitle || targetElement.innerHTML;
+                const input = document.createElement('input');
+                input.type = "text";
+                input.value = currentTitle;
+                input.style.fontSize = "inherit";
+                input.style.fontWeight = "inherit";
+                input.style.width = "100%";
+                input.style.boxSizing = "border-box";
+                targetElement.innerHTML = "";
+                targetElement.appendChild(input);
+                input.focus();
+
+                function finishEdit() {
+                    let newTitle = input.value.trim();
+                    if (!newTitle) {
+                        newTitle = currentTitle;
+                    }
+                    syncTitle(newTitle, targetElement);
+                    renderMathInElement(targetElement, {
+                        delimiters: [
+                            {left: "$$", right: "$$", display: true},
+                            {left: "$", right: "$", display: false}
+                        ]
+                    });
+                    if (targetElement === chatTitleEl) {
+                        // .chat-title編集時は、activeな.history-titleも再レンダリングする
+                        const activeHistory = document.querySelector('.history-item.active .history-title');
+                        if (activeHistory) {
+                            renderMathInElement(activeHistory, {
+                                delimiters: [
+                                    {left: "$$", right: "$$", display: true},
+                                    {left: "$", right: "$", display: false}
+                                ]
+                            });
+                        }
+                    } else if (targetElement.closest('.history-item') && targetElement.closest('.history-item').classList.contains('active') && chatTitleEl) {
+                        // activeな.history-titleを編集した場合は.chat-titleも再レンダリングする
+                        renderMathInElement(chatTitleEl, {
+                            delimiters: [
+                                {left: "$$", right: "$$", display: true},
+                                {left: "$", right: "$", display: false}
+                            ]
+                        });
+                    }
+                }
+
+                input.addEventListener("blur", finishEdit);
+                input.addEventListener("keydown", function(e) {
+                    if (e.key === "Enter") {
+                        finishEdit();
+                    }
+                });
+            }
+
+            if (chatTitleEl) {
+                chatTitleEl.addEventListener("dblclick", function() {
+                    startEditTitle(chatTitleEl);
+                });
+            }
+
+            historyTitleEls.forEach(function(el) {
+                el.addEventListener("dblclick", function() {
+                    startEditTitle(el);
+                });
+            });
         });
     </script>
 </body>
