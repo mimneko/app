@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eisenhower ToDo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium", "Hiragino Sans", "Meiryo", "Helvetica Neue", Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .task-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .task-list {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .task-header {
+            display: flex;
+            background-color: #f0f0f0;
+            padding: 10px 15px;
+            font-weight: bold;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .header-title {
+            flex-grow: 1;
+        }
+
+        .header-rating {
+            display: flex;
+            align-items: center;
+            width: 120px;
+        }
+
+        .header-date {
+            width: 100px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sort-button {
+            background-color: transparent;
+            color: #666;
+            padding: 3px 0px 0px;
+            font-size: 12px;
+            margin-left: 3px;
+        }
+
+        .sort-button:hover {
+            background-color: #e6e6e6;
+        }
+
+        .task-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .task-title {
+            flex-grow: 1;
+            margin-right: 15px;
+        }
+
+        .rating {
+            display: flex;
+            gap: 0px;
+            width: 120px;
+        }
+
+        .rating i {
+            cursor: pointer;
+        }
+
+        .fa-star, .fa-bell {
+            color: #ccc; /* 未選択の色 */
+        }
+
+        .selected {
+            color: #FFD700 !important; /* 選択済みの色（黄色） */
+        }
+
+        .date {
+            color: #666;
+            font-size: 14px;
+            width: 100px;
+            text-align: center;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .complete-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 1px 2px 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 60px;
+            text-align: center;
+        }
+
+        .complete-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* 完了済みタスクのスタイル */
+        .task-completed {
+            background-color: #f9f9f9;
+        }
+
+        .task-completed .task-title {
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .task-completed .rating i.selected {
+            color: #D4AF37 !important; /* 完了済みタスクの選択アイコン色（薄い金色） */
+            opacity: 0.6;
+        }
+
+        .task-completed .rating i:not(.selected) {
+            color: #e5e5e5; /* 完了済みタスクの未選択アイコン色（薄いグレー） */
+        }
+
+        .task-completed .date {
+            color: #999;
+        }
+
+        /* Style overrides for the add task button */
+        #add-task {
+            padding: 7px 15px;
+            background-color: #3498db;
+        }
+        #add-task:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Eisenhower ToDo</h1>
+
+    <div class="task-form">
+        <div class="form-group" style="display: flex; align-items: center;">
+            <input type="text" id="task-title" placeholder="新しいタスクを入力..." required style="flex: 1; width: auto;">
+            <button id="add-task" style="margin-left: 10px;">追加</button>
+        </div>
+    </div>
+
+    <div class="task-list" id="task-list">
+        <div class="task-header">
+            <div class="header-title">タスク</div>
+            <div class="header-rating">
+                重要度 <button class="sort-button" id="sort-importance"><i class="fas fa-sort fa-fw"></i></button>
+            </div>
+            <div class="header-rating">
+                緊急度 <button class="sort-button" id="sort-urgency"><i class="fas fa-sort fa-fw"></i></button>
+            </div>
+            <div class="header-date">
+                記入日 <button class="sort-button" id="sort-date"><i class="fas fa-sort fa-fw"></i></button>
+            </div>
+            <div class="header-date">
+                完了日 <button class="sort-button" id="sort-completed"><i class="fas fa-sort fa-fw"></i></button>
+            </div>
+        </div>
+        <div id="tasks-container"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // サンプルデータを初期データとして使用
+            const tasks = [
+                {
+                    title: "プレゼン資料作成",
+                    importance: 5,
+                    urgency: 4,
+                    date: "2025-04-19",
+                    completedDate: null
+                },
+                {
+                    title: "週次ミーティングの準備",
+                    importance: 4,
+                    urgency: 5,
+                    date: "2025-04-18",
+                    completedDate: null
+                },
+                {
+                    title: "部屋の掃除",
+                    importance: 2,
+                    urgency: 1,
+                    date: "2025-04-17",
+                    completedDate: null
+                },
+                {
+                    title: "定期健康診断の予約",
+                    importance: 3,
+                    urgency: 2,
+                    date: "2025-04-16",
+                    completedDate: null
+                },
+                {
+                    title: "読書",
+                    importance: 1,
+                    urgency: 0,
+                    date: "2025-04-15",
+                    completedDate: null
+                }
+            ];
+
+            // ソート方向を記録する変数（1: 降順、-1: 昇順）
+            let sortDirections = {
+                importance: 1,
+                urgency: 1,
+                date: 1,
+                completed: 1
+            };
+
+            const tasksContainer = document.getElementById('tasks-container');
+            const addTaskButton = document.getElementById('add-task');
+            const taskTitleInput = document.getElementById('task-title');
+            const sortImportanceButton = document.getElementById('sort-importance');
+            const sortUrgencyButton = document.getElementById('sort-urgency');
+            const sortDateButton = document.getElementById('sort-date');
+            const sortCompletedButton = document.getElementById('sort-completed');
+
+            // タスク追加機能
+            addTaskButton.addEventListener('click', () => {
+                const title = taskTitleInput.value.trim();
+                if (title) {
+                    const today = new Date();
+                    const formattedDate = today.toISOString().split('T')[0]; // yyyy-mm-dd形式
+
+                    const newTask = {
+                        title: title,
+                        importance: 0, // 初期値
+                        urgency: 0,    // 初期値
+                        date: formattedDate,
+                        completedDate: null
+                    };
+
+                    tasks.push(newTask);
+                    taskTitleInput.value = '';
+                    renderTasks();
+                }
+            });
+
+            // エンターキーでタスク追加
+            taskTitleInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addTaskButton.click();
+                }
+            });
+
+            // ソート機能
+            sortImportanceButton.addEventListener('click', () => {
+                sortDirections.importance *= -1; // ソート方向を切り替え
+                tasks.sort((a, b) => sortDirections.importance * (b.importance - a.importance));
+                renderTasks();
+                updateSortIcons('importance');
+            });
+
+            sortUrgencyButton.addEventListener('click', () => {
+                sortDirections.urgency *= -1; // ソート方向を切り替え
+                tasks.sort((a, b) => sortDirections.urgency * (b.urgency - a.urgency));
+                renderTasks();
+                updateSortIcons('urgency');
+            });
+
+            sortDateButton.addEventListener('click', () => {
+                sortDirections.date *= -1; // ソート方向を切り替え
+                tasks.sort((a, b) => {
+                    // 日付文字列を比較
+                    if (sortDirections.date === 1) {
+                        return new Date(b.date) - new Date(a.date); // 新しい順
+                    } else {
+                        return new Date(a.date) - new Date(b.date); // 古い順
+                    }
+                });
+                renderTasks();
+                updateSortIcons('date');
+            });
+
+            sortCompletedButton.addEventListener('click', () => {
+                sortDirections.completed *= -1; // ソート方向を切り替え
+                tasks.sort((a, b) => {
+                    // 完了していないタスクは最も新しい日付として扱う
+                    const dateA = a.completedDate ? new Date(a.completedDate) : new Date('9999-12-31');
+                    const dateB = b.completedDate ? new Date(b.completedDate) : new Date('9999-12-31');
+                    
+                    if (sortDirections.completed === 1) {
+                        return dateA - dateB; // 古い順（完了したものが上）
+                    } else {
+                        return dateB - dateA; // 新しい順
+                    }
+                });
+                renderTasks();
+                updateSortIcons('completed');
+            });
+
+            // タスクを完了としてマーク
+            function completeTask(task) {
+                const today = new Date();
+                const formattedDate = today.toISOString().split('T')[0]; // yyyy-mm-dd形式
+                task.completedDate = formattedDate;
+                renderTasks();
+            }
+
+            // ソートアイコンの更新
+            function updateSortIcons(activeSort) {
+                // すべてのソートボタンのアイコンをリセット
+                document.querySelectorAll('.sort-button i').forEach(icon => {
+                    icon.className = 'fas fa-sort fa-fw';
+                });
+
+                // アクティブなソートボタンのアイコンを更新
+                const activeButton = document.getElementById(`sort-${activeSort}`).querySelector('i');
+                if (sortDirections[activeSort] === 1) {
+                    activeButton.className = 'fas fa-sort-down fa-fw'; // 降順
+                } else {
+                    activeButton.className = 'fas fa-sort-up fa-fw'; // 昇順
+                }
+            }
+
+            // タスクリストの表示
+            function renderTasks() {
+                if (tasks.length === 0) {
+                    tasksContainer.innerHTML = '<div class="empty-message">タスクがありません。新しいタスクを追加してください。</div>';
+                    return;
+                }
+
+                tasksContainer.innerHTML = '';
+                tasks.forEach((task, index) => {
+                    const isCompleted = task.completedDate !== null;
+                    
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'task-item' + (isCompleted ? ' task-completed' : '');
+
+                    // タスクのタイトル
+                    const titleElement = document.createElement('div');
+                    titleElement.className = 'task-title';
+                    titleElement.textContent = task.title;
+                    taskElement.appendChild(titleElement);
+
+                    // 重要度（星）
+                    const importanceRating = document.createElement('div');
+                    importanceRating.className = 'rating importance-rating';
+                    
+                    for (let i = 1; i <= 5; i++) {
+                        const star = document.createElement('i');
+                        star.className = i <= task.importance ? 'fas fa-star fa-fw selected' : 'far fa-star fa-fw';
+                        // 完了済みタスクは編集不可
+                        if (!isCompleted) {
+                            star.addEventListener('click', () => {
+                                // 同じ値をクリックした場合は0にリセット
+                                task.importance = (task.importance === i) ? 0 : i;
+                                renderTasks();
+                            });
+                        }
+                        importanceRating.appendChild(star);
+                    }
+                    taskElement.appendChild(importanceRating);
+
+                    // 緊急度（ベル）
+                    const urgencyRating = document.createElement('div');
+                    urgencyRating.className = 'rating urgency-rating';
+                    
+                    for (let i = 1; i <= 5; i++) {
+                        const bell = document.createElement('i');
+                        bell.className = i <= task.urgency ? 'fas fa-bell fa-fw selected' : 'far fa-bell fa-fw';
+                        // 完了済みタスクは編集不可
+                        if (!isCompleted) {
+                            bell.addEventListener('click', () => {
+                                // 同じ値をクリックした場合は0にリセット
+                                task.urgency = (task.urgency === i) ? 0 : i;
+                                renderTasks();
+                            });
+                        }
+                        urgencyRating.appendChild(bell);
+                    }
+                    taskElement.appendChild(urgencyRating);
+
+                    // 記入日
+                    const dateElement = document.createElement('div');
+                    dateElement.className = 'date';
+                    dateElement.textContent = task.date;
+                    taskElement.appendChild(dateElement);
+
+                    // 完了日または完了ボタン
+                    const completedElement = document.createElement('div');
+                    completedElement.className = 'date';
+                    
+                    if (isCompleted) {
+                        // 完了日を表示
+                        completedElement.textContent = task.completedDate;
+                    } else {
+                        // 完了ボタンを表示
+                        const completeButton = document.createElement('button');
+                        completeButton.className = 'complete-btn';
+                        completeButton.textContent = '完了';
+                        completeButton.addEventListener('click', () => {
+                            completeTask(task);
+                        });
+                        completedElement.appendChild(completeButton);
+                    }
+                    taskElement.appendChild(completedElement);
+
+                    tasksContainer.appendChild(taskElement);
+                });
+            }
+
+            // 初期表示
+            renderTasks();
+        });
+    </script>
+</body>
+</html>
