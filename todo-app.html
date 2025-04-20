@@ -30,7 +30,7 @@
 
         input[type="text"] {
             width: calc(100% - 20px);
-            padding: 10px;
+            padding: 10px 10px 9px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
@@ -105,6 +105,12 @@
         .task-title {
             flex-grow: 1;
             margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .high-priority {
+            color: #EA5506;
+            font-weight: 500;
         }
 
         .rating {
@@ -179,11 +185,25 @@
 
         /* Style overrides for the add task button */
         #add-task {
-            padding: 7px 15px;
+            padding: 6px 15px 7px;
             background-color: #3498db;
         }
         #add-task:hover {
             background-color: #2980b9;
+        }
+
+        /* タスク編集用のスタイル */
+        .edit-mode {
+            display: inline-block;
+            width: calc(100% - 10px);
+        }
+
+        .edit-mode input {
+            width: 100%;
+            padding: 1px 5px 2px;
+            font-size: 16px;
+            border: 1px solid #3498db;
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -192,7 +212,7 @@
 
     <div class="task-form">
         <div class="form-group" style="display: flex; align-items: center;">
-            <input type="text" id="task-title" placeholder="新しいタスクを入力..." required style="flex: 1; width: auto;">
+            <input type="text" id="task-title" placeholder="新しいタスクを入力する" required style="flex: 1; width: auto;">
             <button id="add-task" style="margin-left: 10px;">追加</button>
         </div>
     </div>
@@ -278,7 +298,8 @@
                 const title = taskTitleInput.value.trim();
                 if (title) {
                     const today = new Date();
-                    const formattedDate = today.toISOString().split('T')[0]; // yyyy-mm-dd形式
+                    const options = { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" };
+                    const formattedDate = today.toLocaleDateString("ja-JP", options).replace(/\//g, "-"); // yyyy-mm-dd形式（日本時間）
 
                     const newTask = {
                         title: title,
@@ -350,8 +371,65 @@
             // タスクを完了としてマーク
             function completeTask(task) {
                 const today = new Date();
-                const formattedDate = today.toISOString().split('T')[0]; // yyyy-mm-dd形式
+                const options = { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" };
+                const formattedDate = today.toLocaleDateString("ja-JP", options).replace(/\//g, "-"); // yyyy-mm-dd形式（日本時間）
                 task.completedDate = formattedDate;
+                renderTasks();
+            }
+
+            // タスク名の編集モードを開始
+            function startEditing(taskElement, task) {
+                // 完了済みタスクは編集不可
+                if (task.completedDate !== null) return;
+
+                // 現在のタイトルを取得
+                const currentTitle = task.title;
+                
+                // 編集モードのHTML要素を作成
+                const editContainer = document.createElement('div');
+                editContainer.className = 'edit-mode';
+                
+                const inputElement = document.createElement('input');
+                inputElement.type = 'text';
+                inputElement.value = currentTitle;
+                inputElement.className = 'edit-title-input';
+                
+                // 入力欄にフォーカスを当てる
+                editContainer.appendChild(inputElement);
+                
+                // タイトル要素を編集モードに置き換え
+                const titleElement = taskElement.querySelector('.task-title');
+                titleElement.innerHTML = '';
+                titleElement.appendChild(editContainer);
+                
+                // 入力欄にフォーカスを当てる
+                inputElement.focus();
+                
+                // フォーカスが外れたとき、または Enter キーが押されたときに編集を完了
+                inputElement.addEventListener('blur', () => {
+                    finishEditing(task, inputElement.value);
+                });
+                
+                inputElement.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        finishEditing(task, inputElement.value);
+                    }
+                });
+                
+                // キャンセル（Escape キー）
+                inputElement.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        finishEditing(task, currentTitle); // 元の値に戻す
+                    }
+                });
+            }
+
+            // タスク名の編集を完了
+            function finishEditing(task, newTitle) {
+                // 入力が空の場合は元のタイトルを保持
+                if (newTitle.trim() !== '') {
+                    task.title = newTitle.trim();
+                }
                 renderTasks();
             }
 
@@ -381,6 +459,7 @@
                 tasksContainer.innerHTML = '';
                 tasks.forEach((task, index) => {
                     const isCompleted = task.completedDate !== null;
+                    const isHighPriority = task.importance >= 4 && task.urgency >= 4;
                     
                     const taskElement = document.createElement('div');
                     taskElement.className = 'task-item' + (isCompleted ? ' task-completed' : '');
@@ -388,7 +467,18 @@
                     // タスクのタイトル
                     const titleElement = document.createElement('div');
                     titleElement.className = 'task-title';
+                    if (isHighPriority && !isCompleted) {
+                        titleElement.classList.add('high-priority');
+                    }
                     titleElement.textContent = task.title;
+                    
+                    // ダブルクリックでタイトル編集
+                    if (!isCompleted) {
+                        titleElement.addEventListener('dblclick', () => {
+                            startEditing(taskElement, task);
+                        });
+                    }
+                    
                     taskElement.appendChild(titleElement);
 
                     // 重要度（星）
