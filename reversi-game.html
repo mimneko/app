@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>リバーシ</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            width: 400px;
+            margin-bottom: 20px;
+        }
+        
+        .score {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .black-score .disc, .white-score .disc {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .black-score .disc {
+            background-color: black;
+        }
+        
+        .white-score .disc {
+            background-color: white;
+            border: 1px solid #333;
+        }
+        
+        .current-player {
+            padding: 5px 10px;
+            background-color: #ddd;
+            border-radius: 4px;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 1px;
+            background-color: #000;
+            border: 2px solid #000;
+        }
+        
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: #008000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .cell:hover {
+            background-color: #009900;
+        }
+        
+        .disc {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .black {
+            background-color: black;
+        }
+        
+        .white {
+            background-color: white;
+            border: 1px solid #333;
+        }
+        
+        .valid-move::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            position: absolute;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .message {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>リバーシ</h1>
+    
+    <div class="game-info">
+        <div class="black-score">
+            <span class="disc"></span>
+            <span id="black-count">2</span>
+        </div>
+        <div class="current-player">
+            <span>現在の手番: </span>
+            <span id="current-player">黒</span>
+        </div>
+        <div class="white-score">
+            <span class="disc"></span>
+            <span id="white-count">2</span>
+        </div>
+    </div>
+    
+    <div class="board" id="board"></div>
+    
+    <div class="message" id="message"></div>
+    
+    <div class="controls">
+        <button id="restart-btn">ゲームをリスタート</button>
+        <button id="pass-btn">パス</button>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const boardElement = document.getElementById('board');
+            const currentPlayerElement = document.getElementById('current-player');
+            const blackCountElement = document.getElementById('black-count');
+            const whiteCountElement = document.getElementById('white-count');
+            const messageElement = document.getElementById('message');
+            const restartButton = document.getElementById('restart-btn');
+            const passButton = document.getElementById('pass-btn');
+            
+            // 定数
+            const EMPTY = 0;
+            const BLACK = 1;
+            const WHITE = 2;
+            const BOARD_SIZE = 8;
+            
+            // 方向ベクトル（8方向）
+            const DIRECTIONS = [
+                [-1, -1], [-1, 0], [-1, 1],
+                [0, -1],           [0, 1],
+                [1, -1],  [1, 0],  [1, 1]
+            ];
+            
+            // ゲーム状態
+            let board = [];
+            let currentPlayer = BLACK;
+            let gameOver = false;
+            
+            // ゲームの初期化
+            function initGame() {
+                // 盤面の初期化
+                board = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(EMPTY));
+                
+                // 初期配置
+                board[3][3] = WHITE;
+                board[3][4] = BLACK;
+                board[4][3] = BLACK;
+                board[4][4] = WHITE;
+                
+                currentPlayer = BLACK;
+                gameOver = false;
+                
+                renderBoard();
+                updateGameInfo();
+                findValidMoves();
+            }
+            
+            // 盤面の描画
+            function renderBoard() {
+                boardElement.innerHTML = '';
+                
+                for (let row = 0; row < BOARD_SIZE; row++) {
+                    for (let col = 0; col < BOARD_SIZE; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        
+                        if (board[row][col] !== EMPTY) {
+                            const disc = document.createElement('div');
+                            disc.className = `disc ${board[row][col] === BLACK ? 'black' : 'white'}`;
+                            cell.appendChild(disc);
+                        }
+                        
+                        cell.addEventListener('click', () => handleCellClick(row, col));
+                        boardElement.appendChild(cell);
+                    }
+                }
+            }
+            
+            // 有効な手を見つける
+            function findValidMoves() {
+                const cells = document.querySelectorAll('.cell');
+                cells.forEach(cell => {
+                    cell.classList.remove('valid-move');
+                });
+                
+                let validMoveExists = false;
+                
+                for (let row = 0; row < BOARD_SIZE; row++) {
+                    for (let col = 0; col < BOARD_SIZE; col++) {
+                        if (board[row][col] === EMPTY) {
+                            const flips = getFlips(row, col, currentPlayer);
+                            if (flips.length > 0) {
+                                validMoveExists = true;
+                                const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                                cell.classList.add('valid-move');
+                            }
+                        }
+                    }
+                }
+                
+                return validMoveExists;
+            }
+            
+            // セルクリック時の処理
+            function handleCellClick(row, col) {
+                if (gameOver || board[row][col] !== EMPTY) {
+                    return;
+                }
+                
+                const flips = getFlips(row, col, currentPlayer);
+                if (flips.length === 0) {
+                    return;
+                }
+                
+                // 石を置く
+                board[row][col] = currentPlayer;
+                
+                // 石をひっくり返す
+                flips.forEach(([r, c]) => {
+                    board[r][c] = currentPlayer;
+                });
+                
+                // 次のプレイヤーへ
+                currentPlayer = currentPlayer === BLACK ? WHITE : BLACK;
+                
+                // 盤面を更新
+                renderBoard();
+                updateGameInfo();
+                
+                // 次のプレイヤーの有効な手があるか確認
+                const validMoveExists = findValidMoves();
+                
+                if (!validMoveExists) {
+                    // 有効な手がない場合はパス
+                    messageElement.textContent = `${currentPlayer === BLACK ? '黒' : '白'}の有効な手がありません。パスします。`;
+                    
+                    // 両方のプレイヤーがパスしたらゲーム終了
+                    currentPlayer = currentPlayer === BLACK ? WHITE : BLACK;
+                    const otherPlayerHasValidMoves = findValidMoves();
+                    
+                    if (!otherPlayerHasValidMoves) {
+                        endGame();
+                    } else {
+                        currentPlayer = currentPlayer === BLACK ? WHITE : BLACK;
+                    }
+                } else {
+                    messageElement.textContent = '';
+                }
+            }
+            
+            // ひっくり返せる石を取得
+            function getFlips(row, col, player) {
+                const opponent = player === BLACK ? WHITE : BLACK;
+                const flips = [];
+                
+                DIRECTIONS.forEach(([dr, dc]) => {
+                    let r = row + dr;
+                    let c = col + dc;
+                    const temp = [];
+                    
+                    while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && board[r][c] === opponent) {
+                        temp.push([r, c]);
+                        r += dr;
+                        c += dc;
+                    }
+                    
+                    if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && board[r][c] === player && temp.length > 0) {
+                        flips.push(...temp);
+                    }
+                });
+                
+                return flips;
+            }
+            
+            // ゲーム情報を更新
+            function updateGameInfo() {
+                let blackCount = 0;
+                let whiteCount = 0;
+                
+                for (let row = 0; row < BOARD_SIZE; row++) {
+                    for (let col = 0; col < BOARD_SIZE; col++) {
+                        if (board[row][col] === BLACK) {
+                            blackCount++;
+                        } else if (board[row][col] === WHITE) {
+                            whiteCount++;
+                        }
+                    }
+                }
+                
+                blackCountElement.textContent = blackCount;
+                whiteCountElement.textContent = whiteCount;
+                currentPlayerElement.textContent = currentPlayer === BLACK ? '黒' : '白';
+            }
+            
+            // ゲーム終了処理
+            function endGame() {
+                gameOver = true;
+                
+                const blackCount = parseInt(blackCountElement.textContent);
+                const whiteCount = parseInt(whiteCountElement.textContent);
+                
+                if (blackCount > whiteCount) {
+                    messageElement.textContent = 'ゲーム終了：黒の勝ち！';
+                } else if (whiteCount > blackCount) {
+                    messageElement.textContent = 'ゲーム終了：白の勝ち！';
+                } else {
+                    messageElement.textContent = 'ゲーム終了：引き分け！';
+                }
+            }
+            
+            // パスボタンの処理
+            passButton.addEventListener('click', () => {
+                if (gameOver) return;
+                
+                // 本当にパスできるか確認
+                const validMoveExists = findValidMoves();
+                if (validMoveExists) {
+                    messageElement.textContent = '有効な手があるため、パスできません。';
+                    return;
+                }
+                
+                messageElement.textContent = `${currentPlayer === BLACK ? '黒' : '白'}がパスしました。`;
+                currentPlayer = currentPlayer === BLACK ? WHITE : BLACK;
+                
+                // 次のプレイヤーも有効な手がなければゲーム終了
+                const nextPlayerHasValidMoves = findValidMoves();
+                if (!nextPlayerHasValidMoves) {
+                    endGame();
+                }
+            });
+            
+            // リスタートボタンの処理
+            restartButton.addEventListener('click', () => {
+                messageElement.textContent = '';
+                initGame();
+            });
+            
+            // ゲーム開始
+            initGame();
+        });
+    </script>
+</body>
+</html>
