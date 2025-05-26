@@ -185,31 +185,31 @@
         // 各原子のレアリティは収録分子の頻度・重要度を考慮し、CとNはやや低めに調整
         const ATOM_TYPES = {
             H:   { label: 'H',   color: '#E0E0E0', textColor: '#000', score: 10, rarity: 1.0 },   // 水素
-            C:   { label: 'C',   color: '#4A4A4A', textColor: '#000', score: 10, rarity: 0.45 },  // 炭素
-            N:   { label: 'N',   color: '#3498DB', textColor: '#000', score: 10, rarity: 0.45 },  // 窒素
+            C:   { label: 'C',   color: '#4A4A4A', textColor: '#000', score: 10, rarity: 0.25 },  // 炭素
+            N:   { label: 'N',   color: '#3498DB', textColor: '#000', score: 10, rarity: 0.35 },  // 窒素
             O:   { label: 'O',   color: '#E74C3C', textColor: '#000', score: 10, rarity: 0.85 },  // 酸素
-            F:   { label: 'F',   color: '#00FFCC', textColor: '#000', score: 60, rarity: 0.10 },  // フッ素
-            Cl:  { label: 'Cl',  color: '#2ECC71', textColor: '#000', score: 60, rarity: 0.13 },  // 塩素
-            Br:  { label: 'Br',  color: '#A0522D', textColor: '#000', score: 70, rarity: 0.07 },  // 臭素
-            I:   { label: 'I',   color: '#800080', textColor: '#000', score: 80, rarity: 0.05 },  // ヨウ素
-            S:   { label: 'S',   color: '#F1C40F', textColor: '#000', score: 70, rarity: 0.10 },  // 硫黄
-            P:   { label: 'P',   color: '#FF8C00', textColor: '#000', score: 70, rarity: 0.07 },  // リン
-            Na:  { label: 'Na',  color: '#9B59B6', textColor: '#000', score: 50, rarity: 0.13 },  // ナトリウム
-            K:   { label: 'K',   color: '#B8860B', textColor: '#000', score: 50, rarity: 0.10 },  // カリウム
-            Ca:  { label: 'Ca',  color: '#B0C4DE', textColor: '#000', score: 50, rarity: 0.10 },  // カルシウム
-            Mg:  { label: 'Mg',  color: '#A9DFBF', textColor: '#000', score: 50, rarity: 0.08 },  // マグネシウム
-            Fe:  { label: 'Fe',  color: '#B22222', textColor: '#000', score: 60, rarity: 0.08 },  // 鉄
-            Cu:  { label: 'Cu',  color: '#B87333', textColor: '#000', score: 60, rarity: 0.07 },  // 銅
-            Zn:  { label: 'Zn',  color: '#7DCEA0', textColor: '#000', score: 60, rarity: 0.07 },  // 亜鉛
-            Ag:  { label: 'Ag',  color: '#C0C0C0', textColor: '#000', score: 80, rarity: 0.03 },  // 銀
-            Ba:  { label: 'Ba',  color: '#E6E6FA', textColor: '#000', score: 80, rarity: 0.03 },  // バリウム
-            Al:  { label: 'Al',  color: '#D3D3D3', textColor: '#000', score: 60, rarity: 0.07 },  // アルミニウム
-            Si:  { label: 'Si',  color: '#A3C1AD', textColor: '#000', score: 60, rarity: 0.05 },  // ケイ素
-            Mn:  { label: 'Mn',  color: '#B0B0B0', textColor: '#000', score: 60, rarity: 0.03 },  // マンガン
-            Pb:  { label: 'Pb',  color: '#888888', textColor: '#000', score: 60, rarity: 0.02 },  // 鉛
-            Sn:  { label: 'Sn',  color: '#C0C0C0', textColor: '#000', score: 60, rarity: 0.02 },  // スズ
-            Li:  { label: 'Li',  color: '#CC99FF', textColor: '#000', score: 50, rarity: 0.03 },  // リチウム
-            Cr:  { label: 'Cr',  color: '#8FBC8F', textColor: '#000', score: 60, rarity: 0.03 },  // クロム
+            F:   { label: 'F',   color: '#00FFCC', textColor: '#000', score: 60, rarity: 0.05 },  // フッ素
+            Cl:  { label: 'Cl',  color: '#2ECC71', textColor: '#000', score: 60, rarity: 0.06 },  // 塩素
+            Br:  { label: 'Br',  color: '#A0522D', textColor: '#000', score: 70, rarity: 0.03 },  // 臭素
+            I:   { label: 'I',   color: '#800080', textColor: '#000', score: 80, rarity: 0.02 },  // ヨウ素
+            S:   { label: 'S',   color: '#F1C40F', textColor: '#000', score: 70, rarity: 0.05 },  // 硫黄
+            P:   { label: 'P',   color: '#FF8C00', textColor: '#000', score: 70, rarity: 0.03 },  // リン
+            Na:  { label: 'Na',  color: '#9B59B6', textColor: '#000', score: 50, rarity: 0.06 },  // ナトリウム
+            K:   { label: 'K',   color: '#B8860B', textColor: '#000', score: 50, rarity: 0.05 },  // カリウム
+            Ca:  { label: 'Ca',  color: '#B0C4DE', textColor: '#000', score: 50, rarity: 0.05 },  // カルシウム
+            Mg:  { label: 'Mg',  color: '#A9DFBF', textColor: '#000', score: 50, rarity: 0.04 },  // マグネシウム
+            Fe:  { label: 'Fe',  color: '#B22222', textColor: '#000', score: 60, rarity: 0.04 },  // 鉄
+            Cu:  { label: 'Cu',  color: '#B87333', textColor: '#000', score: 60, rarity: 0.03 },  // 銅
+            Zn:  { label: 'Zn',  color: '#7DCEA0', textColor: '#000', score: 60, rarity: 0.03 },  // 亜鉛
+            Ag:  { label: 'Ag',  color: '#C0C0C0', textColor: '#000', score: 80, rarity: 0.01 },  // 銀
+            Ba:  { label: 'Ba',  color: '#E6E6FA', textColor: '#000', score: 80, rarity: 0.01 },  // バリウム
+            Al:  { label: 'Al',  color: '#D3D3D3', textColor: '#000', score: 60, rarity: 0.03 },  // アルミニウム
+            Si:  { label: 'Si',  color: '#A3C1AD', textColor: '#000', score: 60, rarity: 0.02 },  // ケイ素
+            Mn:  { label: 'Mn',  color: '#B0B0B0', textColor: '#000', score: 60, rarity: 0.01 },  // マンガン
+            Pb:  { label: 'Pb',  color: '#888888', textColor: '#000', score: 60, rarity: 0.01 },  // 鉛
+            Sn:  { label: 'Sn',  color: '#C0C0C0', textColor: '#000', score: 60, rarity: 0.01 },  // スズ
+            Li:  { label: 'Li',  color: '#CC99FF', textColor: '#000', score: 50, rarity: 0.01 },  // リチウム
+            Cr:  { label: 'Cr',  color: '#8FBC8F', textColor: '#000', score: 60, rarity: 0.01 },  // クロム
         };
 
         // --- 分子リスト定義 ---
@@ -265,7 +265,7 @@
             { composition: { Mg:1, C:1, O:3 }, name: '炭酸マグネシウム', formula: 'MgCO₃' },
             { composition: { Ca:1, C:1, O:3 }, name: '炭酸カルシウム', formula: 'CaCO₃' },
             { composition: { Ba:1, C:1, O:3 }, name: '炭酸バリウム', formula: 'BaCO₃' },
-            { composition: { NH4:2, C:1, O:3 }, name: '炭酸アンモニウム', formula: '(NH₄)₂CO₃' },
+            { composition: { N:2, H:8, C:1, O:3 }, name: '炭酸アンモニウム', formula: '(NH₄)₂CO₃' },
             { composition: { H:2, C:2, O:4 }, name: 'シュウ酸', formula: 'H₂C₂O₄' },
             { composition: { C:2, H:4, O:2 }, name: '酢酸', formula: 'CH₃COOH' },
             { composition: { H:3, P:1, O:4 }, name: 'リン酸', formula: 'H₃PO₄' },
@@ -291,7 +291,7 @@
             { composition: { Ag:1, F:1 }, name: 'フッ化銀', formula: 'AgF' },
             { composition: { Na:1, Cl:1 }, name: '塩化ナトリウム', formula: 'NaCl' },
             { composition: { Ca:1, Cl:2 }, name: '塩化カルシウム', formula: 'CaCl₂' },
-            { composition: { NH4:1, Cl:1 }, name: '塩化アンモニウム', formula: 'NH₄Cl' },
+            { composition: { N:1, H:4, Cl:1 }, name: '塩化アンモニウム', formula: 'NH₄Cl' },
             { composition: { K:1, Cl:1 }, name: '塩化カリウム', formula: 'KCl' },
             { composition: { Mg:1, Cl:2 }, name: '塩化マグネシウム', formula: 'MgCl₂' },
             { composition: { Ba:1, Cl:2 }, name: '塩化バリウム', formula: 'BaCl₂' },
@@ -350,10 +350,9 @@
             { composition: { C:3, H:6, O:2 }, name: 'ギ酸エチル', formula: 'C₃H₆O₂' },
             { composition: { C:2, H:6, O:2 }, name: 'エチレングリコール', formula: 'C₂H₆O₂' },
             // --- イオン性分子（代表的なもの） ---
-            { composition: { NH4:1, NO3:1 }, name: '硝酸アンモニウム', formula: 'NH₄NO₃' },
-            { composition: { NH4:1, Cl:1 }, name: '塩化アンモニウム', formula: 'NH₄Cl' },
-            { composition: { NH4:2, S:1, O:4 }, name: '硫酸アンモニウム', formula: '(NH₄)₂SO₄' },
-            { composition: { NH4:1, H:1, C:1, O:3 }, name: '炭酸水素アンモニウム', formula: 'NH₄HCO₃' },
+            { composition: { N:2, H:4, O:3 }, name: '硝酸アンモニウム', formula: 'NH₄NO₃' },
+            { composition: { N:2, H:8, S:1, O:4 }, name: '硫酸アンモニウム', formula: '(NH₄)₂SO₄' },
+            { composition: { N:1, H:5, C:1, O:3 }, name: '炭酸水素アンモニウム', formula: 'NH₄HCO₃' },
         ];
 
         // =========================
