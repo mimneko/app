@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>分子メーカー</title>
+    <style>
+        /* CSS */
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f8ff;
+            color: #333;
+            /* iOSでのダブルタップによるズームを防止 */
+            touch-action: manipulation;
+        }
+
+        .game-container {
+            position: relative;
+            width: 400px;
+            /* スマートフォン向けに高さを調整 */
+            max-width: 100vw;
+            height: 600px;
+            max-height: 90vh;
+            border: 2px solid #3498db;
+            background-color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        #game-canvas {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            /* タッチ操作の対象であることを明示 */
+            touch-action: none;
+        }
+        /* Matter.jsが生成するcanvasのスタイル */
+        #game-canvas canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: -60px; /* キャンバスの外に配置 */
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .info-panel > div {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        #next-atoms {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .atom-preview {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 10px;
+            line-height: 20px;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        #game-over-screen.hidden {
+            display: none;
+        }
+
+        #restart-button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="info-panel">
+            <div>
+                <strong>SCORE</strong>
+                <span id="score">0</span>
+            </div>
+            <div>
+                <strong>COMBO</strong>
+                <span id="combo">0</span>
+            </div>
+            <div style="display: none;">
+                <strong>NEXT</strong>
+                <div id="next-atoms"></div>
+            </div>
+        </div>
+
+        <div id="game-canvas"></div>
+
+        <div id="game-over-screen" class="hidden">
+            <h1>GAME OVER</h1>
+            <p>FINAL SCORE: <span id="final-score">0</span></p>
+            <button id="restart-button">もう一度プレイ</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    
+    <script>
+    // =========================
+    // メイン処理開始
+    // =========================
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Matter.js の主要モジュールをエイリアスで取得 ---
+        const { Engine, Render, Runner, World, Bodies, Body, Events, Query } = Matter;
+
+        // --- ゲーム全体の設定値 ---
+        const gameContainer = document.querySelector('.game-container');
+        const GAME_WIDTH = gameContainer.clientWidth;
+        const GAME_HEIGHT = gameContainer.clientHeight;
+        const ATOM_RADIUS = 30; // 原子の半径
+        const GAME_OVER_LINE_Y = 80; // ゲームオーバー判定ラインのY座標
+        const INITIAL_ATOM_COUNT = 30; // 初期配置する原子の数
+
+        // --- DOM要素の参照を取得 ---
+        const gameCanvas = document.getElementById('game-canvas');
+        const scoreEl = document.getElementById('score');
+        const comboEl = document.getElementById('combo');
+        const nextAtomsEl = document.getElementById('next-atoms');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreEl = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-button');
+
+        // --- ゲームの状態管理用変数 ---
+        let engine, render, runner;
+        let score = 0;
+        let combo = 0;
+        let isDragging = false;
+        let selectedAtoms = [];
+        let linePoints = [];
+        let atomDropInterval;
+        let atomDropFrequency = 2000; // 原子が落ちてくる間隔（ミリ秒）
+        let nextAtomQueue = [];
+        let isGameOver = false;
+
+        // --- 原子の種類定義 ---
+        // 高校化学で扱う主な元素（高分子除く）
+        // rarity: 出現頻度の重み（大きいほどよく出る、1.0が標準、0.1などでレアに）
+        // score: 点数計算時の重み
+        // 各原子のレアリティは収録分子の頻度・重要度を考慮し、CとNはやや低めに調整
+        const ATOM_TYPES = {
+            H:   { label: 'H',   color: '#E0E0E0', textColor: '#000', score: 10, rarity: 1.0 },   // 水素
+            C:   { label: 'C',   color: '#4A4A4A', textColor: '#000', score: 10, rarity: 0.45 },  // 炭素
+            N:   { label: 'N',   color: '#3498DB', textColor: '#000', score: 10, rarity: 0.45 },  // 窒素
+            O:   { label: 'O',   color: '#E74C3C', textColor: '#000', score: 10, rarity: 0.85 },  // 酸素
+            F:   { label: 'F',   color: '#00FFCC', textColor: '#000', score: 60, rarity: 0.10 },  // フッ素
+            Cl:  { label: 'Cl',  color: '#2ECC71', textColor: '#000', score: 60, rarity: 0.13 },  // 塩素
+            Br:  { label: 'Br',  color: '#A0522D', textColor: '#000', score: 70, rarity: 0.07 },  // 臭素
+            I:   { label: 'I',   color: '#800080', textColor: '#000', score: 80, rarity: 0.05 },  // ヨウ素
+            S:   { label: 'S',   color: '#F1C40F', textColor: '#000', score: 70, rarity: 0.10 },  // 硫黄
+            P:   { label: 'P',   color: '#FF8C00', textColor: '#000', score: 70, rarity: 0.07 },  // リン
+            Na:  { label: 'Na',  color: '#9B59B6', textColor: '#000', score: 50, rarity: 0.13 },  // ナトリウム
+            K:   { label: 'K',   color: '#B8860B', textColor: '#000', score: 50, rarity: 0.10 },  // カリウム
+            Ca:  { label: 'Ca',  color: '#B0C4DE', textColor: '#000', score: 50, rarity: 0.10 },  // カルシウム
+            Mg:  { label: 'Mg',  color: '#A9DFBF', textColor: '#000', score: 50, rarity: 0.08 },  // マグネシウム
+            Fe:  { label: 'Fe',  color: '#B22222', textColor: '#000', score: 60, rarity: 0.08 },  // 鉄
+            Cu:  { label: 'Cu',  color: '#B87333', textColor: '#000', score: 60, rarity: 0.07 },  // 銅
+            Zn:  { label: 'Zn',  color: '#7DCEA0', textColor: '#000', score: 60, rarity: 0.07 },  // 亜鉛
+            Ag:  { label: 'Ag',  color: '#C0C0C0', textColor: '#000', score: 80, rarity: 0.03 },  // 銀
+            Ba:  { label: 'Ba',  color: '#E6E6FA', textColor: '#000', score: 80, rarity: 0.03 },  // バリウム
+            Al:  { label: 'Al',  color: '#D3D3D3', textColor: '#000', score: 60, rarity: 0.07 },  // アルミニウム
+            Si:  { label: 'Si',  color: '#A3C1AD', textColor: '#000', score: 60, rarity: 0.05 },  // ケイ素
+            Mn:  { label: 'Mn',  color: '#B0B0B0', textColor: '#000', score: 60, rarity: 0.03 },  // マンガン
+            Pb:  { label: 'Pb',  color: '#888888', textColor: '#000', score: 60, rarity: 0.02 },  // 鉛
+            Sn:  { label: 'Sn',  color: '#C0C0C0', textColor: '#000', score: 60, rarity: 0.02 },  // スズ
+            Li:  { label: 'Li',  color: '#CC99FF', textColor: '#000', score: 50, rarity: 0.03 },  // リチウム
+            Cr:  { label: 'Cr',  color: '#8FBC8F', textColor: '#000', score: 60, rarity: 0.03 },  // クロム
+        };
+
+        // --- 分子リスト定義 ---
+        // 高校化学で習う高分子以外の分子
+        // ※一部の分子は同じ組成でも異性体があるが、代表的なもののみ記載
+        const MOLECULE_LIST = [
+            // --- 無機分子・単体 ---
+            { composition: { H:2 }, name: '水素', formula: 'H₂' },
+            { composition: { O:2 }, name: '酸素', formula: 'O₂' },
+            { composition: { O:3 }, name: 'オゾン', formula: 'O₃' },
+            { composition: { N:2 }, name: '窒素', formula: 'N₂' },
+            { composition: { Cl:2 }, name: '塩素', formula: 'Cl₂' },
+            { composition: { F:2 }, name: 'フッ素', formula: 'F₂' },
+            { composition: { Br:2 }, name: '臭素', formula: 'Br₂' },
+            { composition: { I:2 }, name: 'ヨウ素', formula: 'I₂' },
+            // --- 無機分子・酸化物・水素化物・酸・塩基 ---
+            { composition: { H:2, O:1 }, name: '水', formula: 'H₂O' },
+            { composition: { N:1, H:3 }, name: 'アンモニア', formula: 'NH₃' },
+            { composition: { C:1, O:1 }, name: '一酸化炭素', formula: 'CO' },
+            { composition: { C:1, O:2 }, name: '二酸化炭素', formula: 'CO₂' },
+            { composition: { N:1, O:1 }, name: '一酸化窒素', formula: 'NO' },
+            { composition: { N:1, O:2 }, name: '二酸化窒素', formula: 'NO₂' },
+            { composition: { S:1, O:2 }, name: '二酸化硫黄', formula: 'SO₂' },
+            { composition: { S:1, O:3 }, name: '三酸化硫黄', formula: 'SO₃' },
+            { composition: { H:2, O:2 }, name: '過酸化水素', formula: 'H₂O₂' },
+            { composition: { H:1, F:1 }, name: 'フッ化水素', formula: 'HF' },
+            { composition: { H:1, Cl:1 }, name: '塩化水素', formula: 'HCl' },
+            { composition: { H:1, Br:1 }, name: '臭化水素', formula: 'HBr' },
+            { composition: { H:1, I:1 }, name: 'ヨウ化水素', formula: 'HI' },
+            { composition: { Si:1, O:2 }, name: '二酸化ケイ素', formula: 'SiO₂' },
+            { composition: { Mn:1, O:2 }, name: '二酸化マンガン', formula: 'MnO₂' },
+            { composition: { Pb:1, O:2 }, name: '二酸化鉛', formula: 'PbO₂' },
+            { composition: { Sn:1, O:2 }, name: '二酸化スズ', formula: 'SnO₂' },
+            { composition: { H:2, S:1 }, name: '硫化水素', formula: 'H₂S' },
+            { composition: { H:2, S:1, O:4 }, name: '硫酸', formula: 'H₂SO₄' },
+            { composition: { H:2, S:1, O:3 }, name: '亜硫酸', formula: 'H₂SO₃' },
+            { composition: { Cu:1, S:1, O:4 }, name: '硫酸銅(II)', formula: 'CuSO₄' },
+            { composition: { Fe:1, S:1, O:4 }, name: '硫酸鉄(II)', formula: 'FeSO₄' },
+            { composition: { Na:2, S:1, O:4 }, name: '硫酸ナトリウム', formula: 'Na₂SO₄' },
+            { composition: { Na:1, H:1, S:1, O:4 }, name: '硫酸水素ナトリウム', formula: 'NaHSO₄' },
+            { composition: { K:2, S:1, O:4 }, name: '硫酸カリウム', formula: 'K₂SO₄' },
+            { composition: { Ca:1, S:1, O:4 }, name: '硫酸カルシウム', formula: 'CaSO₄' },
+            { composition: { H:1, N:1, O:3 }, name: '硝酸', formula: 'HNO₃' },
+            { composition: { H:1, N:1, O:2 }, name: '亜硝酸', formula: 'HNO₂' },
+            { composition: { Ag:1, N:1, O:3 }, name: '硝酸銀', formula: 'AgNO₃' },
+            { composition: { Cu:1, N:2, O:6 }, name: '硝酸銅(II)', formula: 'Cu(NO₃)₂' },
+            { composition: { Na:1, N:1, O:3 }, name: '硝酸ナトリウム', formula: 'NaNO₃' },
+            { composition: { K:1, N:1, O:3 }, name: '硝酸カリウム', formula: 'KNO₃' },
+            { composition: { Ca:1, N:2, O:6 }, name: '硝酸カルシウム', formula: 'Ca(NO₃)₂' },
+            { composition: { H:2, C:1, O:3 }, name: '炭酸', formula: 'H₂CO₃' },
+            { composition: { Na:2, C:1, O:3 }, name: '炭酸ナトリウム', formula: 'Na₂CO₃' },
+            { composition: { Na:1, H:1, C:1, O:3 }, name: '炭酸水素ナトリウム', formula: 'NaHCO₃' },
+            { composition: { Mg:1, C:1, O:3 }, name: '炭酸マグネシウム', formula: 'MgCO₃' },
+            { composition: { Ca:1, C:1, O:3 }, name: '炭酸カルシウム', formula: 'CaCO₃' },
+            { composition: { Ba:1, C:1, O:3 }, name: '炭酸バリウム', formula: 'BaCO₃' },
+            { composition: { NH4:2, C:1, O:3 }, name: '炭酸アンモニウム', formula: '(NH₄)₂CO₃' },
+            { composition: { H:2, C:2, O:4 }, name: 'シュウ酸', formula: 'H₂C₂O₄' },
+            { composition: { C:2, H:4, O:2 }, name: '酢酸', formula: 'CH₃COOH' },
+            { composition: { H:3, P:1, O:4 }, name: 'リン酸', formula: 'H₃PO₄' },
+            { composition: { Na:3, P:1, O:4 }, name: 'リン酸ナトリウム', formula: 'Na₃PO₄' },
+            { composition: { Al:1, P:1, O:4 }, name: 'リン酸アルミニウム', formula: 'AlPO₄' },
+            { composition: { P:4, O:10 }, name: '十酸化四リン', formula: 'P₄O₁₀' },
+            { composition: { H:1, Cl:1, O:1 }, name: '次亜塩素酸', formula: 'HClO' },
+            { composition: { H:1, Cl:1, O:2 }, name: '亜塩素酸', formula: 'HClO₂' },
+            { composition: { H:1, Cl:1, O:3 }, name: '塩素酸', formula: 'HClO₃' },
+            { composition: { H:1, Cl:1, O:4 }, name: '過塩素酸', formula: 'HClO₄' },
+            { composition: { Na:2, O:1 }, name: '酸化ナトリウム', formula: 'Na₂O' },
+            { composition: { Ca:1, O:1 }, name: '酸化カルシウム', formula: 'CaO' },
+            { composition: { Mg:1, O:1 }, name: '酸化マグネシウム', formula: 'MgO' },
+            { composition: { Al:2, O:3 }, name: '酸化アルミニウム', formula: 'Al₂O₃' },
+            { composition: { Fe:2, O:3 }, name: '酸化鉄(III)', formula: 'Fe₂O₃' },
+            { composition: { Mn:1, O:2 }, name: '酸化マンガン(IV)', formula: 'MnO₂' },
+            { composition: { Cu:2, O:1 }, name: '酸化銅(I)', formula: 'Cu₂O' },
+            { composition: { Cu:1, O:1 }, name: '酸化銅(II)', formula: 'CuO' },
+            { composition: { Zn:1, O:1 }, name: '酸化亜鉛', formula: 'ZnO' },
+            { composition: { Na:1, F:1 }, name: 'フッ化ナトリウム', formula: 'NaF' },
+            { composition: { Ca:1, F:2 }, name: 'フッ化カルシウム', formula: 'CaF₂' },
+            { composition: { Al:1, F:3 }, name: 'フッ化アルミニウム', formula: 'AlF₃' },
+            { composition: { Ag:1, F:1 }, name: 'フッ化銀', formula: 'AgF' },
+            { composition: { Na:1, Cl:1 }, name: '塩化ナトリウム', formula: 'NaCl' },
+            { composition: { Ca:1, Cl:2 }, name: '塩化カルシウム', formula: 'CaCl₂' },
+            { composition: { NH4:1, Cl:1 }, name: '塩化アンモニウム', formula: 'NH₄Cl' },
+            { composition: { K:1, Cl:1 }, name: '塩化カリウム', formula: 'KCl' },
+            { composition: { Mg:1, Cl:2 }, name: '塩化マグネシウム', formula: 'MgCl₂' },
+            { composition: { Ba:1, Cl:2 }, name: '塩化バリウム', formula: 'BaCl₂' },
+            { composition: { Al:1, Cl:3 }, name: '塩化アルミニウム', formula: 'AlCl₃' },
+            { composition: { Ag:1, Cl:1 }, name: '塩化銀', formula: 'AgCl' },
+            { composition: { Zn:1, Cl:2 }, name: '塩化亜鉛', formula: 'ZnCl₂' },
+            { composition: { Cu:1, Cl:2 }, name: '塩化銅(II)', formula: 'CuCl₂' },
+            { composition: { Li:1, Br:1 }, name: '臭化リチウム', formula: 'LiBr' },
+            { composition: { K:1, I:1 }, name: 'ヨウ化カリウム', formula: 'KI' },
+            { composition: { Cu:1, S:1 }, name: '硫化銅(II)', formula: 'CuS' },
+            { composition: { Fe:1, S:1 }, name: '硫化鉄(II)', formula: 'FeS' },
+            { composition: { Na:2, S:1 }, name: '硫化ナトリウム', formula: 'Na₂S' },
+            { composition: { Zn:1, S:1 }, name: '硫化亜鉛', formula: 'ZnS' },
+            { composition: { Ca:1, S:1 }, name: '硫化カルシウム', formula: 'CaS' },
+            { composition: { Na:1, O:1, H:1 }, name: '水酸化ナトリウム', formula: 'NaOH' },
+            { composition: { K:1, O:1, H:1 }, name: '水酸化カリウム', formula: 'KOH' },
+            { composition: { Ca:1, O:2, H:2 }, name: '水酸化カルシウム', formula: 'Ca(OH)₂' },
+            { composition: { Ba:1, O:2, H:2 }, name: '水酸化バリウム', formula: 'Ba(OH)₂' },
+            { composition: { Fe:1, O:3, H:3 }, name: '水酸化鉄(III)', formula: 'Fe(OH)₃' },
+            { composition: { Al:1, O:3, H:3 }, name: '水酸化アルミニウム', formula: 'Al(OH)₃' },
+            { composition: { K:1, Mn:1, O:4 }, name: '過マンガン酸カリウム', formula: 'KMnO₄' },
+            { composition: { K:2, Cr:2, O:7 }, name: '二クロム酸カリウム', formula: 'K₂Cr₂O₇' },
+            { composition: { K:2, Cr:1, O:4 }, name: 'クロム酸カリウム', formula: 'K₂CrO₄' },
+            { composition: { C:2, H:3, O:2, Na:1 }, name: '酢酸ナトリウム', formula: 'CH₃COONa' },
+            // --- 有機分子（代表的なもの） ---
+            { composition: { C:1, H:4 }, name: 'メタン', formula: 'CH₄' },
+            { composition: { C:2, H:6 }, name: 'エタン', formula: 'C₂H₆' },
+            { composition: { C:3, H:8 }, name: 'プロパン', formula: 'C₃H₈' },
+            { composition: { C:4, H:10 }, name: 'ブタン', formula: 'C₄H₁₀' },
+            { composition: { C:5, H:12 }, name: 'ペンタン', formula: 'C₅H₁₂' },
+            { composition: { C:6, H:14 }, name: 'ヘキサン', formula: 'C₆H₁₄' },
+            { composition: { C:7, H:16 }, name: 'ヘプタン', formula: 'C₇H₁₆' },
+            { composition: { C:8, H:18 }, name: 'オクタン', formula: 'C₈H₁₈' },
+            { composition: { C:9, H:20 }, name: 'ノナン', formula: 'C₉H₂₀' },
+            { composition: { C:10, H:22 }, name: 'デカン', formula: 'C₁₀H₂₂' },
+            { composition: { C:2, H:4 }, name: 'エチレン', formula: 'C₂H₄' },
+            { composition: { C:3, H:6 }, name: 'プロピレン', formula: 'C₃H₆' },
+            { composition: { C:2, H:2 }, name: 'アセチレン', formula: 'C₂H₂' },
+            { composition: { C:1, H:4, O:1 }, name: 'メタノール', formula: 'CH₃OH' },
+            { composition: { C:2, H:6, O:1 }, name: 'エタノール', formula: 'C₂H₅OH' },
+            { composition: { C:6, H:6 }, name: 'ベンゼン', formula: 'C₆H₆' },
+            { composition: { C:6, H:12, O:6 }, name: 'グルコース', formula: 'C₆H₁₂O₆' },
+            { composition: { C:10, H:8 }, name: 'ナフタレン', formula: 'C₁₀H₈' },
+            { composition: { C:6, H:6, O:1 }, name: 'フェノール', formula: 'C₆H₅OH' },
+            { composition: { C:1, H:2, O:1 }, name: 'ホルムアルデヒド', formula: 'HCHO' },
+            { composition: { C:2, H:4, O:1 }, name: 'アセトアルデヒド', formula: 'CH₃CHO' },
+            { composition: { C:3, H:6, O:1 }, name: 'アセトン', formula: 'CH₃COCH₃' },
+            // --- その他（高校化学で扱う主な分子） ---
+            { composition: { H:2, O:1, S:1 }, name: '過酸化硫黄', formula: 'H₂SO₅' },
+            { composition: { H:2, C:1, O:2 }, name: 'ギ酸', formula: 'CH₂O₂' },
+            { composition: { C:2, H:6, O:1 }, name: 'ジメチルエーテル', formula: 'C₂H₆O' },
+            { composition: { C:4, H:10, O:1 }, name: 'ジエチルエーテル', formula: 'C₄H₁₀O' },
+            { composition: { C:3, H:8, O:1 }, name: 'プロパノール', formula: 'C₃H₈O' },
+            { composition: { C:2, H:4, O:2 }, name: 'ギ酸メチル', formula: 'C₂H₄O₂' },
+            { composition: { C:4, H:8, O:2 }, name: '酢酸エチル', formula: 'C₄H₈O₂' },
+            { composition: { C:3, H:6, O:2 }, name: 'ギ酸エチル', formula: 'C₃H₆O₂' },
+            { composition: { C:2, H:6, O:2 }, name: 'エチレングリコール', formula: 'C₂H₆O₂' },
+            // --- イオン性分子（代表的なもの） ---
+            { composition: { NH4:1, NO3:1 }, name: '硝酸アンモニウム', formula: 'NH₄NO₃' },
+            { composition: { NH4:1, Cl:1 }, name: '塩化アンモニウム', formula: 'NH₄Cl' },
+            { composition: { NH4:2, S:1, O:4 }, name: '硫酸アンモニウム', formula: '(NH₄)₂SO₄' },
+            { composition: { NH4:1, H:1, C:1, O:3 }, name: '炭酸水素アンモニウム', formula: 'NH₄HCO₃' },
+        ];
+
+        // =========================
+        // ゲーム初期化処理
+        // =========================
+        function init() {
+            score = 0;
+            combo = 0;
+            atomDropFrequency = 2000;
+            isGameOver = false;
+            selectedAtoms = [];
+            linePoints = [];
+            
+            if (engine) {
+                World.clear(engine.world, false);
+                Engine.clear(engine);
+            }
+            
+            updateScore(0);
+            updateCombo(0);
+            gameOverScreen.classList.add('hidden');
+
+            // --- Matter.js エンジン・レンダラ・ランナーの生成 ---
+            engine = Engine.create();
+            engine.world.gravity.y = 0.5;
+
+            render = Render.create({
+                element: gameCanvas,
+                engine: engine,
+                options: {
+                    width: GAME_WIDTH,
+                    height: GAME_HEIGHT,
+                    wireframes: false,
+                    background: 'transparent'
+                }
+            });
+
+            runner = Runner.create();
+            
+            // --- Matter.js イベントリスナー登録 ---
+            Events.on(render, 'afterRender', drawGameElements);
+            Events.on(engine, 'afterUpdate', checkGameOver);
+            
+            Render.run(render);
+            Runner.run(runner, engine);
+            
+            // --- 壁と地面の作成 ---
+            const ground = Bodies.rectangle(GAME_WIDTH / 2, GAME_HEIGHT + 10, GAME_WIDTH, 20, { isStatic: true, label: 'ground' });
+            const leftWall = Bodies.rectangle(-10, GAME_HEIGHT / 2, 20, GAME_HEIGHT, { isStatic: true, label: 'wall' });
+            const rightWall = Bodies.rectangle(GAME_WIDTH + 10, GAME_HEIGHT / 2, 20, GAME_HEIGHT, { isStatic: true, label: 'wall' });
+            World.add(engine.world, [ground, leftWall, rightWall]);
+            
+            // --- 次に落ちてくる原子のキューを初期化 ---
+            nextAtomQueue = [];
+            generateNextAtomQueue();
+            generateNextAtomQueue();
+
+            // --- 初期原子を配置 ---
+            addInitialAtoms();
+            // --- 原子落下ループ開始 ---
+            startGameLoop();
+        }
+
+        // =========================
+        // 初期原子をランダムに配置
+        // =========================
+        function addInitialAtoms() {
+            // 配置のための行数・列数を計算
+            const cols = Math.floor(GAME_WIDTH / (ATOM_RADIUS * 2.5));
+            const rows = Math.ceil(INITIAL_ATOM_COUNT / cols);
+            let placed = 0;
+            for (let row = 0; row < rows && placed < INITIAL_ATOM_COUNT; row++) {
+                for (let col = 0; col < cols && placed < INITIAL_ATOM_COUNT; col++) {
+                    // 原子の種類をランダムに決定
+                    const typeKey = getRandomAtomType();
+                    const typeInfo = ATOM_TYPES[typeKey];
+                    // 配置座標を計算（少しランダムにずらす）
+                    const x = (col + 0.5) * (GAME_WIDTH / cols) + (Math.random() - 0.5) * ATOM_RADIUS;
+                    const y = GAME_HEIGHT - (row + 1) * (ATOM_RADIUS * 2.2) + (Math.random() - 0.5) * ATOM_RADIUS;
+                    // y座標がゲームオーバーラインより下になるように制限
+                    const safeY = Math.max(y, GAME_OVER_LINE_Y + ATOM_RADIUS * 2);
+                    const atom = Bodies.circle(x, safeY, ATOM_RADIUS, {
+                        restitution: 0.3, friction: 0.1, label: 'atom',
+                        atomType: typeKey,
+                        render: { fillStyle: typeInfo.color, strokeStyle: '#000', lineWidth: 2 }
+                    });
+                    World.add(engine.world, atom);
+                    placed++;
+                }
+            }
+        }
+
+        // =========================
+        // 原子落下ループ開始
+        // =========================
+        function startGameLoop() {
+            if (atomDropInterval) clearInterval(atomDropInterval);
+            atomDropInterval = setInterval(() => {
+                if (!isGameOver) {
+                    dropAtom();
+                    if (atomDropFrequency > 500) {
+                        atomDropFrequency *= 0.99;
+                    }
+                } else {
+                    clearInterval(atomDropInterval);
+                }
+            }, atomDropFrequency);
+        }
+
+        // =========================
+        // レア度に基づく原子のランダム選択
+        // =========================
+        function getRandomAtomType() {
+            const typeKeys = Object.keys(ATOM_TYPES);
+            // rarityが0以下のものは出現しない
+            const weighted = [];
+            for (const key of typeKeys) {
+                const rarity = ATOM_TYPES[key].rarity;
+                if (rarity > 0) {
+                    weighted.push({ key, weight: rarity });
+                }
+            }
+            // 合計重み
+            const total = weighted.reduce((sum, w) => sum + w.weight, 0);
+            let r = Math.random() * total;
+            for (const w of weighted) {
+                if (r < w.weight) return w.key;
+                r -= w.weight;
+            }
+            // 万一のフォールバック
+            return weighted.length > 0 ? weighted[0].key : typeKeys[0];
+        }
+
+        // =========================
+        // 次の原子キューを生成
+        // =========================
+        function generateNextAtomQueue() {
+            nextAtomQueue.push(getRandomAtomType());
+            updateNextAtomUI();
+        }
+        
+        // =========================
+        // 原子を1つ落下させる
+        // =========================
+        function dropAtom() {
+            if (nextAtomQueue.length === 0) generateNextAtomQueue();
+            const typeKey = nextAtomQueue.shift();
+            generateNextAtomQueue();
+
+            const typeInfo = ATOM_TYPES[typeKey];
+            const x = Math.random() * (GAME_WIDTH - ATOM_RADIUS * 4) + ATOM_RADIUS * 2;
+            const atom = Bodies.circle(x, 30, ATOM_RADIUS, {
+                restitution: 0.3, friction: 0.1, label: 'atom',
+                atomType: typeKey,
+                render: { fillStyle: typeInfo.color, strokeStyle: '#000', lineWidth: 2 }
+            });
+            World.add(engine.world, atom);
+        }
+        
+        // =========================
+        // スコア表示を更新
+        // =========================
+        function updateScore(points) {
+            score = points;
+            scoreEl.textContent = score;
+        }
+
+        // =========================
+        // コンボ表示を更新
+        // =========================
+        function updateCombo(count) {
+            combo = count;
+            comboEl.textContent = combo;
+        }
+        
+        // =========================
+        // 次に落ちてくる原子のUIを更新
+        // =========================
+        function updateNextAtomUI() {
+            nextAtomsEl.innerHTML = '';
+            nextAtomQueue.slice(0, 2).forEach(typeKey => {
+                const type = ATOM_TYPES[typeKey];
+                const div = document.createElement('div');
+                div.className = 'atom-preview';
+                div.textContent = type.label;
+                div.style.backgroundColor = type.color;
+                div.style.color = type.textColor;
+                nextAtomsEl.appendChild(div);
+            });
+        }
+
+        // =========================
+        // マウス・タッチイベント座標取得
+        // =========================
+        function getEventCoordinates(e) {
+            const rect = gameCanvas.getBoundingClientRect();
+            let x, y;
+            if (e.touches && e.touches.length > 0) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                x = e.changedTouches[0].clientX - rect.left;
+                y = e.changedTouches[0].clientY - rect.top;
+            } else {
+                x = e.offsetX;
+                y = e.offsetY;
+            }
+            return { x, y };
+        }
+        
+        // =========================
+        // ドラッグ開始時の処理
+        // =========================
+        function handleDragStart(e) {
+            e.preventDefault();
+            if (isGameOver) return;
+            isDragging = true;
+            selectedAtoms = [];
+            linePoints = [];
+            const { x, y } = getEventCoordinates(e);
+            addAtomToSelection(x, y);
+        }
+
+        // =========================
+        // ドラッグ中の処理
+        // =========================
+        function handleDragMove(e) {
+            e.preventDefault();
+            if (!isDragging || isGameOver) return;
+            const { x, y } = getEventCoordinates(e);
+            addAtomToSelection(x, y);
+        }
+
+        // =========================
+        // ドラッグ終了時の処理
+        // =========================
+        function handleDragEnd(e) {
+            e.preventDefault();
+            if (!isDragging || isGameOver) return;
+            isDragging = false;
+            
+            if (selectedAtoms.length > 1) {
+                checkMolecule();
+            }
+            selectedAtoms = [];
+            linePoints = [];
+        }
+        
+        // =========================
+        // 選択中の原子リストに追加
+        // =========================
+        function addAtomToSelection(x, y) {
+            if (!engine) return; // engineが初期化されるまで何もしない
+            const bodies = Query.point(engine.world.bodies, { x, y });
+            const atomBody = bodies.find(body => body.label === 'atom');
+
+            if (atomBody && !selectedAtoms.includes(atomBody)) {
+                if (selectedAtoms.length > 0) {
+                    const lastAtom = selectedAtoms[selectedAtoms.length - 1];
+                    const distance = Math.hypot(atomBody.position.x - lastAtom.position.x, atomBody.position.y - lastAtom.position.y);
+                    if (distance > ATOM_RADIUS * 6) return;
+                }
+                selectedAtoms.push(atomBody);
+                linePoints.push({ x: atomBody.position.x, y: atomBody.position.y });
+            }
+        }
+
+        // =========================
+        // 分子判定ロジック
+        // =========================
+        // 選択した原子の組成から分子リストと一致するものを探す
+        function checkMolecule() {
+            // 構成原子の組成オブジェクトを作成
+            const composition = {};
+            selectedAtoms.forEach(atom => {
+                const type = atom.atomType;
+                composition[type] = (composition[type] || 0) + 1;
+            });
+
+            // 組成が一致する分子を検索
+            const found = MOLECULE_LIST.find(mol => isSameComposition(mol.composition, composition));
+            if (found) {
+                handleSuccess(selectedAtoms, found.name);
+            } else {
+                handleFailure();
+            }
+        }
+
+        // =========================
+        // 2つの組成オブジェクトが等しいか判定
+        // =========================
+        function isSameComposition(a, b) {
+            const keysA = Object.keys(a);
+            const keysB = Object.keys(b);
+            if (keysA.length !== keysB.length) return false;
+            for (const k of keysA) {
+                if (a[k] !== b[k]) return false;
+            }
+            return true;
+        }
+
+        // =========================
+        // 分子成立時の処理
+        // =========================
+        function handleSuccess(atomsToRemove, moleculeName) {
+            let baseScore = 0;
+            atomsToRemove.forEach(atom => {
+                baseScore += ATOM_TYPES[atom.atomType].score;
+            });
+
+            updateCombo(combo + 1);
+            const comboMultiplier = 1 + (combo * 0.2);
+            const calculatedScore = Math.round(baseScore * comboMultiplier);
+            updateScore(score + calculatedScore);
+
+            // 分子名を一時的に表示するなどの演出も可能（ここでは未実装）
+            atomsToRemove.forEach(atom => World.remove(engine.world, atom));
+        }
+
+        // =========================
+        // 分子不成立時の処理
+        // =========================
+        function handleFailure() {
+            updateCombo(0);
+        }
+
+        // =========================
+        // ゲームオーバー判定
+        // 原子が3つ以上ボーダーラインを越えたらゲームオーバー
+        // =========================
+        function checkGameOver() {
+            if (!engine || isGameOver) return;
+            const atoms = engine.world.bodies.filter(b => b.label === 'atom');
+            let overCount = 0;
+            for (const atom of atoms) {
+                // 原子の上端がボーダーラインより上に来たらカウント
+                if ((atom.position.y - ATOM_RADIUS) < GAME_OVER_LINE_Y) {
+                    overCount++;
+                    if (overCount >= 3) {
+                        endGame();
+                        return;
+                    }
+                }
+            }
+        }
+
+        // =========================
+        // ゲームオーバー処理
+        // =========================
+        function endGame() {
+            if (isGameOver) return;
+            isGameOver = true;
+            clearInterval(atomDropInterval);
+            if (runner) Runner.stop(runner);
+
+            finalScoreEl.textContent = score;
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        // =========================
+        // Matter.jsのafterRenderで呼ばれる描画処理
+        // =========================
+        function drawGameElements() {
+            if (!render) return;
+            const ctx = render.context;
+            
+            ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+            // --- 選択中の線を描画 ---
+            if (isDragging && linePoints.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(linePoints[0].x, linePoints[0].y);
+                for (let i = 1; i < linePoints.length; i++) {
+                    ctx.lineTo(linePoints[i].x, linePoints[i].y);
+                }
+                ctx.strokeStyle = '#3498db';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            }
+
+            // --- 選択中の原子を強調表示 ---
+            selectedAtoms.forEach(atom => {
+                ctx.beginPath();
+                ctx.arc(atom.position.x, atom.position.y, ATOM_RADIUS + 3, 0, 2 * Math.PI);
+                ctx.strokeStyle = '#f1c40f';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            });
+            
+            // --- 原子の描画 ---
+            const atoms = engine.world.bodies.filter(b => b.label === 'atom');
+            ctx.font = `bold ${ATOM_RADIUS}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            atoms.forEach(atom => {
+                const typeInfo = ATOM_TYPES[atom.atomType];
+                // --- 塗りつぶし ---
+                ctx.beginPath();
+                ctx.arc(atom.position.x, atom.position.y, ATOM_RADIUS, 0, 2 * Math.PI);
+                ctx.fillStyle = typeInfo.color; // 原子ごとの色
+                ctx.fill();
+                /*
+                // --- 輪郭線 ---
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#000'; // 黒色の輪郭
+                ctx.stroke();
+                */
+                // --- 文字 ---
+                ctx.fillStyle = typeInfo.textColor;
+                ctx.font = `bold ${ATOM_RADIUS}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(typeInfo.label, atom.position.x, atom.position.y);
+            });
+
+            // --- ゲームオーバーラインの描画 ---
+            ctx.beginPath();
+            ctx.moveTo(0, GAME_OVER_LINE_Y);
+            ctx.lineTo(GAME_WIDTH, GAME_OVER_LINE_Y);
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // =========================
+        // イベントリスナー登録
+        // =========================
+        gameCanvas.addEventListener('mousedown', handleDragStart);
+        gameCanvas.addEventListener('mousemove', handleDragMove);
+        window.addEventListener('mouseup', handleDragEnd);
+        
+        gameCanvas.addEventListener('touchstart', handleDragStart, { passive: false });
+        gameCanvas.addEventListener('touchmove', handleDragMove, { passive: false });
+        window.addEventListener('touchend', handleDragEnd);
+        
+        restartButton.addEventListener('click', () => {
+            if (render) {
+                Render.stop(render);
+                render.canvas.remove();
+                render.textures = {};
+            }
+            if (runner) Runner.stop(runner);
+            
+            init();
+        });
+
+        // =========================
+        // ゲーム開始
+        // =========================
+        init();
+    });
+    // =========================
+    // メイン処理終了
+    // =========================
+    </script>
+</body>
+</html>
