@@ -29,6 +29,7 @@
             border: 2px solid #3498db;
             background-color: #ffffff;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 20px auto;
         }
 
         #game-canvas {
@@ -211,32 +212,32 @@
         // score: 点数計算時の重み
         // 各原子のレアリティは収録分子の頻度・重要度を考慮
         const ATOM_TYPES = {
-            H:   { label: 'H',   color: '#E0E0E0', textColor: '#000', score: 10, rarity: 56 },    // 水素
-            O:   { label: 'O',   color: '#E74C3C', textColor: '#000', score: 10, rarity: 95 },    // 酸素
-            Cl:  { label: 'Cl',  color: '#2ECC71', textColor: '#000', score: 60, rarity: 22 },    // 塩素
-            C:   { label: 'C',   color: '#4A4A4A', textColor: '#000', score: 10, rarity: 18 },    // 炭素
+            H:   { label: 'H',   color: '#E0E0E0', textColor: '#000', score: 5,  rarity: 56 },    // 水素
+            O:   { label: 'O',   color: '#E74C3C', textColor: '#000', score: 8,  rarity: 95 },    // 酸素
+            Cl:  { label: 'Cl',  color: '#2ECC71', textColor: '#000', score: 30, rarity: 22 },    // 塩素
+            C:   { label: 'C',   color: '#4A4A4A', textColor: '#000', score: 12, rarity: 18 },    // 炭素
             N:   { label: 'N',   color: '#3498DB', textColor: '#000', score: 10, rarity: 10 },    // 窒素
-            F:   { label: 'F',   color: '#00FFCC', textColor: '#000', score: 60, rarity: 10 },    // フッ素
-            S:   { label: 'S',   color: '#F1C40F', textColor: '#000', score: 70, rarity: 8 },     // 硫黄
-            Na:  { label: 'Na',  color: '#9B59B6', textColor: '#000', score: 50, rarity: 8 },     // ナトリウム
-            K:   { label: 'K',   color: '#B8860B', textColor: '#000', score: 50, rarity: 7 },     // カリウム
-            Ca:  { label: 'Ca',  color: '#B0C4DE', textColor: '#000', score: 50, rarity: 6 },     // カルシウム
-            Al:  { label: 'Al',  color: '#D3D3D3', textColor: '#000', score: 60, rarity: 5 },     // アルミニウム
-            Cu:  { label: 'Cu',  color: '#B87333', textColor: '#000', score: 60, rarity: 5 },     // 銅
-            Br:  { label: 'Br',  color: '#A0522D', textColor: '#000', score: 70, rarity: 4 },     // 臭素
-            I:   { label: 'I',   color: '#800080', textColor: '#000', score: 80, rarity: 4 },     // ヨウ素
-            Mg:  { label: 'Mg',  color: '#A9DFBF', textColor: '#000', score: 50, rarity: 4 },     // マグネシウム
-            Mn:  { label: 'Mn',  color: '#B0B0B0', textColor: '#000', score: 60, rarity: 3 },     // マンガン
-            Ag:  { label: 'Ag',  color: '#C0C0C0', textColor: '#000', score: 80, rarity: 3 },     // 銀
-            Ba:  { label: 'Ba',  color: '#E6E6FA', textColor: '#000', score: 80, rarity: 3 },     // バリウム
-            Fe:  { label: 'Fe',  color: '#B22222', textColor: '#000', score: 60, rarity: 3 },     // 鉄
-            Zn:  { label: 'Zn',  color: '#7DCEA0', textColor: '#000', score: 60, rarity: 3 },     // 亜鉛
-            Cr:  { label: 'Cr',  color: '#8FBC8F', textColor: '#000', score: 60, rarity: 1 },     // クロム
-            Si:  { label: 'Si',  color: '#A3C1AD', textColor: '#000', score: 60, rarity: 1 },     // ケイ素
-            Pb:  { label: 'Pb',  color: '#888888', textColor: '#000', score: 60, rarity: 1 },     // 鉛
-            Sn:  { label: 'Sn',  color: '#C0C0C0', textColor: '#000', score: 60, rarity: 1 },     // スズ
-            P:   { label: 'P',   color: '#FF8C00', textColor: '#000', score: 70, rarity: 1 },     // リン
-            Li:  { label: 'Li',  color: '#CC99FF', textColor: '#000', score: 50, rarity: 1 },     // リチウム
+            F:   { label: 'F',   color: '#00FFCC', textColor: '#000', score: 35, rarity: 10 },    // フッ素
+            S:   { label: 'S',   color: '#F1C40F', textColor: '#000', score: 40, rarity: 8 },     // 硫黄
+            Na:  { label: 'Na',  color: '#9B59B6', textColor: '#000', score: 25, rarity: 8 },     // ナトリウム
+            K:   { label: 'K',   color: '#B8860B', textColor: '#000', score: 28, rarity: 7 },     // カリウム
+            Ca:  { label: 'Ca',  color: '#B0C4DE', textColor: '#000', score: 28, rarity: 6 },     // カルシウム
+            Al:  { label: 'Al',  color: '#D3D3D3', textColor: '#000', score: 32, rarity: 5 },     // アルミニウム
+            Cu:  { label: 'Cu',  color: '#B87333', textColor: '#000', score: 35, rarity: 5 },     // 銅
+            Br:  { label: 'Br',  color: '#A0522D', textColor: '#000', score: 45, rarity: 4 },     // 臭素
+            I:   { label: 'I',   color: '#800080', textColor: '#000', score: 55, rarity: 4 },     // ヨウ素
+            Mg:  { label: 'Mg',  color: '#A9DFBF', textColor: '#000', score: 22, rarity: 4 },     // マグネシウム
+            Mn:  { label: 'Mn',  color: '#B0B0B0', textColor: '#000', score: 38, rarity: 3 },     // マンガン
+            Ag:  { label: 'Ag',  color: '#C0C0C0', textColor: '#000', score: 60, rarity: 3 },     // 銀
+            Ba:  { label: 'Ba',  color: '#E6E6FA', textColor: '#000', score: 60, rarity: 3 },     // バリウム
+            Fe:  { label: 'Fe',  color: '#B22222', textColor: '#000', score: 40, rarity: 3 },     // 鉄
+            Zn:  { label: 'Zn',  color: '#7DCEA0', textColor: '#000', score: 35, rarity: 3 },     // 亜鉛
+            Cr:  { label: 'Cr',  color: '#8FBC8F', textColor: '#000', score: 40, rarity: 1 },     // クロム
+            Si:  { label: 'Si',  color: '#A3C1AD', textColor: '#000', score: 35, rarity: 1 },     // ケイ素
+            Pb:  { label: 'Pb',  color: '#888888', textColor: '#000', score: 40, rarity: 1 },     // 鉛
+            Sn:  { label: 'Sn',  color: '#C0C0C0', textColor: '#000', score: 38, rarity: 1 },     // スズ
+            P:   { label: 'P',   color: '#FF8C00', textColor: '#000', score: 45, rarity: 1 },     // リン
+            Li:  { label: 'Li',  color: '#CC99FF', textColor: '#000', score: 22, rarity: 1 },     // リチウム
         };
 
         // --- 分子リスト定義 ---
@@ -746,22 +747,13 @@
             const uniqueAtomTypeBonus = atomTypes.size * 20; // 種類数ボーナス
             const atomCountBonus = atomsToRemove.length >= 4 ? (atomsToRemove.length - 3) * 15 : 0; // 4個以上で加算
 
-            // --- レア分子ボーナス（例：分子リストの末尾10個をレア扱い）---
-            let rareMoleculeBonus = 0;
-            if (!handleSuccess._rareNames) {
-                handleSuccess._rareNames = new Set(MOLECULE_LIST.slice(-10).map(mol => mol.name));
-            }
-            if (handleSuccess._rareNames.has(moleculeName)) {
-                rareMoleculeBonus = 100;
-            }
-
             // --- コンボ倍率 ---
             updateCombo(combo + 1);
             const comboMultiplier = 1 + (combo * 0.2);
 
             // --- スコア計算 ---
             const calculatedScore = Math.round(
-                (baseScore + rareAtomBonus + uniqueAtomTypeBonus + atomCountBonus + rareMoleculeBonus) * comboMultiplier
+                (baseScore + rareAtomBonus + uniqueAtomTypeBonus + atomCountBonus) * comboMultiplier
             );
             updateScore(score + calculatedScore);
 
