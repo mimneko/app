@@ -206,40 +206,10 @@
         let lastDropTime = 0; // 前回の原子落下時刻
 
         // --- 原子の種類定義 ---
-        // 高校化学で扱う主な元素（高分子除く）
-        // rarity: 出現頻度の重み（大きいほどよく出る、1.0が標準、0.1などでレアに）
+        // 高校化学で扱う主な元素
+        // rarity: 出現頻度の重み（大きいほどよく出る）
         // score: 点数計算時の重み
-        // 各原子のレアリティは収録分子の頻度・重要度を考慮し、CとNはやや低めに調整
-        /*
-        const ATOM_TYPES = {
-            H:   { label: 'H',   color: '#E0E0E0', textColor: '#000', score: 10, rarity: 1.0 },   // 水素
-            C:   { label: 'C',   color: '#4A4A4A', textColor: '#000', score: 10, rarity: 0.25 },  // 炭素
-            N:   { label: 'N',   color: '#3498DB', textColor: '#000', score: 10, rarity: 0.35 },  // 窒素
-            O:   { label: 'O',   color: '#E74C3C', textColor: '#000', score: 10, rarity: 0.85 },  // 酸素
-            F:   { label: 'F',   color: '#00FFCC', textColor: '#000', score: 60, rarity: 0.05 },  // フッ素
-            Cl:  { label: 'Cl',  color: '#2ECC71', textColor: '#000', score: 60, rarity: 0.06 },  // 塩素
-            Br:  { label: 'Br',  color: '#A0522D', textColor: '#000', score: 70, rarity: 0.03 },  // 臭素
-            I:   { label: 'I',   color: '#800080', textColor: '#000', score: 80, rarity: 0.02 },  // ヨウ素
-            S:   { label: 'S',   color: '#F1C40F', textColor: '#000', score: 70, rarity: 0.05 },  // 硫黄
-            P:   { label: 'P',   color: '#FF8C00', textColor: '#000', score: 70, rarity: 0.03 },  // リン
-            Na:  { label: 'Na',  color: '#9B59B6', textColor: '#000', score: 50, rarity: 0.06 },  // ナトリウム
-            K:   { label: 'K',   color: '#B8860B', textColor: '#000', score: 50, rarity: 0.05 },  // カリウム
-            Ca:  { label: 'Ca',  color: '#B0C4DE', textColor: '#000', score: 50, rarity: 0.05 },  // カルシウム
-            Mg:  { label: 'Mg',  color: '#A9DFBF', textColor: '#000', score: 50, rarity: 0.04 },  // マグネシウム
-            Fe:  { label: 'Fe',  color: '#B22222', textColor: '#000', score: 60, rarity: 0.04 },  // 鉄
-            Cu:  { label: 'Cu',  color: '#B87333', textColor: '#000', score: 60, rarity: 0.03 },  // 銅
-            Zn:  { label: 'Zn',  color: '#7DCEA0', textColor: '#000', score: 60, rarity: 0.03 },  // 亜鉛
-            Ag:  { label: 'Ag',  color: '#C0C0C0', textColor: '#000', score: 80, rarity: 0.01 },  // 銀
-            Ba:  { label: 'Ba',  color: '#E6E6FA', textColor: '#000', score: 80, rarity: 0.01 },  // バリウム
-            Al:  { label: 'Al',  color: '#D3D3D3', textColor: '#000', score: 60, rarity: 0.03 },  // アルミニウム
-            Si:  { label: 'Si',  color: '#A3C1AD', textColor: '#000', score: 60, rarity: 0.02 },  // ケイ素
-            Mn:  { label: 'Mn',  color: '#B0B0B0', textColor: '#000', score: 60, rarity: 0.01 },  // マンガン
-            Pb:  { label: 'Pb',  color: '#888888', textColor: '#000', score: 60, rarity: 0.01 },  // 鉛
-            Sn:  { label: 'Sn',  color: '#C0C0C0', textColor: '#000', score: 60, rarity: 0.01 },  // スズ
-            Li:  { label: 'Li',  color: '#CC99FF', textColor: '#000', score: 50, rarity: 0.01 },  // リチウム
-            Cr:  { label: 'Cr',  color: '#8FBC8F', textColor: '#000', score: 60, rarity: 0.01 },  // クロム
-        };
-        */
+        // 各原子のレアリティは収録分子の頻度・重要度を考慮
         const ATOM_TYPES = {
             H:   { label: 'H',   color: '#E0E0E0', textColor: '#000', score: 10, rarity: 56 },    // 水素
             O:   { label: 'O',   color: '#E74C3C', textColor: '#000', score: 10, rarity: 95 },    // 酸素
@@ -573,24 +543,29 @@
         // レア度に基づく原子のランダム選択
         // =========================
         function getRandomAtomType() {
-            const typeKeys = Object.keys(ATOM_TYPES);
-            // rarityが0以下のものは出現しない
-            const weighted = [];
-            for (const key of typeKeys) {
-                const rarity = ATOM_TYPES[key].rarity;
-                if (rarity > 0) {
-                    weighted.push({ key, weight: rarity });
+            // 事前に重み付き配列をキャッシュしておくことで効率化
+            if (!getRandomAtomType._weighted) {
+                const typeKeys = Object.keys(ATOM_TYPES);
+                const weighted = [];
+                for (const key of typeKeys) {
+                    const rarity = ATOM_TYPES[key].rarity;
+                    if (rarity > 0) {
+                        weighted.push({ key, weight: rarity });
+                    }
                 }
+                getRandomAtomType._weighted = weighted;
+                getRandomAtomType._total = weighted.reduce((sum, w) => sum + w.weight, 0);
+                getRandomAtomType._fallback = weighted.length > 0 ? weighted[0].key : typeKeys[0];
             }
-            // 合計重み
-            const total = weighted.reduce((sum, w) => sum + w.weight, 0);
+            const weighted = getRandomAtomType._weighted;
+            const total = getRandomAtomType._total;
             let r = Math.random() * total;
-            for (const w of weighted) {
-                if (r < w.weight) return w.key;
-                r -= w.weight;
+            for (let i = 0; i < weighted.length; i++) {
+                if (r < weighted[i].weight) return weighted[i].key;
+                r -= weighted[i].weight;
             }
             // 万一のフォールバック
-            return weighted.length > 0 ? weighted[0].key : typeKeys[0];
+            return getRandomAtomType._fallback;
         }
 
         // =========================
@@ -687,15 +662,23 @@
         function addAtomToSelection(x, y) {
             if (!engine) return; // engineが初期化されるまで何もしない
             const bodies = Query.point(engine.world.bodies, { x, y });
-            const atomBody = bodies.find(body => body.label === 'atom');
+            // 既に選択済みの原子をSetで管理し、O(1)で判定
+            if (!addAtomToSelection._selectedSet) addAtomToSelection._selectedSet = new Set();
+            const selectedSet = addAtomToSelection._selectedSet;
+            // selectedAtomsが空ならSetも初期化
+            if (selectedAtoms.length === 0) selectedSet.clear();
 
-            if (atomBody && !selectedAtoms.includes(atomBody)) {
+            const atomBody = bodies.find(body => body.label === 'atom' && !selectedSet.has(body));
+            if (atomBody) {
                 if (selectedAtoms.length > 0) {
                     const lastAtom = selectedAtoms[selectedAtoms.length - 1];
-                    const distance = Math.hypot(atomBody.position.x - lastAtom.position.x, atomBody.position.y - lastAtom.position.y);
-                    if (distance > ATOM_RADIUS * 6) return;
+                    const dx = atomBody.position.x - lastAtom.position.x;
+                    const dy = atomBody.position.y - lastAtom.position.y;
+                    // Math.hypotより高速な平方根比較
+                    if ((dx * dx + dy * dy) > (ATOM_RADIUS * 6) * (ATOM_RADIUS * 6)) return;
                 }
                 selectedAtoms.push(atomBody);
+                selectedSet.add(atomBody);
                 linePoints.push({ x: atomBody.position.x, y: atomBody.position.y });
             }
         }
@@ -707,13 +690,24 @@
         function checkMolecule() {
             // 構成原子の組成オブジェクトを作成
             const composition = {};
-            selectedAtoms.forEach(atom => {
-                const type = atom.atomType;
+            for (let i = 0; i < selectedAtoms.length; i++) {
+                const type = selectedAtoms[i].atomType;
                 composition[type] = (composition[type] || 0) + 1;
-            });
+            }
 
             // 組成が一致する分子を検索
-            const found = MOLECULE_LIST.find(mol => isSameComposition(mol.composition, composition));
+            // 事前にMOLECULE_LISTのcompositionをソート済み文字列にしてMap化しておくことで高速化
+            if (!checkMolecule._compositionMap) {
+                const map = new Map();
+                for (let i = 0; i < MOLECULE_LIST.length; i++) {
+                    const mol = MOLECULE_LIST[i];
+                    const key = getCompositionKey(mol.composition);
+                    map.set(key, mol);
+                }
+                checkMolecule._compositionMap = map;
+            }
+            const key = getCompositionKey(composition);
+            const found = checkMolecule._compositionMap.get(key);
             if (found) {
                 handleSuccess(selectedAtoms, found.name, found.formula);
             } else {
@@ -724,14 +718,10 @@
         // =========================
         // 2つの組成オブジェクトが等しいか判定
         // =========================
-        function isSameComposition(a, b) {
-            const keysA = Object.keys(a);
-            const keysB = Object.keys(b);
-            if (keysA.length !== keysB.length) return false;
-            for (const k of keysA) {
-                if (a[k] !== b[k]) return false;
-            }
-            return true;
+        // 高速化のため、組成をソート済みの文字列に変換して比較
+        function getCompositionKey(obj) {
+            // 例: {H:2,O:1} → "H2O1"
+            return Object.keys(obj).sort().map(k => k + obj[k]).join('');
         }
 
         // =========================
@@ -742,14 +732,15 @@
             let baseScore = 0;
             let rareAtomBonus = 0;
             let atomTypes = new Set();
-            atomsToRemove.forEach(atom => {
+            for (let i = 0; i < atomsToRemove.length; i++) {
+                const atom = atomsToRemove[i];
                 baseScore += ATOM_TYPES[atom.atomType].score;
                 atomTypes.add(atom.atomType);
                 // レア原子ボーナス（rarityが5以下ならレアとみなす例）
                 if (ATOM_TYPES[atom.atomType].rarity <= 5) {
                     rareAtomBonus += 30;
                 }
-            });
+            }
 
             // --- 分子の複雑さボーナス ---
             const uniqueAtomTypeBonus = atomTypes.size * 20; // 種類数ボーナス
@@ -757,7 +748,10 @@
 
             // --- レア分子ボーナス（例：分子リストの末尾10個をレア扱い）---
             let rareMoleculeBonus = 0;
-            if (MOLECULE_LIST.slice(-10).some(mol => mol.name === moleculeName)) {
+            if (!handleSuccess._rareNames) {
+                handleSuccess._rareNames = new Set(MOLECULE_LIST.slice(-10).map(mol => mol.name));
+            }
+            if (handleSuccess._rareNames.has(moleculeName)) {
                 rareMoleculeBonus = 100;
             }
 
@@ -774,7 +768,9 @@
             // --- ポップアップ表示などはそのまま ---
             showMoleculePopup(moleculeName, moleculeFormula);
 
-            atomsToRemove.forEach(atom => World.remove(engine.world, atom));
+            for (let i = 0; i < atomsToRemove.length; i++) {
+                World.remove(engine.world, atomsToRemove[i]);
+            }
         }
 
         // =========================
@@ -817,15 +813,19 @@
         // =========================
         function checkGameOver() {
             if (!engine || isGameOver) return;
-            const atoms = engine.world.bodies.filter(b => b.label === 'atom');
+            // フィルタを使わず、カウントが3に達した時点で即return
             let overCount = 0;
-            for (const atom of atoms) {
-                // 原子の上端がボーダーラインより上に来たらカウント
-                if ((atom.position.y - ATOM_RADIUS) < GAME_OVER_LINE_Y) {
-                    overCount++;
-                    if (overCount >= 3) {
-                        endGame();
-                        return;
+            const bodies = engine.world.bodies;
+            for (let i = 0; i < bodies.length; i++) {
+                const atom = bodies[i];
+                if (atom.label === 'atom') {
+                    // 原子の上端がボーダーラインより上に来たらカウント
+                    if ((atom.position.y - ATOM_RADIUS) < GAME_OVER_LINE_Y) {
+                        overCount++;
+                        if (overCount >= 3) {
+                            endGame();
+                            return;
+                        }
                     }
                 }
             }
@@ -868,39 +868,38 @@
             }
 
             // --- 選択中の原子を強調表示 ---
-            selectedAtoms.forEach(atom => {
+            for (let i = 0; i < selectedAtoms.length; i++) {
+                const atom = selectedAtoms[i];
                 ctx.beginPath();
                 ctx.arc(atom.position.x, atom.position.y, ATOM_RADIUS + 3, 0, 2 * Math.PI);
                 ctx.strokeStyle = '#f1c40f';
                 ctx.lineWidth = 3;
                 ctx.stroke();
-            });
+            }
             
             // --- 原子の描画 ---
-            const atoms = engine.world.bodies.filter(b => b.label === 'atom');
+            // フィルタを使わずforループで高速化
+            const bodies = engine.world.bodies;
             ctx.font = `bold ${ATOM_RADIUS}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            atoms.forEach(atom => {
-                const typeInfo = ATOM_TYPES[atom.atomType];
-                // --- 塗りつぶし ---
-                ctx.beginPath();
-                ctx.arc(atom.position.x, atom.position.y, ATOM_RADIUS, 0, 2 * Math.PI);
-                ctx.fillStyle = typeInfo.color; // 原子ごとの色
-                ctx.fill();
-                /*
-                // --- 輪郭線 ---
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#000'; // 黒色の輪郭
-                ctx.stroke();
-                */
-                // --- 文字 ---
-                ctx.fillStyle = typeInfo.textColor;
-                ctx.font = `bold ${ATOM_RADIUS}px sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(typeInfo.label, atom.position.x, atom.position.y);
-            });
+            for (let i = 0; i < bodies.length; i++) {
+                const atom = bodies[i];
+                if (atom.label === 'atom') {
+                    const typeInfo = ATOM_TYPES[atom.atomType];
+                    // --- 塗りつぶし ---
+                    ctx.beginPath();
+                    ctx.arc(atom.position.x, atom.position.y, ATOM_RADIUS, 0, 2 * Math.PI);
+                    ctx.fillStyle = typeInfo.color; // 原子ごとの色
+                    ctx.fill();
+                    // --- 文字 ---
+                    ctx.fillStyle = typeInfo.textColor;
+                    ctx.font = `bold ${ATOM_RADIUS}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(typeInfo.label, atom.position.x, atom.position.y);
+                }
+            }
 
             // --- ゲームオーバーラインの描画 ---
             ctx.beginPath();
