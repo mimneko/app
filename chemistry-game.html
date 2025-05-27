@@ -38,6 +38,7 @@
             /* タッチ操作の対象であることを明示 */
             touch-action: none;
         }
+        
         /* Matter.jsが生成するcanvasのスタイル */
         #game-canvas canvas {
             display: block;
@@ -47,7 +48,7 @@
 
         .info-panel {
             position: absolute;
-            top: -60px; /* キャンバスの外に配置 */
+            top: -70px; /* キャンバスの外に配置 */
             left: 0;
             width: 100%;
             display: flex;
@@ -64,24 +65,7 @@
             border-radius: 10px;
             text-align: center;
         }
-
-        #next-atoms {
-            display: flex;
-            gap: 5px;
-            margin-top: 5px;
-        }
-
-        .atom-preview {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 10px;
-            line-height: 20px;
-            color: white;
-            text-align: center;
-            font-weight: bold;
-        }
-
+        
         #game-over-screen {
             position: absolute;
             top: 0;
@@ -111,26 +95,58 @@
             color: white;
             margin-top: 20px;
         }
+
+        /* 分子ポップアップ用 */
+        #molecule-popup {
+            position: absolute;
+            left: 50%;
+            top: 30px;
+            transform: translateX(-50%);
+            min-width: 200px;
+            max-width: 90%;
+            background: rgba(255,255,255,0.55);
+            color: #222;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(52,152,219,0.18);
+            padding: 12px 24px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            border: 2px solid #3498db;
+            line-height: 1.4;
+        }
+
+        #molecule-popup.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
         <div class="info-panel">
             <div>
-                <strong>SCORE</strong>
+                <strong>SCORE</strong><br>
                 <span id="score">0</span>
             </div>
             <div>
-                <strong>COMBO</strong>
-                <span id="combo">0</span>
+                <strong>TIME</strong><br>
+                <span id="elapsed-time">0:00</span>
             </div>
-            <div style="display: none;">
-                <strong>NEXT</strong>
-                <div id="next-atoms"></div>
+            <div>
+                <strong>COMBO</strong><br>
+                <span id="combo">0</span>
             </div>
         </div>
 
         <div id="game-canvas"></div>
+
+        <!-- 分子ポップアップ -->
+        <div id="molecule-popup"></div>
 
         <div id="game-over-screen" class="hidden">
             <h1>GAME OVER</h1>
@@ -161,10 +177,11 @@
         const gameCanvas = document.getElementById('game-canvas');
         const scoreEl = document.getElementById('score');
         const comboEl = document.getElementById('combo');
-        const nextAtomsEl = document.getElementById('next-atoms');
+        const elapsedTimeEl = document.getElementById('elapsed-time');
         const gameOverScreen = document.getElementById('game-over-screen');
         const finalScoreEl = document.getElementById('final-score');
         const restartButton = document.getElementById('restart-button');
+        const moleculePopup = document.getElementById('molecule-popup');
 
         // --- ゲームの状態管理用変数 ---
         let engine, render, runner;
@@ -175,14 +192,25 @@
         let linePoints = [];
         let atomDropInterval;
         let atomDropFrequency = 2000; // 原子が落ちてくる間隔（ミリ秒）
-        let nextAtomQueue = [];
         let isGameOver = false;
+
+        // 経過時間用
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timerInterval = null;
+
+        // --- 難易度調整用 ---
+        const ATOM_DROP_FREQUENCY_INITIAL = 2000; // 初期値
+        const ATOM_DROP_FREQUENCY_MIN = 500;      // 最小値
+        const ATOM_DROP_FREQUENCY_10MIN = 500;    // 10分以降の固定値
+        let lastDropTime = 0; // 前回の原子落下時刻
 
         // --- 原子の種類定義 ---
         // 高校化学で扱う主な元素（高分子除く）
         // rarity: 出現頻度の重み（大きいほどよく出る、1.0が標準、0.1などでレアに）
         // score: 点数計算時の重み
         // 各原子のレアリティは収録分子の頻度・重要度を考慮し、CとNはやや低めに調整
+        /*
         const ATOM_TYPES = {
             H:   { label: 'H',   color: '#E0E0E0', textColor: '#000', score: 10, rarity: 1.0 },   // 水素
             C:   { label: 'C',   color: '#4A4A4A', textColor: '#000', score: 10, rarity: 0.25 },  // 炭素
@@ -210,6 +238,35 @@
             Sn:  { label: 'Sn',  color: '#C0C0C0', textColor: '#000', score: 60, rarity: 0.01 },  // スズ
             Li:  { label: 'Li',  color: '#CC99FF', textColor: '#000', score: 50, rarity: 0.01 },  // リチウム
             Cr:  { label: 'Cr',  color: '#8FBC8F', textColor: '#000', score: 60, rarity: 0.01 },  // クロム
+        };
+        */
+        const ATOM_TYPES = {
+            H:   { label: 'H',   color: '#E0E0E0', textColor: '#000', score: 10, rarity: 56 },    // 水素
+            O:   { label: 'O',   color: '#E74C3C', textColor: '#000', score: 10, rarity: 95 },    // 酸素
+            Cl:  { label: 'Cl',  color: '#2ECC71', textColor: '#000', score: 60, rarity: 22 },    // 塩素
+            C:   { label: 'C',   color: '#4A4A4A', textColor: '#000', score: 10, rarity: 18 },    // 炭素
+            N:   { label: 'N',   color: '#3498DB', textColor: '#000', score: 10, rarity: 10 },    // 窒素
+            F:   { label: 'F',   color: '#00FFCC', textColor: '#000', score: 60, rarity: 10 },    // フッ素
+            S:   { label: 'S',   color: '#F1C40F', textColor: '#000', score: 70, rarity: 8 },     // 硫黄
+            Na:  { label: 'Na',  color: '#9B59B6', textColor: '#000', score: 50, rarity: 8 },     // ナトリウム
+            K:   { label: 'K',   color: '#B8860B', textColor: '#000', score: 50, rarity: 7 },     // カリウム
+            Ca:  { label: 'Ca',  color: '#B0C4DE', textColor: '#000', score: 50, rarity: 6 },     // カルシウム
+            Al:  { label: 'Al',  color: '#D3D3D3', textColor: '#000', score: 60, rarity: 5 },     // アルミニウム
+            Cu:  { label: 'Cu',  color: '#B87333', textColor: '#000', score: 60, rarity: 5 },     // 銅
+            Br:  { label: 'Br',  color: '#A0522D', textColor: '#000', score: 70, rarity: 4 },     // 臭素
+            I:   { label: 'I',   color: '#800080', textColor: '#000', score: 80, rarity: 4 },     // ヨウ素
+            Mg:  { label: 'Mg',  color: '#A9DFBF', textColor: '#000', score: 50, rarity: 4 },     // マグネシウム
+            Mn:  { label: 'Mn',  color: '#B0B0B0', textColor: '#000', score: 60, rarity: 3 },     // マンガン
+            Ag:  { label: 'Ag',  color: '#C0C0C0', textColor: '#000', score: 80, rarity: 3 },     // 銀
+            Ba:  { label: 'Ba',  color: '#E6E6FA', textColor: '#000', score: 80, rarity: 3 },     // バリウム
+            Fe:  { label: 'Fe',  color: '#B22222', textColor: '#000', score: 60, rarity: 3 },     // 鉄
+            Zn:  { label: 'Zn',  color: '#7DCEA0', textColor: '#000', score: 60, rarity: 3 },     // 亜鉛
+            Cr:  { label: 'Cr',  color: '#8FBC8F', textColor: '#000', score: 60, rarity: 1 },     // クロム
+            Si:  { label: 'Si',  color: '#A3C1AD', textColor: '#000', score: 60, rarity: 1 },     // ケイ素
+            Pb:  { label: 'Pb',  color: '#888888', textColor: '#000', score: 60, rarity: 1 },     // 鉛
+            Sn:  { label: 'Sn',  color: '#C0C0C0', textColor: '#000', score: 60, rarity: 1 },     // スズ
+            P:   { label: 'P',   color: '#FF8C00', textColor: '#000', score: 70, rarity: 1 },     // リン
+            Li:  { label: 'Li',  color: '#CC99FF', textColor: '#000', score: 50, rarity: 1 },     // リチウム
         };
 
         // --- 分子リスト定義 ---
@@ -308,6 +365,7 @@
             { composition: { Ca:1, S:1 }, name: '硫化カルシウム', formula: 'CaS' },
             { composition: { Na:1, O:1, H:1 }, name: '水酸化ナトリウム', formula: 'NaOH' },
             { composition: { K:1, O:1, H:1 }, name: '水酸化カリウム', formula: 'KOH' },
+            { composition: { Mg:1, O:2, H:2 }, name: '水酸化マグネシウム', formula: 'Mg(OH)₂' },
             { composition: { Ca:1, O:2, H:2 }, name: '水酸化カルシウム', formula: 'Ca(OH)₂' },
             { composition: { Ba:1, O:2, H:2 }, name: '水酸化バリウム', formula: 'Ba(OH)₂' },
             { composition: { Fe:1, O:3, H:3 }, name: '水酸化鉄(III)', formula: 'Fe(OH)₃' },
@@ -361,11 +419,16 @@
         function init() {
             score = 0;
             combo = 0;
-            atomDropFrequency = 2000;
+            atomDropFrequency = ATOM_DROP_FREQUENCY_INITIAL;
             isGameOver = false;
             selectedAtoms = [];
             linePoints = [];
-            
+            // 経過時間
+            startTime = Date.now();
+            elapsedTime = 0;
+            if (timerInterval) clearInterval(timerInterval);
+            updateElapsedTime(0);
+
             if (engine) {
                 World.clear(engine.world, false);
                 Engine.clear(engine);
@@ -374,6 +437,12 @@
             updateScore(0);
             updateCombo(0);
             gameOverScreen.classList.add('hidden');
+
+            // ポップアップ非表示
+            if (moleculePopup) {
+                moleculePopup.classList.remove('show');
+                moleculePopup.innerHTML = '';
+            }
 
             // --- Matter.js エンジン・レンダラ・ランナーの生成 ---
             engine = Engine.create();
@@ -405,15 +474,30 @@
             const rightWall = Bodies.rectangle(GAME_WIDTH + 10, GAME_HEIGHT / 2, 20, GAME_HEIGHT, { isStatic: true, label: 'wall' });
             World.add(engine.world, [ground, leftWall, rightWall]);
             
-            // --- 次に落ちてくる原子のキューを初期化 ---
-            nextAtomQueue = [];
-            generateNextAtomQueue();
-            generateNextAtomQueue();
-
             // --- 初期原子を配置 ---
             addInitialAtoms();
             // --- 原子落下ループ開始 ---
             startGameLoop();
+
+            // --- 経過時間タイマー開始 ---
+            timerInterval = setInterval(() => {
+                if (!isGameOver) {
+                    elapsedTime = (Date.now() - startTime) / 1000;
+                    updateElapsedTime(elapsedTime);
+                }
+            }, 100);
+        }
+
+        // =========================
+        // 経過時間表示を更新
+        // =========================
+        function updateElapsedTime(sec) {
+            if (elapsedTimeEl) {
+                const totalSeconds = Math.floor(sec);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                elapsedTimeEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
         }
 
         // =========================
@@ -448,18 +532,41 @@
         // =========================
         // 原子落下ループ開始
         // =========================
+        // 1分ごとに落下間隔を速くし、10分以降は固定
         function startGameLoop() {
             if (atomDropInterval) clearInterval(atomDropInterval);
+            lastDropTime = Date.now();
+            atomDropFrequency = ATOM_DROP_FREQUENCY_INITIAL;
+
             atomDropInterval = setInterval(() => {
-                if (!isGameOver) {
-                    dropAtom();
-                    if (atomDropFrequency > 500) {
-                        atomDropFrequency *= 0.99;
-                    }
-                } else {
+                if (isGameOver) {
                     clearInterval(atomDropInterval);
+                    return;
                 }
-            }, atomDropFrequency);
+
+                // 経過分数を計算
+                const now = Date.now();
+                const elapsedSec = (now - startTime) / 1000;
+                const elapsedMin = Math.floor(elapsedSec / 60);
+
+                // 10分以降は固定
+                if (elapsedMin >= 10) {
+                    atomDropFrequency = ATOM_DROP_FREQUENCY_10MIN;
+                } else {
+                    // 1分ごとに少しずつ速く（指数的 or 線形、ここでは線形で例示）
+                    // 例: 1分ごとに150ms短縮、ただし最小値はATOM_DROP_FREQUENCY_MIN
+                    atomDropFrequency = Math.max(
+                        ATOM_DROP_FREQUENCY_INITIAL - elapsedMin * 150,
+                        ATOM_DROP_FREQUENCY_MIN
+                    );
+                }
+
+                // 前回の落下からatomDropFrequencyミリ秒経過していれば落下
+                if (now - lastDropTime >= atomDropFrequency) {
+                    dropAtom();
+                    lastDropTime = now;
+                }
+            }, 30); // 30msごとにチェック（高頻度でチェックしても負荷は小さい）
         }
 
         // =========================
@@ -487,21 +594,10 @@
         }
 
         // =========================
-        // 次の原子キューを生成
-        // =========================
-        function generateNextAtomQueue() {
-            nextAtomQueue.push(getRandomAtomType());
-            updateNextAtomUI();
-        }
-        
-        // =========================
         // 原子を1つ落下させる
         // =========================
         function dropAtom() {
-            if (nextAtomQueue.length === 0) generateNextAtomQueue();
-            const typeKey = nextAtomQueue.shift();
-            generateNextAtomQueue();
-
+            const typeKey = getRandomAtomType();
             const typeInfo = ATOM_TYPES[typeKey];
             const x = Math.random() * (GAME_WIDTH - ATOM_RADIUS * 4) + ATOM_RADIUS * 2;
             const atom = Bodies.circle(x, 30, ATOM_RADIUS, {
@@ -528,22 +624,6 @@
             comboEl.textContent = combo;
         }
         
-        // =========================
-        // 次に落ちてくる原子のUIを更新
-        // =========================
-        function updateNextAtomUI() {
-            nextAtomsEl.innerHTML = '';
-            nextAtomQueue.slice(0, 2).forEach(typeKey => {
-                const type = ATOM_TYPES[typeKey];
-                const div = document.createElement('div');
-                div.className = 'atom-preview';
-                div.textContent = type.label;
-                div.style.backgroundColor = type.color;
-                div.style.color = type.textColor;
-                nextAtomsEl.appendChild(div);
-            });
-        }
-
         // =========================
         // マウス・タッチイベント座標取得
         // =========================
@@ -635,7 +715,7 @@
             // 組成が一致する分子を検索
             const found = MOLECULE_LIST.find(mol => isSameComposition(mol.composition, composition));
             if (found) {
-                handleSuccess(selectedAtoms, found.name);
+                handleSuccess(selectedAtoms, found.name, found.formula);
             } else {
                 handleFailure();
             }
@@ -657,19 +737,71 @@
         // =========================
         // 分子成立時の処理
         // =========================
-        function handleSuccess(atomsToRemove, moleculeName) {
+        function handleSuccess(atomsToRemove, moleculeName, moleculeFormula) {
+            // --- 基本点 ---
             let baseScore = 0;
+            let rareAtomBonus = 0;
+            let atomTypes = new Set();
             atomsToRemove.forEach(atom => {
                 baseScore += ATOM_TYPES[atom.atomType].score;
+                atomTypes.add(atom.atomType);
+                // レア原子ボーナス（rarityが5以下ならレアとみなす例）
+                if (ATOM_TYPES[atom.atomType].rarity <= 5) {
+                    rareAtomBonus += 30;
+                }
             });
 
+            // --- 分子の複雑さボーナス ---
+            const uniqueAtomTypeBonus = atomTypes.size * 20; // 種類数ボーナス
+            const atomCountBonus = atomsToRemove.length >= 4 ? (atomsToRemove.length - 3) * 15 : 0; // 4個以上で加算
+
+            // --- レア分子ボーナス（例：分子リストの末尾10個をレア扱い）---
+            let rareMoleculeBonus = 0;
+            if (MOLECULE_LIST.slice(-10).some(mol => mol.name === moleculeName)) {
+                rareMoleculeBonus = 100;
+            }
+
+            // --- コンボ倍率 ---
             updateCombo(combo + 1);
             const comboMultiplier = 1 + (combo * 0.2);
-            const calculatedScore = Math.round(baseScore * comboMultiplier);
+
+            // --- スコア計算 ---
+            const calculatedScore = Math.round(
+                (baseScore + rareAtomBonus + uniqueAtomTypeBonus + atomCountBonus + rareMoleculeBonus) * comboMultiplier
+            );
             updateScore(score + calculatedScore);
 
-            // 分子名を一時的に表示するなどの演出も可能（ここでは未実装）
+            // --- ポップアップ表示などはそのまま ---
+            showMoleculePopup(moleculeName, moleculeFormula);
+
             atomsToRemove.forEach(atom => World.remove(engine.world, atom));
+        }
+
+        // =========================
+        // 分子ポップアップ表示
+        // =========================
+        function showMoleculePopup(name, formula) {
+            if (!moleculePopup) return;
+            // 例: 水<br>H2O
+            // 下付き文字対応
+            function toSubscript(str) {
+                // 2,3,4,5,6,7,8,9,0,1 を下付きに
+                return str.replace(/([A-Za-z\)\]])(\d+)/g, function(_, pre, num) {
+                    return pre + num.split('').map(d => String.fromCharCode(0x2080 + parseInt(d,10))).join('');
+                });
+            }
+            let formulaHtml = formula;
+            // Unicode下付き数字対応
+            formulaHtml = toSubscript(formulaHtml);
+
+            moleculePopup.innerHTML = `${name}<br>${formulaHtml}`;
+            moleculePopup.classList.add('show');
+
+            // 1.2秒後にフェードアウト
+            clearTimeout(moleculePopup._timeout);
+            moleculePopup._timeout = setTimeout(() => {
+                moleculePopup.classList.remove('show');
+            }, 1200);
         }
 
         // =========================
@@ -707,6 +839,8 @@
             isGameOver = true;
             clearInterval(atomDropInterval);
             if (runner) Runner.stop(runner);
+
+            if (timerInterval) clearInterval(timerInterval);
 
             finalScoreEl.textContent = score;
             gameOverScreen.classList.remove('hidden');
@@ -797,7 +931,11 @@
                 render.textures = {};
             }
             if (runner) Runner.stop(runner);
-            
+            if (timerInterval) clearInterval(timerInterval);
+            if (moleculePopup) {
+                moleculePopup.classList.remove('show');
+                moleculePopup.innerHTML = '';
+            }
             init();
         });
 
