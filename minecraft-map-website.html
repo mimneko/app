@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彩失の坑道 - 失われた色彩を取り戻せ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #1a1a1a;
+            --secondary-dark: #2d2d2d;
+            --accent-gold: #d4af37;
+            --accent-cyan: #4fd3e7;
+            --accent-magenta: #e74fd3;
+            --accent-lime: #7de74f;
+            --text-light: #f0f0f0;
+            --text-dim: #b0b0b0;
+            --mining-brown: #8b4513;
+            --ruin-purple: #6a4c93;
+            --flower-pink: #ff69b4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--accent-gold), var(--accent-cyan), var(--accent-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent-gold);
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-cyan));
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(106, 76, 147, 0.3) 0%, transparent 70%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(79, 211, 231, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(231, 79, 211, 0.1) 0%, transparent 50%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--accent-gold), var(--text-light), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3)); }
+            to { filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6)); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--text-dim);
+            font-weight: 300;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent-gold), #f4d03f);
+            color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-light);
+            border: 2px solid var(--accent-cyan);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-cyan);
+            color: var(--primary-dark);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background: linear-gradient(to bottom, transparent, rgba(45, 45, 45, 0.3));
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--accent-gold);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .feature-card {
+            background: rgba(45, 45, 45, 0.6);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-gold);
+            box-shadow: 0 15px 30px rgba(212, 175, 55, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        /* Gallery Section */
+        .gallery {
+            padding: 6rem 0;
+            background: radial-gradient(ellipse at center, rgba(106, 76, 147, 0.2) 0%, transparent 70%);
+        }
+
+        .gallery-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--text-dim);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active,
+        .tab-btn:hover {
+            background: var(--accent-cyan);
+            color: var(--primary-dark);
+            border-color: var(--accent-cyan);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .gallery-item {
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, var(--mining-brown), var(--ruin-purple));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item:hover::before {
+            opacity: 0;
+        }
+
+        /* Download Section */
+        .download {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, rgba(45, 45, 45, 0.8), rgba(26, 26, 26, 0.8));
+            text-align: center;
+        }
+
+        .download-card {
+            background: rgba(45, 45, 45, 0.8);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 600px;
+            margin: 0 auto;
+            border: 2px solid var(--accent-gold);
+            position: relative;
+        }
+
+        .download-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--accent-gold), var(--accent-cyan), var(--accent-magenta), var(--accent-gold));
+            border-radius: 22px;
+            z-index: -1;
+            animation: rainbow 3s linear infinite;
+        }
+
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .download-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--accent-gold);
+        }
+
+        .download-info {
+            margin-bottom: 2rem;
+            color: var(--text-dim);
+        }
+
+        .specs-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .spec-icon {
+            color: var(--accent-gold);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-dark);
+            padding: 3rem 0 1rem;
+            text-align: center;
+            border-top: 1px solid var(--secondary-dark);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-gold);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .nav-menu {
+                display: none;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .gallery-tabs {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 1rem;
+            }
+        }
+
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--accent-gold), var(--accent-cyan));
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(var(--accent-cyan), var(--accent-magenta));
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">彩失の坑道</div>
+            <ul class="nav-menu">
+                <li><a href="#home">ホーム</a></li>
+                <li><a href="#features">特徴</a></li>
+                <li><a href="#gallery">ギャラリー</a></li>
+                <li><a href="#download">ダウンロード</a></li>
+                <li><a href="#contact">お問い合わせ</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>彩失の坑道</h1>
+            <p class="hero-subtitle">失われた色彩を取り戻せ</p>
+            <p class="hero-description">
+                古の遺跡と近代の炭鉱が交錯する神秘の地で、あなたは色と光に隠された謎を解き明かし、
+                真実の扉を開くことができるか。知恵と洞察力、そして勇気が試される最高難易度の挑戦が待っている。
+            </p>
+            <div class="cta-buttons">
+                <a href="#download" class="btn btn-primary">今すぐダウンロード</a>
+                <a href="#features" class="btn btn-secondary">詳細を見る</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">マップの特徴</h2>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">🎨</span>
+                    <h3 class="feature-title">色彩の謎</h3>
+                    <p>12色の対応関係を駆使した独創的なパズル。羊毛、テラコッタ、コンクリートブロックが織りなす色彩の迷宮を解き明かせ。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">⏰</span>
+                    <h3 class="feature-title">時計盤ギミック</h3>
+                    <p>時刻と盤面の数字・色が複雑に絡み合う謎の起点。時間の概念を超越した古代の知恵に挑戦しよう。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">🧩</span>
+                    <h3 class="feature-title">15パズル坑道</h3>
+                    <p>坑道内の部屋配置を15パズルの要領で組み替え、新たな道を開拓。空間認識力と論理的思考が試される。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">🏹</span>
+                    <h3 class="feature-title">多彩なアイテム謎</h3>
+                    <p>弓矢、ピッケル、花言葉の本、5種の鉱石と天秤など、様々なアイテムを駆使した謎解きが展開される。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">🌸</span>
+                    <h3 class="feature-title">花言葉の秘密</h3>
+                    <p>特定の謎を解く鍵となる花言葉の本。自然の美しさに隠された古の暗号を読み解こう。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">💀</span>
+                    <h3 class="feature-title">死こそ希望</h3>
+                    <p>特定の状況での死亡が新たな活路を見出すギミック。絶望的な状況でこそ真の解決策が見えてくる。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">🔍</span>
+                    <h3 class="feature-title">探索と記憶</h3>
+                    <p>振り返る小道、頭文字の謎、無の間群など、記憶力と観察力を駆使した探索要素が豊富。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">💎</span>
+                    <h3 class="feature-title">60種のコレクション</h3>
+                    <p>マップ各所に隠された60種類以上のコレクションアイテムと27冊のヒント本を探し出せ。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">🌊</span>
+                    <h3 class="feature-title">水没坑道</h3>
+                    <p>湖から流れ込んだ水で満たされた坑道での呼吸管理が必要な緊張感溢れる探索体験。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery" id="gallery">
+        <div class="container">
+            <h2 class="section-title">ギャラリー</h2>
+            <div class="gallery-tabs">
+                <button class="tab-btn active">風景</button>
+                <button class="tab-btn">謎解き</button>
+                <button class="tab-btn">ギミック</button>
+                <button class="tab-btn">遺跡</button>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item">夕暮れの炭鉱入口</div>
+                <div class="gallery-item">神秘的な遺跡の光</div>
+                <div class="gallery-item">色とりどりの花畑</div>
+                <div class="gallery-item">時計盤の謎</div>
+                <div class="gallery-item">水没した坑道</div>
+                <div class="gallery-item">古代文字の壁</div>
+                <div class="gallery-item">12色のパズル部屋</div>
+                <div class="gallery-item">無の間群</div>
+                <div class="gallery-item">天秤と鉱石</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="download" id="download">
+        <div class="container">
+            <div class="download-card">
+                <h2 class="download-title">ダウンロード</h2>
+                <p class="download-info">
+                    Minecraft統合版対応の高難易度謎解き脱出マップ<br>
+                    リソースパック同梱・アドベンチャーモード専用
+                </p>
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <span class="spec-icon">📱</span>
+                        <span>Minecraft統合版</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-icon">🎮</span>
+                        <span>アドベンチャーモード</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-icon">⏱️</span>
+                        <span>プレイ時間: 10-20時間</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-icon">🔥</span>
+                        <span>難易度: 最高レベル</span>
+                    </div>
+                </div>
+                <a href="#" class="btn btn-primary" style="font-size: 1.2rem; padding: 1.2rem 3rem;">
+                    マップをダウンロード
+                </a>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-dim);">
+                    ※ダウンロード前に導入方法をご確認ください
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">導入方法</a>
+                <a href="#">ヒント・FAQ</a>
+                <a href="#">バグ報告</a>
+                <a href="#">制作者について</a>
+                <a href="#">利用規約</a>
+            </div>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">
+                &copy; 2025 彩失の坑道. Minecraft配布マップ
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(26, 26, 26, 0.98)';
+                header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.3)';
+            } else {
+                header.style.background = 'rgba(26, 26, 26, 0.95)';
+                header.style.boxShadow = 'none';
+            }
+        });
+
+        // Fade in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Gallery tabs functionality
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const galleryItems = document.querySelectorAll('.gallery-item');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons
+                tabBtns.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                btn.classList.add('active');
+                
+                // Add a subtle animation to gallery items
+                galleryItems.forEach((item, index) => {
+                    item.style.animation = 'none';
+                    setTimeout(() => {
+                        item.style.animation = `fadeInUp 0.5s ease forwards`;
+                        item.style.animationDelay = `${index * 0.1}s`;
+                    }, 50);
+                });
+            });
+        });
+
+        // Add fadeInUp animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Gallery item hover effects
+        galleryItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.style.boxShadow = '0 15px 35px rgba(212, 175, 55, 0.3)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.boxShadow = 'none';
+            });
+        });
+
+        // Add dynamic particle effect to hero section
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.width = '2px';
+            particle.style.height = '2px';
+            particle.style.background = 'rgba(212, 175, 55, 0.6)';
+            particle.style.borderRadius = '50%';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = '100%';
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '1';
+            
+            document.querySelector('.hero').appendChild(particle);
+            
+            const duration = 3000 + Math.random() * 2000;
+            const animation = particle.animate([
+                { transform: 'translateY(0)', opacity: 0 },
+                { transform: 'translateY(-100vh)', opacity: 1 },
+                { transform: 'translateY(-120vh)', opacity: 0 }
+            ], {
+                duration: duration,
+                easing: 'ease-out'
+            });
+            
+            animation.onfinish = () => {
+                particle.remove();
+            };
+        }
+
+        // Create particles periodically
+        setInterval(createParticle, 800);
+
+        // Add typing effect to hero subtitle
+        const subtitle = document.querySelector('.hero-subtitle');
+        const originalText = subtitle.textContent;
+        subtitle.textContent = '';
+        
+        function typeWriter(text, element, speed = 100) {
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+        
+        // Start typing effect after a delay
+        setTimeout(() => {
+            typeWriter(originalText, subtitle, 150);
+        }, 1000);
+
+        // Add random color shifting to feature cards
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach((card, index) => {
+            card.addEventListener('mouseenter', () => {
+                const colors = ['var(--accent-gold)', 'var(--accent-cyan)', 'var(--accent-magenta)', 'var(--accent-lime)'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                card.style.borderColor = randomColor;
+                card.querySelector('.feature-title').style.color = randomColor;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.borderColor = 'rgba(212, 175, 55, 0.2)';
+                card.querySelector('.feature-title').style.color = 'var(--accent-gold)';
+            });
+        });
+
+        // Add interactive download button effect
+        const downloadBtn = document.querySelector('.download .btn-primary');
+        downloadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = downloadBtn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.pointerEvents = 'none';
+            
+            downloadBtn.style.position = 'relative';
+            downloadBtn.style.overflow = 'hidden';
+            downloadBtn.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+            
+            // Show download message
+            downloadBtn.textContent = 'ダウンロード準備中...';
+            setTimeout(() => {
+                downloadBtn.textContent = 'マップをダウンロード';
+            }, 2000);
+        });
+
+        // Add ripple animation
+        const rippleStyle = document.createElement('style');
+        rippleStyle.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(rippleStyle);
+
+        // Add mobile menu toggle (for future enhancement)
+        const nav = document.querySelector('.nav-menu');
+        const mobileMenuBtn = document.createElement('button');
+        mobileMenuBtn.innerHTML = '☰';
+        mobileMenuBtn.style.display = 'none';
+        mobileMenuBtn.style.background = 'none';
+        mobileMenuBtn.style.border = 'none';
+        mobileMenuBtn.style.color = 'var(--text-light)';
+        mobileMenuBtn.style.fontSize = '1.5rem';
+        mobileMenuBtn.style.cursor = 'pointer';
+        
+        document.querySelector('nav').appendChild(mobileMenuBtn);
+        
+        // Show mobile menu button on small screens
+        function checkScreenSize() {
+            if (window.innerWidth <= 768) {
+                mobileMenuBtn.style.display = 'block';
+            } else {
+                mobileMenuBtn.style.display = 'none';
+            }
+        }
+        
+        window.addEventListener('resize', checkScreenSize);
+        checkScreenSize();
+
+        // Add parallax effect to hero section
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroContent = document.querySelector('.hero-content');
+            const parallaxSpeed = scrolled * 0.5;
+            
+            if (scrolled < window.innerHeight) {
+                heroContent.style.transform = `translateY(${parallaxSpeed}px)`;
+                heroContent.style.opacity = 1 - (scrolled / window.innerHeight);
+            }
+        });
+
+        // Add color cycling to logo
+        const logo = document.querySelector('.logo');
+        let colorIndex = 0;
+        const logoColors = [
+            'linear-gradient(45deg, var(--accent-gold), var(--accent-cyan), var(--accent-magenta))',
+            'linear-gradient(45deg, var(--accent-cyan), var(--accent-magenta), var(--accent-lime))',
+            'linear-gradient(45deg, var(--accent-magenta), var(--accent-lime), var(--accent-gold))',
+            'linear-gradient(45deg, var(--accent-lime), var(--accent-gold), var(--accent-cyan))'
+        ];
+
+        setInterval(() => {
+            colorIndex = (colorIndex + 1) % logoColors.length;
+            logo.style.background = logoColors[colorIndex];
+            logo.style.webkitBackgroundClip = 'text';
+            logo.style.backgroundClip = 'text';
+        }, 3000);
+
+        // Add easter egg - Konami code
+        const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+        let konamiIndex = 0;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.keyCode === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    // Easter egg activated
+                    document.body.style.animation = 'rainbow 2s linear infinite';
+                    setTimeout(() => {
+                        document.body.style.animation = 'none';
+                        konamiIndex = 0;
+                    }, 10000);
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+
+        // Add loading screen effect
+        window.addEventListener('load', () => {
+            const loader = document.createElement('div');
+            loader.style.position = 'fixed';
+            loader.style.top = '0';
+            loader.style.left = '0';
+            loader.style.width = '100%';
+            loader.style.height = '100%';
+            loader.style.background = 'var(--primary-dark)';
+            loader.style.zIndex = '9999';
+            loader.style.display = 'flex';
+            loader.style.alignItems = 'center';
+            loader.style.justifyContent = 'center';
+            loader.style.flexDirection = 'column';
+            loader.innerHTML = `
+                <div style="font-family: 'Cinzel', serif; font-size: 2rem; color: var(--accent-gold); margin-bottom: 2rem;">彩失の坑道</div>
+                <div style="width: 50px; height: 50px; border: 3px solid rgba(212, 175, 55, 0.3); border-top: 3px solid var(--accent-gold); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            `;
+            
+            document.body.appendChild(loader);
+            
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                loader.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => {
+                    loader.remove();
+                }, 500);
+            }, 1500);
+        });
+
+        // Add spin animation for loader
+        const spinStyle = document.createElement('style');
+        spinStyle.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(spinStyle);
+
+    </script>
+</body>
+</html>
