@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>石柱パズル</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        #puzzle-container {
+            display: grid;
+            grid-template-areas:
+                ". col-controls"
+                "row-controls grid";
+            gap: 25px;
+            align-items: center;
+        }
+
+        #grid-container {
+            grid-area: grid;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            padding: 15px;
+            background-color: #d3d3d3;
+            border: 2px solid #a9a9a9;
+            border-radius: 15px;
+        }
+
+        .pillar {
+            width: 70px;
+            height: 70px;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 12px;
+            position: relative;
+            font-size: 24px;
+            font-weight: bold;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .face {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .top { top: -25%; }
+        .bottom { bottom: -25%; }
+        .left { left: -25%; }
+        .right { right: -25%; }
+
+        .red-circle {
+            color: orange;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #col-controls {
+            grid-area: col-controls;
+            flex-direction: row;
+            gap: 20px;
+            padding-left: 0px; /* Align with grid */
+        }
+
+        #row-controls {
+            grid-area: row-controls;
+            flex-direction: column;
+            gap: 20px;
+            padding-top: 0px; /* Align with grid */
+        }
+
+        button {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            border: 2px solid #555;
+            border-radius: 8px;
+            background-color: #f8f8f8;
+        }
+        button:hover {
+            background-color: #e2e2e2;
+        }
+    </style>
+</head>
+<body>
+    <div id="puzzle-container">
+        <div id="col-controls" class="controls"></div>
+        <div id="row-controls" class="controls"></div>
+        <div id="grid-container"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gridSize = 5;
+            const gridContainer = document.getElementById('grid-container');
+            const colControlsContainer = document.getElementById('col-controls');
+            const rowControlsContainer = document.getElementById('row-controls');
+
+            // [上, 右, 下, 左] の順で初期状態を定義
+            const initialState = [
+                [['X','O','X','X'], ['X','X','O','O'], ['X','X','O','X'], ['X','X','O','X'], ['O','X','X','X']],
+                [['X','X','X','X'], ['O','X','O','X'], ['O','O','X','X'], ['O','X','O','O'], ['X','O','O','X']],
+                [['X','O','X','X'], ['O','O','X','O'], ['X','X','O','O'], ['O','O','O','X'], ['X','X','X','O']],
+                [['X','O','X','X'], ['X','X','O','O'], ['O','X','O','X'], ['O','X','O','X'], ['X','X','X','X']],
+                [['O','X','O','X'], ['O','X','X','X'], ['O','X','X','X'], ['O','O','X','X'], ['X','X','O','O']]
+            ];
+
+            let puzzleState = [];
+
+            // ボタンの押下回数を記録する配列
+            let colButtonCounts = [];
+            let rowButtonCounts = [];
+            let colButtons = [];
+            let rowButtons = [];
+
+            function createPuzzle() {
+                // パズルの状態を初期化
+                puzzleState = initialState.map((row, r) =>
+                    row.map((faces, c) => ({
+                        id: `pillar-${r}-${c}`,
+                        faces: faces,
+                        rotation: 0
+                    }))
+                );
+
+                // ボタン回数配列を初期化
+                colButtonCounts = Array(gridSize).fill(0);
+                rowButtonCounts = Array(gridSize).fill(0);
+                colButtons = [];
+                rowButtons = [];
+
+                // グリッドと操作ボタンを生成
+                gridContainer.innerHTML = '';
+                colControlsContainer.innerHTML = '';
+                rowControlsContainer.innerHTML = '';
+
+                for (let r = 0; r < gridSize; r++) {
+                    for (let c = 0; c < gridSize; c++) {
+                        const pillarData = puzzleState[r][c];
+                        const pillar = document.createElement('div');
+                        pillar.id = pillarData.id;
+                        pillar.className = 'pillar';
+
+                        const [top, right, bottom, left] = pillarData.faces;
+
+                        pillar.innerHTML = `
+                            <div class="face top ${top === 'O' ? 'red-circle' : ''}">${top}</div>
+                            <div class="face right ${right === 'O' ? 'red-circle' : ''}">${right}</div>
+                            <div class="face bottom ${bottom === 'O' ? 'red-circle' : ''}">${bottom}</div>
+                            <div class="face left ${left === 'O' ? 'red-circle' : ''}">${left}</div>
+                        `;
+                        gridContainer.appendChild(pillar);
+                    }
+                }
+
+                // 列ボタンの生成
+                for (let c = 0; c < gridSize; c++) {
+                    const button = document.createElement('button');
+                    button.textContent = '0';
+                    button.style.width = '74px'; // 石柱の幅+ボーダー*2
+                    button.onclick = () => {
+                        colButtonCounts[c]++;
+                        rotateCol(c);
+                        updateButtonLabels();
+                    };
+                    colControlsContainer.appendChild(button);
+                    colButtons.push(button);
+                }
+
+                // 行ボタンの生成
+                for (let r = 0; r < gridSize; r++) {
+                    const button = document.createElement('button');
+                    button.textContent = '0';
+                    button.style.height = '74px'; // 石柱の高さ+ボーダー*2
+                    button.onclick = () => {
+                        rowButtonCounts[r]++;
+                        rotateRow(r);
+                        updateButtonLabels();
+                    };
+                    rowControlsContainer.appendChild(button);
+                    rowButtons.push(button);
+                }
+            }
+
+            // n行目のボタンを押すとn行目の石柱がそれぞれ右回転
+            function rotateRow(rowIndex) {
+                for (let c = 0; c < gridSize; c++) {
+                    puzzleState[rowIndex][c].rotation += 90;
+                }
+                updateView();
+            }
+
+            // m列目のボタンを押すとm列目の石柱がそれぞれ右回転
+            function rotateCol(colIndex) {
+                for (let r = 0; r < gridSize; r++) {
+                    puzzleState[r][colIndex].rotation += 90;
+                }
+                updateView();
+            }
+
+            function updateView() {
+                for (let r = 0; r < gridSize; r++) {
+                    for (let c = 0; c < gridSize; c++) {
+                        const pillarData = puzzleState[r][c];
+                        const pillarElement = document.getElementById(pillarData.id);
+                        pillarElement.style.transform = `rotate(${pillarData.rotation}deg)`;
+
+                        const [top, right, bottom, left] = pillarData.faces;
+                        pillarElement.querySelector('.top').textContent = top;
+                        pillarElement.querySelector('.top').className = `face top ${top === 'O' ? 'red-circle' : ''}`;
+                        pillarElement.querySelector('.right').textContent = right;
+                        pillarElement.querySelector('.right').className = `face right ${right === 'O' ? 'red-circle' : ''}`;
+                        pillarElement.querySelector('.bottom').textContent = bottom;
+                        pillarElement.querySelector('.bottom').className = `face bottom ${bottom === 'O' ? 'red-circle' : ''}`;
+                        pillarElement.querySelector('.left').textContent = left;
+                        pillarElement.querySelector('.left').className = `face left ${left === 'O' ? 'red-circle' : ''}`;
+                    }
+                }
+            }
+
+            // ボタンのラベルを更新
+            function updateButtonLabels() {
+                for (let c = 0; c < gridSize; c++) {
+                    colButtons[c].textContent = ((-1 * colButtonCounts[c]) % 4 + 4) % 4;
+                }
+                for (let r = 0; r < gridSize; r++) {
+                    rowButtons[r].textContent = ((-1 * rowButtonCounts[r]) % 4 + 4) % 4;
+                }
+            }
+
+            // パズルを初期化して開始
+            createPuzzle();
+            updateButtonLabels();
+        });
+    </script>
+
+</body>
+</html>
