@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>干支</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Noto Sans JP,Hiragino Kaku Gothic ProN,Yu Gothic Medium,Hiragino Sans,Meiryo,Helvetica Neue,Arial,sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+            background: #ffffff;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1a252f;
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            border-top: 1px solid #cbd5e0;
+            border-bottom: 1px solid #cbd5e0;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        
+        .year-display {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 30px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .year-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .year-item {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 20px 30px;
+            min-width: 200px;
+            transition: all 0.2s ease;
+        }
+        
+        .current-year {
+            background: #edf2f7;
+            border-color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .year-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+        
+        .year-value {
+            font-size: 1.4em;
+            color: #1a252f;
+            font-weight: 400;
+        }
+        
+        .section {
+            margin: 50px 0;
+            padding: 0;
+        }
+        
+        h2 {
+            color: #1a252f;
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            border-left: 4px solid #4a5568;
+            padding-left: 15px;
+        }
+        
+        .explanation {
+            background: #f8fafc;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid #cbd5e0;
+            font-size: 0.95em;
+            line-height: 1.7;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9em;
+        }
+        
+        th {
+            background: #f8fafc;
+            color: #1a252f;
+            padding: 15px 12px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        tbody tr:hover {
+            background: #edf2f7;
+        }
+        
+        .kanji-large {
+            font-size: 1.3em;
+            font-weight: 500;
+            color: #1a252f;
+        }
+        
+        .reading {
+            color: #4a5568;
+            font-size: 0.85em;
+        }
+        
+        .rokujuu-table {
+            margin-top: 30px;
+        }
+        
+        .rokujuu-table th {
+            background: #1a252f;
+            color: #ffffff;
+            font-size: 0.85em;
+        }
+        
+        .rokujuu-table td {
+            padding: 10px 8px;
+            font-size: 0.85em;
+        }
+        
+        .rokujuu-table .number {
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .rokujuu-table .kanji {
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #1a252f;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .grid-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .year-row {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .year-item {
+                min-width: 180px;
+            }
+            
+            .grid-3, .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+                font-size: 0.8em;
+            }
+        }
+        /* 参考文献リスト用 */
+        .references {
+            margin-top: 60px;
+            padding: 30px 20px 20px 20px;
+            background: #f8fafc;
+            border-left: 4px solid #4a5568;
+            font-size: 0.95em;
+        }
+        .references h2 {
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            border: none;
+            padding-left: 0;
+            color: #1a252f;
+        }
+        .references ol {
+            margin-left: 1.2em;
+            margin-bottom: 0;
+        }
+        .references li {
+            margin-bottom: 0.5em;
+            line-height: 1.6;
+        }
+        .note {
+            font-size: 0.92em;
+            color: #4a5568;
+            margin-bottom: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>干支</h1>
+        
+        <div class="year-display" id="eto-year-display">
+            <!-- ここにJavaScriptで去年・今年・来年の干支を動的に挿入 -->
+        </div>
+
+        <div class="section">
+            <h2>十干十二支とは</h2>
+            <div class="explanation">
+                十干十二支（じっかんじゅうにし）は、中国古来の暦法で、十干と十二支を組み合わせた60通りの組み合わせで年や日を表現する体系です。日本では干支（えと）として親しまれており、年の象徴として広く使われています。60年で一回りするため「還暦」の語源となっています。
+            </div>
+            
+            <table class="rokujuu-table">
+                <thead>
+                    <tr>
+                        <th>番号</th>
+                        <th>漢字</th>
+                        <th>訓読み</th>
+                        <th>音読み</th>
+                        <th>使用例</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="number">1</td>
+                        <td class="kanji">甲子</td>
+                        <td>きのえね</td>
+                        <td>コウシ</td>
+                        <td>甲子園球場［1924］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">2</td>
+                        <td class="kanji">乙丑</td>
+                        <td>きのとうし</td>
+                        <td>イッチュウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">3</td>
+                        <td class="kanji">丙寅</td>
+                        <td>ひのえとら</td>
+                        <td>ヘイイン</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">4</td>
+                        <td class="kanji">丁卯</td>
+                        <td>ひのとう</td>
+                        <td>テイボウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">5</td>
+                        <td class="kanji">戊辰</td>
+                        <td>つちのえたつ</td>
+                        <td>ボシン</td>
+                        <td>戊辰戦争［1868勃発。1869まで続く］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">6</td>
+                        <td class="kanji">己巳</td>
+                        <td>つちのとみ</td>
+                        <td>キシ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">7</td>
+                        <td class="kanji">庚午</td>
+                        <td>かのえうま</td>
+                        <td>コウゴ</td>
+                        <td>庚午年籍［670］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">8</td>
+                        <td class="kanji">辛未</td>
+                        <td>かのとひつじ</td>
+                        <td>シンビ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">9</td>
+                        <td class="kanji">壬申</td>
+                        <td>みずのえさる</td>
+                        <td>ジンシン</td>
+                        <td>壬申の乱［672］、壬申戸籍［1872］、壬申地券［1872］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">10</td>
+                        <td class="kanji">癸酉</td>
+                        <td>みずのととり</td>
+                        <td>キユウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">11</td>
+                        <td class="kanji">甲戌</td>
+                        <td>きのえいぬ</td>
+                        <td>コウジュツ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">12</td>
+                        <td class="kanji">乙亥</td>
+                        <td>きのとい</td>
+                        <td>イツガイ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">13</td>
+                        <td class="kanji">丙子</td>
+                        <td>ひのえね</td>
+                        <td>ヘイシ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">14</td>
+                        <td class="kanji">丁丑</td>
+                        <td>ひのとうし</td>
+                        <td>テイチュウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">15</td>
+                        <td class="kanji">戊寅</td>
+                        <td>つちのえとら</td>
+                        <td>ボイン</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">16</td>
+                        <td class="kanji">己卯</td>
+                        <td>つちのとう</td>
+                        <td>キボウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">17</td>
+                        <td class="kanji">庚辰</td>
+                        <td>かのえたつ</td>
+                        <td>コウシン</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">18</td>
+                        <td class="kanji">辛巳</td>
+                        <td>かのとみ</td>
+                        <td>シンシ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">19</td>
+                        <td class="kanji">壬午</td>
+                        <td>みずのえうま</td>
+                        <td>ジンゴ</td>
+                        <td>壬午軍乱（壬午事変）［1882］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">20</td>
+                        <td class="kanji">癸未</td>
+                        <td>みずのとひつじ</td>
+                        <td>キビ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">21</td>
+                        <td class="kanji">甲申</td>
+                        <td>きのえさる</td>
+                        <td>コウシン</td>
+                        <td>甲申事変［1884］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">22</td>
+                        <td class="kanji">乙酉</td>
+                        <td>きのととり</td>
+                        <td>イツユウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">23</td>
+                        <td class="kanji">丙戌</td>
+                        <td>ひのえいぬ</td>
+                        <td>ヘイジュツ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">24</td>
+                        <td class="kanji">丁亥</td>
+                        <td>ひのとい</td>
+                        <td>テイガイ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">25</td>
+                        <td class="kanji">戊子</td>
+                        <td>つちのえね</td>
+                        <td>ボシ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">26</td>
+                        <td class="kanji">己丑</td>
+                        <td>つちのとうし</td>
+                        <td>キチュウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">27</td>
+                        <td class="kanji">庚寅</td>
+                        <td>かのえとら</td>
+                        <td>コウイン</td>
+                        <td>庚寅年籍［690］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">28</td>
+                        <td class="kanji">辛卯</td>
+                        <td>かのとう</td>
+                        <td>シンボウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">29</td>
+                        <td class="kanji">壬辰</td>
+                        <td>みずのえたつ</td>
+                        <td>ジンシン</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">30</td>
+                        <td class="kanji">癸巳</td>
+                        <td>みずのとみ</td>
+                        <td>キシ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">31</td>
+                        <td class="kanji">甲午</td>
+                        <td>きのえうま</td>
+                        <td>コウゴ</td>
+                        <td>甲午農民戦争（東学党の乱）［1894］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">32</td>
+                        <td class="kanji">乙未</td>
+                        <td>きのとひつじ</td>
+                        <td>イツビ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">33</td>
+                        <td class="kanji">丙申</td>
+                        <td>ひのえさる</td>
+                        <td>ヘイシン</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">34</td>
+                        <td class="kanji">丁酉</td>
+                        <td>ひのととり</td>
+                        <td>テイユウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">35</td>
+                        <td class="kanji">戊戌</td>
+                        <td>つちのえいぬ</td>
+                        <td>ボジュツ</td>
+                        <td>戊戌夢物語［1838］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">36</td>
+                        <td class="kanji">己亥</td>
+                        <td>つちのとい</td>
+                        <td>キガイ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">37</td>
+                        <td class="kanji">庚子</td>
+                        <td>かのえね</td>
+                        <td>コウシ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">38</td>
+                        <td class="kanji">辛丑</td>
+                        <td>かのとうし</td>
+                        <td>シンチュウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">39</td>
+                        <td class="kanji">壬寅</td>
+                        <td>みずのえとら</td>
+                        <td>ジンイン</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">40</td>
+                        <td class="kanji">癸卯</td>
+                        <td>みずのとう</td>
+                        <td>キボウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">41</td>
+                        <td class="kanji">甲辰</td>
+                        <td>きのえたつ</td>
+                        <td>コウシン</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">42</td>
+                        <td class="kanji">乙巳</td>
+                        <td>きのとみ</td>
+                        <td>イッシ</td>
+                        <td>乙巳の変［645］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">43</td>
+                        <td class="kanji">丙午</td>
+                        <td>ひのえうま</td>
+                        <td>ヘイゴ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">44</td>
+                        <td class="kanji">丁未</td>
+                        <td>ひのとひつじ</td>
+                        <td>テイビ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">45</td>
+                        <td class="kanji">戊申</td>
+                        <td>つちのえさる</td>
+                        <td>ボシン</td>
+                        <td>戊申詔書［1908］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">46</td>
+                        <td class="kanji">己酉</td>
+                        <td>つちのととり</td>
+                        <td>キユウ</td>
+                        <td>己酉約条［1609］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">47</td>
+                        <td class="kanji">庚戌</td>
+                        <td>かのえいぬ</td>
+                        <td>コウジュツ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">48</td>
+                        <td class="kanji">辛亥</td>
+                        <td>かのとい</td>
+                        <td>シンガイ</td>
+                        <td>辛亥革命［1911］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">49</td>
+                        <td class="kanji">壬子</td>
+                        <td>みずのえね</td>
+                        <td>ジンシ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">50</td>
+                        <td class="kanji">癸丑</td>
+                        <td>みずのとうし</td>
+                        <td>キチュウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">51</td>
+                        <td class="kanji">甲寅</td>
+                        <td>きのえとら</td>
+                        <td>コウイン</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">52</td>
+                        <td class="kanji">乙卯</td>
+                        <td>きのとう</td>
+                        <td>イツボウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">53</td>
+                        <td class="kanji">丙辰</td>
+                        <td>ひのえたつ</td>
+                        <td>ヘイシン</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">54</td>
+                        <td class="kanji">丁巳</td>
+                        <td>ひのとみ</td>
+                        <td>テイシ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">55</td>
+                        <td class="kanji">戊午</td>
+                        <td>つちのえうま</td>
+                        <td>ボゴ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">56</td>
+                        <td class="kanji">己未</td>
+                        <td>つちのとひつじ</td>
+                        <td>キビ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">57</td>
+                        <td class="kanji">庚申</td>
+                        <td>かのえさる</td>
+                        <td>コウシン</td>
+                        <td>庚申講・庚申塔［庚申の年ではなく、庚申の日を指す］</td>
+                    </tr>
+                    <tr>
+                        <td class="number">58</td>
+                        <td class="kanji">辛酉</td>
+                        <td>かのととり</td>
+                        <td>シンユウ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">59</td>
+                        <td class="kanji">壬戌</td>
+                        <td>みずのえいぬ</td>
+                        <td>ジンジュツ</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="number">60</td>
+                        <td class="kanji">癸亥</td>
+                        <td>みずのとい</td>
+                        <td>キガイ</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="note">
+                国立国会図書館<sup><a href="#ref1">1</a></sup>では「乙巳」の読みを「いつし」としているが、「乙巳の変」<sup><a href="#ref2">2</a></sup>から本記事では「イッシ」とした。
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>十干</h2>
+            <div class="explanation">
+                十干は、甲・乙・丙・丁・戊・己・庚・辛・壬・癸の10の要素からなり、五行思想（木・火・土・金・水）と陰陽思想を組み合わせたものです。
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>漢字</th>
+                        <th>訓読み</th>
+                        <th>音読み</th>
+                        <th>五行</th>
+                        <th>陰陽</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="kanji-large">甲</td><td>きのえ</td><td>コウ</td><td>木</td><td>陽</td></tr>
+                    <tr><td class="kanji-large">乙</td><td>きのと</td><td>オツ</td><td>木</td><td>陰</td></tr>
+                    <tr><td class="kanji-large">丙</td><td>ひのえ</td><td>ヘイ</td><td>火</td><td>陽</td></tr>
+                    <tr><td class="kanji-large">丁</td><td>ひのと</td><td>テイ、チョウ</td><td>火</td><td>陰</td></tr>
+                    <tr><td class="kanji-large">戊</td><td>つちのえ</td><td>ボ</td><td>土</td><td>陽</td></tr>
+                    <tr><td class="kanji-large">己</td><td>つちのと</td><td>キ、コ</td><td>土</td><td>陰</td></tr>
+                    <tr><td class="kanji-large">庚</td><td>かのえ</td><td>コウ</td><td>金</td><td>陽</td></tr>
+                    <tr><td class="kanji-large">辛</td><td>かのと</td><td>シン</td><td>金</td><td>陰</td></tr>
+                    <tr><td class="kanji-large">壬</td><td>みずのえ</td><td>ジン</td><td>水</td><td>陽</td></tr>
+                    <tr><td class="kanji-large">癸</td><td>みずのと</td><td>キ</td><td>水</td><td>陰</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>五行思想</h2>
+            <div class="explanation">
+                五行思想は、万物を木・火・土・金・水の5つの要素で説明する中国古来の思想です。十干は五行と陰陽を組み合わせて構成されています。
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>五行</th>
+                        <th>陽（兄：え）</th>
+                        <th>陰（弟：と）</th>
+                        <th>象徴・性質</th>
+                        <th>方角</th>
+                        <th>色</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>木</strong></td>
+                        <td>甲（きのえ）</td>
+                        <td>乙（きのと）</td>
+                        <td>成長・発展</td>
+                        <td>東</td>
+                        <td>青</td>
+                    </tr>
+                    <tr>
+                        <td><strong>火</strong></td>
+                        <td>丙（ひのえ）</td>
+                        <td>丁（ひのと）</td>
+                        <td>繁栄・情熱</td>
+                        <td>南</td>
+                        <td>赤</td>
+                    </tr>
+                    <tr>
+                        <td><strong>土</strong></td>
+                        <td>戊（つちのえ）</td>
+                        <td>己（つちのと）</td>
+                        <td>安定・中央</td>
+                        <td>中央</td>
+                        <td>黄</td>
+                    </tr>
+                    <tr>
+                        <td><strong>金</strong></td>
+                        <td>庚（かのえ）</td>
+                        <td>辛（かのと）</td>
+                        <td>収穫・完成</td>
+                        <td>西</td>
+                        <td>白</td>
+                    </tr>
+                    <tr>
+                        <td><strong>水</strong></td>
+                        <td>壬（みずのえ）</td>
+                        <td>癸（みずのと）</td>
+                        <td>静寂・知恵</td>
+                        <td>北</td>
+                        <td>黒</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>陰陽思想</h2>
+            <div class="explanation">
+                陰陽思想は、万物を陰と陽の2つの相対する力で説明する思想です。十干では「兄（え）」が陽、「弟（と）」が陰を表します。
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>区分</th>
+                        <th>性質</th>
+                        <th>象徴</th>
+                        <th>十干での呼び方</th>
+                        <th>時間</th>
+                        <th>数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>陽</strong></td>
+                        <td>積極的・動的・外向的</td>
+                        <td>太陽・男性・天</td>
+                        <td>兄（え）</td>
+                        <td>昼</td>
+                        <td>奇数</td>
+                    </tr>
+                    <tr>
+                        <td><strong>陰</strong></td>
+                        <td>消極的・静的・内向的</td>
+                        <td>月・女性・地</td>
+                        <td>弟（と）</td>
+                        <td>夜</td>
+                        <td>偶数</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>十二支</h2>
+            <div class="explanation">
+                十二支は、子・丑・寅・卯・辰・巳・午・未・申・酉・戌・亥の12の動物で表される体系です。時刻や方角も表現し、12年で一回りします。
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>漢字</th>
+                        <th>訓読み</th>
+                        <th>音読み</th>
+                        <th>動物</th>
+                        <th>時刻</th>
+                        <th>方角</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>子</td>
+                        <td>ね</td>
+                        <td>シ</td>
+                        <td>鼠</td>
+                        <td>23:00～1:00</td>
+                        <td>北</td>
+                    </tr>
+                    <tr>
+                        <td>丑</td>
+                        <td>うし</td>
+                        <td>チュウ</td>
+                        <td>牛</td>
+                        <td>1:00～3:00</td>
+                        <td>北北東</td>
+                    </tr>
+                    <tr>
+                        <td>寅</td>
+                        <td>とら</td>
+                        <td>イン</td>
+                        <td>虎</td>
+                        <td>3:00～5:00</td>
+                        <td>東北東</td>
+                    </tr>
+                    <tr>
+                        <td>卯</td>
+                        <td>う</td>
+                        <td>ボウ</td>
+                        <td>兎</td>
+                        <td>5:00～7:00</td>
+                        <td>東</td>
+                    </tr>
+                    <tr>
+                        <td>辰</td>
+                        <td>たつ</td>
+                        <td>シン</td>
+                        <td>龍</td>
+                        <td>7:00～9:00</td>
+                        <td>東南東</td>
+                    </tr>
+                    <tr>
+                        <td>巳</td>
+                        <td>み</td>
+                        <td>シ</td>
+                        <td>蛇</td>
+                        <td>9:00～11:00</td>
+                        <td>南南東</td>
+                    </tr>
+                    <tr>
+                        <td>午</td>
+                        <td>うま</td>
+                        <td>ゴ</td>
+                        <td>馬</td>
+                        <td>11:00～13:00</td>
+                        <td>南</td>
+                    </tr>
+                    <tr>
+                        <td>未</td>
+                        <td>ひつじ</td>
+                        <td>ビ</td>
+                        <td>羊</td>
+                        <td>13:00～15:00</td>
+                        <td>南南西</td>
+                    </tr>
+                    <tr>
+                        <td>申</td>
+                        <td>さる</td>
+                        <td>シン</td>
+                        <td>猿</td>
+                        <td>15:00～17:00</td>
+                        <td>西南西</td>
+                    </tr>
+                    <tr>
+                        <td>酉</td>
+                        <td>とり</td>
+                        <td>ユウ</td>
+                        <td>鶏</td>
+                        <td>17:00～19:00</td>
+                        <td>西</td>
+                    </tr>
+                    <tr>
+                        <td>戌</td>
+                        <td>いぬ</td>
+                        <td>ジュツ</td>
+                        <td>犬</td>
+                        <td>19:00～21:00</td>
+                        <td>西北西</td>
+                    </tr>
+                    <tr>
+                        <td>亥</td>
+                        <td>い</td>
+                        <td>ガイ</td>
+                        <td>猪</td>
+                        <td>21:00～23:00</td>
+                        <td>北北西</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="references">
+            <h2>参考文献</h2>
+            <ol>
+                <li id="ref1">
+                    <a href="https://www.ndl.go.jp/koyomi/chapter3/s1.html" target="_blank" rel="noopener">国立国会図書館「暦の中のことば」</a>
+                    （参照日: 2025-06-12）
+                </li>
+                <li id="ref2">
+                    <a href="https://www.pref.nara.jp/miryoku/aruku/masumasu/taika/taika02/" target="_blank" rel="noopener">奈良県公式サイト「乙巳の変、そして大化へ」</a>
+                    （参照日: 2025-06-12）
+                </li>
+            </ol>
+        </div>
+    </div>
+    <script>
+        // 十干・十二支・訓読み
+        const jikkan = [
+            {kanji: "甲", kun: "きのえ"},
+            {kanji: "乙", kun: "きのと"},
+            {kanji: "丙", kun: "ひのえ"},
+            {kanji: "丁", kun: "ひのと"},
+            {kanji: "戊", kun: "つちのえ"},
+            {kanji: "己", kun: "つちのと"},
+            {kanji: "庚", kun: "かのえ"},
+            {kanji: "辛", kun: "かのと"},
+            {kanji: "壬", kun: "みずのえ"},
+            {kanji: "癸", kun: "みずのと"}
+        ];
+        const junishi = [
+            {kanji: "子", kun: "ね"},
+            {kanji: "丑", kun: "うし"},
+            {kanji: "寅", kun: "とら"},
+            {kanji: "卯", kun: "う"},
+            {kanji: "辰", kun: "たつ"},
+            {kanji: "巳", kun: "み"},
+            {kanji: "午", kun: "うま"},
+            {kanji: "未", kun: "ひつじ"},
+            {kanji: "申", kun: "さる"},
+            {kanji: "酉", kun: "とり"},
+            {kanji: "戌", kun: "いぬ"},
+            {kanji: "亥", kun: "い"}
+        ];
+
+        // 干支の漢字と訓読みを返す
+        function etoName(year) {
+            // 1984年（甲子）を起点とする
+            const baseYear = 1984;
+            const diff = year - baseYear;
+            const jikkanIdx = ((diff % 10) + 10) % 10;
+            const junishiIdx = ((diff % 12) + 12) % 12;
+            const jikkanKanji = jikkan[jikkanIdx].kanji;
+            const junishiKanji = junishi[junishiIdx].kanji;
+            const jikkanKun = jikkan[jikkanIdx].kun;
+            const junishiKun = junishi[junishiIdx].kun;
+            return {
+                kanji: jikkanKanji + junishiKanji,
+                kun: jikkanKun + junishiKun,
+                ruby: `<ruby>${jikkanKanji}<rt>${jikkanKun}</rt></ruby><ruby>${junishiKanji}<rt>${junishiKun}</rt></ruby>`
+            };
+        }
+
+        // 表示する年（去年・今年・来年）
+        const now = new Date();
+        const thisYear = now.getFullYear();
+        const years = [
+            {label: "去年", year: thisYear - 1},
+            {label: "今年", year: thisYear},
+            {label: "来年", year: thisYear + 1}
+        ];
+
+        // 干支の特別な読み（例：乙巳の年は「イッシ」など）があればここで上書き
+        // ここでは訓読みのみ表示（ruby要素を利用）
+        function renderEtoYearDisplay() {
+            const container = document.getElementById("eto-year-display");
+            let html = '<div class="year-row">';
+            years.forEach((item, idx) => {
+                const eto = etoName(item.year);
+                html += `<div class="year-item${idx === 1 ? ' current-year' : ''}">
+                    <div class="year-label">${item.label}（${item.year}年）</div>
+                    <div class="year-value">${eto.ruby}</div>
+                </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        renderEtoYearDisplay();
+    </script>
+</body>
+</html>
