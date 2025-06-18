@@ -1,0 +1,2895 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minecraft PlaySound Command List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* 参考ファイルのデザインに基づいたカスタムスタイル */
+      body {
+        font-family: "Noto Sans JP", sans-serif;
+        background-color: #f8fafc; /* Tailwind gray-50 */
+        color: #2c3e50; /* ダークグレー */
+      }
+      .container {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0; /* Tailwind gray-200 */
+      }
+      .sound-item {
+        position: relative;
+      }
+      .copy-feedback {
+        position: absolute;
+        right: 0.5rem; /* 8px */
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: #10b981; /* Tailwind green-500 */
+        color: white;
+        padding: 2px 8px;
+        border-radius: 9999px; /* pill shape */
+        font-size: 0.75rem; /* 12px */
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        pointer-events: none;
+      }
+      .copy-feedback.show {
+        opacity: 1;
+        transform: translateY(-50%) translateX(5px);
+      }
+      /* 参考文献ペイン用のスタイル */
+      .reference-pane {
+        background-color: #f1f5f9; /* Tailwind gray-100 */
+        border-left: 4px solid #60a5fa; /* Tailwind blue-400 */
+        padding: 1.5rem 1.5rem 1.5rem 2rem;
+        margin-bottom: 2rem;
+        border-radius: 0.5rem;
+      }
+      .reference-title {
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: #2563eb; /* Tailwind blue-600 */
+        margin-bottom: 0.5rem;
+      }
+      .reference-link {
+        color: #2563eb;
+        text-decoration: underline;
+        word-break: break-all;
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <div
+      class="container mx-auto max-w-5xl my-8 p-6 md:p-10 rounded-lg shadow-sm"
+    >
+      <header class="text-center mb-12">
+        <h1
+          class="text-3xl md:text-4xl font-light text-gray-800 tracking-wider border-t border-b border-gray-200 py-5"
+        >
+          Minecraft PlaySound Command List
+        </h1>
+        <p class="text-gray-500 mt-4">
+          サウンドIDをクリックするとクリップボードにコピーされます。
+        </p>
+      </header>
+
+      <!-- フィルタリング機能と検索 -->
+      <div class="flex items-center justify-end mb-8 space-x-8">
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            id="filter-recommended"
+            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <label
+            for="filter-recommended"
+            class="ml-2 text-sm font-medium text-gray-700"
+            >⭐ 推奨サウンドのみ表示</label
+          >
+        </div>
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            id="show-category-only"
+            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <label
+            for="show-category-only"
+            class="ml-2 text-sm font-medium text-gray-700"
+            >カテゴリ名とサブカテゴリ名だけ表示</label
+          >
+        </div>
+      </div>
+
+      <!-- サウンド一覧のコンテナ -->
+      <main id="sound-list-container" class="space-y-10"></main>
+      
+      <!-- 参考文献ペイン -->
+      <section class="reference-pane mt-6 mb-6">
+        <div class="reference-title">参考文献</div>
+        <ul class="list-disc pl-5">
+          <li>
+            <a
+              href="https://pluspecommand.blogspot.com/2017/08/playsound.html"
+              class="reference-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              >playsoundの効果音</a
+            >
+            <span class="text-gray-500 text-sm ml-2">（参照日: 2025-06-18）</span>
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <script>
+      // サウンドデータ
+      // recommended: true を設定すると推奨マーク(⭐)が付きます
+      // { value: "block.amethyst_block.chime", recommended: true }
+      const soundData = [
+        {
+          category: "ブロック",
+          subcategories: [
+            {
+              name: "アメジスト",
+              sounds: [
+                { value: "break.amethyst_block" },
+                { value: "chime.amethyst_block" },
+                { value: "fall.amethyst_block" },
+                { value: "hit.amethyst_block" },
+                { value: "place.amethyst_block" },
+                { value: "step.amethyst_block" },
+                { value: "resonate.amethyst_block" }
+              ]
+            },
+            {
+              name: "アメジストの塊",
+              sounds: [
+                { value: "break.amethyst_cluster" },
+                { value: "fall.amethyst_cluster" },
+                { value: "hit.amethyst_cluster" },
+                { value: "place.amethyst_cluster" },
+                { value: "step.amethyst_cluster" },
+                { value: "break.large_amethyst_bud" },
+                { value: "place.large_amethyst_bud" },
+                { value: "break.medium_amethyst_bud" },
+                { value: "place.medium_amethyst_bud" },
+                { value: "break.small_amethyst_bud" },
+                { value: "place.small_amethyst_bud" }
+              ]
+            },
+            {
+              name: "ウミガメのタマゴ",
+              sounds: [
+                { value: "fall.egg" },
+                { value: "block.turtle_egg.drop" },
+                { value: "block.turtle_egg.break" },
+                { value: "block.turtle_egg.crack" }
+              ]
+            },
+            {
+              name: "エンダーチェスト",
+              sounds: [
+                { value: "random.enderchestopen" },
+                { value: "random.enderchestclosed" }
+              ]
+            },
+            {
+              name: "エンチャントテーブル",
+              sounds: [
+                { value: "block.enchanting_table.use" }
+              ]
+            },
+            {
+              name: "エンドポータル",
+              sounds: [
+                { value: "block.end_portal.spawn" },
+                { value: "block.end_portal_frame.fill" }
+              ]
+            },
+            {
+              name: "かまど",
+              sounds: [
+                { value: "block.furnace.lit" },
+                { value: "block.blastfurnace.fire_crackle" }
+              ]
+            },
+            {
+              name: "ガラス",
+              sounds: [
+                { value: "random.glass" }
+              ]
+            },
+            {
+              name: "きのこ",
+              sounds: [
+                { value: "dig.fungus" }
+              ]
+            },
+            {
+              name: "コーラスフラワー",
+              sounds: [
+                { value: "block.chorusflower.death" },
+                { value: "block.chorusflower.grow" }
+              ]
+            },
+            {
+              name: "コーラル",
+              sounds: [
+                { value: "use.coral" },
+                { value: "hit.coral" },
+                { value: "step.coral" },
+                { value: "land.coral" },
+                { value: "dig.coral" },
+                { value: "fall.coral" },
+                { value: "jump.coral" }
+              ]
+            },
+            {
+              name: "こけ",
+              sounds: [
+                { value: "use.moss" },
+                { value: "dig.moss" },
+                { value: "hit.moss" },
+                { value: "fall.moss" },
+                { value: "step.moss" },
+                { value: "place.moss" },
+                { value: "land.moss" },
+                { value: "jump.moss" }
+              ]
+            },
+            {
+              name: "コンジット",
+              sounds: [
+                { value: "conduit.activate" },
+                { value: "conduit.ambient" },
+                { value: "conduit.attack" },
+                { value: "conduit.deactivate" },
+                { value: "conduit.short" }
+              ]
+            },
+            {
+              name: "コンポスター",
+              sounds: [
+                { value: "block.composter.fill" },
+                { value: "block.composter.fill_success" },
+                { value: "block.composter.empty" },
+                { value: "block.composter.ready" }
+              ]
+            },
+            {
+              name: "シュルームライト",
+              sounds: [
+                { value: "use.shroomlight" },
+                { value: "step.shroomlight" },
+                { value: "land.shroomlight" },
+                { value: "dig.shroomlight" },
+                { value: "fall.shroomlight" },
+                { value: "jump.shroomlight" }
+              ]
+            },
+            {
+              name: "シュルカーボックス",
+              sounds: [
+                { value: "random.shulkerboxclosed" },
+                { value: "random.shulkerboxopen" }
+              ]
+            },
+            {
+              name: "スイートベリー",
+              sounds: [
+                { value: "block.sweet_berry_bush.break" },
+                { value: "block.sweet_berry_bush.place" },
+                { value: "block.sweet_berry_bush.hurt" },
+                { value: "block.sweet_berry_bush.pick" }
+              ]
+            },
+            {
+              name: "スカルク",
+              sounds: [
+                { value: "spread.sculk" },
+                { value: "charge.sculk" },
+                { value: "hit.sculk" },
+                { value: "step.sculk" },
+                { value: "place.sculk" },
+                { value: "break.sculk" }
+              ]
+            },
+            {
+              name: "スカルクヴェイン",
+              sounds: [
+                { value: "step.sculk_vein" },
+                { value: "break.sculk_vein" }
+              ]
+            },
+            {
+              name: "スカルクカタリスト",
+              sounds: [
+                { value: "bloom.sculk_catalyst" },
+                { value: "hit.sculk_catalyst" },
+                { value: "step.sculk_catalyst" },
+                { value: "place.sculk_catalyst" },
+                { value: "break.sculk_catalyst" }
+              ]
+            },
+            {
+              name: "スカルクシュリーカー",
+              sounds: [
+                { value: "fall.sculk_shrieker" },
+                { value: "hit.sculk_shrieker" },
+                { value: "step.sculk_shrieker" },
+                { value: "place.sculk_shrieker" },
+                { value: "break.sculk_shrieker" },
+                { value: "shriek.sculk_shrieker" }
+              ]
+            },
+            {
+              name: "スカルクセンサー",
+              sounds: [
+                { value: "use.sculk_sensor" },
+                { value: "break.sculk_sensor" },
+                { value: "place.sculk_sensor" },
+                { value: "hit.sculk_sensor" },
+                { value: "fall.sculk_sensor" },
+                { value: "step.sculk_sensor" },
+                { value: "jump.sculk_sensor" },
+                { value: "land.sculk_sensor" },
+                { value: "power.on.sculk_sensor" },
+                { value: "power.off.sculk_sensor" }
+              ]
+            },
+            {
+              name: "スポアブロッサム",
+              sounds: [
+                { value: "break.spore_blossom" },
+                { value: "fall.spore_blossom" },
+                { value: "hit.spore_blossom" },
+                { value: "place.spore_blossom" },
+                { value: "step.spore_blossom" },
+                { value: "land.spore_blossom" },
+                { value: "jump.spore_blossom" },
+                { value: "use.spore_blossom" }
+              ]
+            },
+            {
+              name: "ソウルサンド",
+              sounds: [
+                { value: "use.soul_sand" },
+                { value: "hit.soul_sand" },
+                { value: "step.soul_sand" },
+                { value: "land.soul_sand" },
+                { value: "dig.soul_sand" },
+                { value: "fall.soul_sand" },
+                { value: "jump.soul_sand" }
+              ]
+            },
+            {
+              name: "ソウルソイル",
+              sounds: [
+                { value: "use.soul_soil" },
+                { value: "hit.soul_soil" },
+                { value: "step.soul_soil" },
+                { value: "land.soul_soil" },
+                { value: "dig.soul_soil" },
+                { value: "fall.soul_soil" },
+                { value: "jump.soul_soil" }
+              ]
+            },
+            {
+              name: "タル",
+              sounds: [
+                { value: "block.barrel.close" },
+                { value: "block.barrel.open" }
+              ]
+            },
+            {
+              name: "チェーン",
+              sounds: [
+                { value: "use.chain" },
+                { value: "hit.chain" },
+                { value: "step.chain" },
+                { value: "land.chain" },
+                { value: "dig.chain", recommended: true },
+                { value: "fall.chain" },
+                { value: "jump.chain" }
+              ]
+            },
+            {
+              name: "つつじ",
+              sounds: [
+                { value: "break.azalea" },
+                { value: "fall.azalea" },
+                { value: "hit.azalea" },
+                { value: "jump.azalea" },
+                { value: "land.azalea" },
+                { value: "place.azalea" },
+                { value: "step.azalea" }
+              ]
+            },
+            {
+              name: "つつじの葉っぱ",
+              sounds: [
+                { value: "dig.azalea_leaves" },
+                { value: "fall.azalea_leaves" },
+                { value: "hit.azalea_leaves" },
+                { value: "place.azalea_leaves" },
+                { value: "step.azalea_leaves" }
+              ]
+            },
+            {
+              name: "つる",
+              sounds: [
+                { value: "use.vines" },
+                { value: "hit.vines" },
+                { value: "step.vines" },
+                { value: "land.vines" },
+                { value: "dig.vines" },
+                { value: "fall.vines" },
+                { value: "jump.vines" }
+              ]
+            },
+            {
+              name: "ディープスレート",
+              sounds: [
+                { value: "use.deepslate" },
+                { value: "dig.deepslate" },
+                { value: "hit.deepslate" },
+                { value: "place.deepslate" },
+                { value: "fall.deepslate" },
+                { value: "step.deepslate" },
+                { value: "jump.deepslate" },
+                { value: "land.deepslate" }
+              ]
+            },
+            {
+              name: "ディープスレート レンガ",
+              sounds: [
+                { value: "use.deepslate_bricks" },
+                { value: "dig.deepslate_bricks" },
+                { value: "hit.deepslate_bricks" },
+                { value: "place.deepslate_bricks" },
+                { value: "fall.deepslate_bricks" },
+                { value: "step.deepslate_bricks" },
+                { value: "jump.deepslate_bricks" },
+                { value: "land.deepslate_bricks" }
+              ]
+            },
+            {
+              name: "ドリップリーフ",
+              sounds: [
+                { value: "break.big_dripleaf" },
+                { value: "fall.big_dripleaf" },
+                { value: "hit.big_dripleaf" },
+                { value: "jump.big_dripleaf" },
+                { value: "land.big_dripleaf" },
+                { value: "place.big_dripleaf" },
+                { value: "step.big_dripleaf" },
+                { value: "tilt_down.big_dripleaf" },
+                { value: "tilt_up.big_dripleaf" }
+              ]
+            },
+            {
+              name: "ナイリウム",
+              sounds: [
+                { value: "use.nylium" },
+                { value: "hit.nylium" },
+                { value: "step.nylium" },
+                { value: "land.nylium" },
+                { value: "dig.nylium" },
+                { value: "fall.nylium" },
+                { value: "jump.nylium" }
+              ]
+            },
+            {
+              name: "ネザーの木材",
+              sounds: [
+                { value: "break.nether_wood" },
+                { value: "fall.nether_wood" },
+                { value: "hit.nether_wood" },
+                { value: "place.nether_wood" },
+                { value: "step.nether_wood" }
+              ]
+            },
+            {
+              name: "ネザーウォート",
+              sounds: [
+                { value: "use.nether_wart" },
+                { value: "hit.nether_wart" },
+                { value: "step.nether_wart" },
+                { value: "land.nether_wart" },
+                { value: "dig.nether_wart" },
+                { value: "fall.nether_wart" },
+                { value: "jump.nether_wart" }
+              ]
+            },
+            {
+              name: "ネザーゴールド",
+              sounds: [
+                { value: "use.nether_gold_ore" },
+                { value: "hit.nether_gold_ore" },
+                { value: "step.nether_gold_ore" },
+                { value: "land.nether_gold_ore" },
+                { value: "dig.nether_gold_ore" },
+                { value: "fall.nether_gold_ore" },
+                { value: "jump.nether_gold_ore" }
+              ]
+            },
+            {
+              name: "ネザースプラウト",
+              sounds: [
+                { value: "use.nether_sprouts" },
+                { value: "hit.nether_sprouts" },
+                { value: "step.nether_sprouts" },
+                { value: "land.nether_sprouts" },
+                { value: "dig.nether_sprouts" },
+                { value: "fall.nether_sprouts" },
+                { value: "jump.nether_sprouts" }
+              ]
+            },
+            {
+              name: "ネザーラック",
+              sounds: [
+                { value: "use.netherrack" },
+                { value: "hit.netherrack" },
+                { value: "step.netherrack" },
+                { value: "land.netherrack" },
+                { value: "dig.netherrack" },
+                { value: "fall.netherrack" },
+                { value: "jump.netherrack" }
+              ]
+            },
+            {
+              name: "ネザーレンガ",
+              sounds: [
+                { value: "use.nether_brick" },
+                { value: "hit.nether_brick" },
+                { value: "step.nether_brick" },
+                { value: "land.nether_brick" },
+                { value: "dig.nether_brick" },
+                { value: "fall.nether_brick" },
+                { value: "jump.nether_brick" }
+              ]
+            },
+            {
+              name: "ネザライト",
+              sounds: [
+                { value: "use.netherite" },
+                { value: "hit.netherite" },
+                { value: "step.netherite" },
+                { value: "land.netherite" },
+                { value: "dig.netherite" },
+                { value: "fall.netherite" },
+                { value: "jump.netherite" }
+              ]
+            },
+            {
+              name: "ハチミツブロック",
+              sounds: [
+                { value: "use.honey_block" },
+                { value: "hit.honey_block" },
+                { value: "step.honey_block" },
+                { value: "land.honey_block" },
+                { value: "dig.honey_block" },
+                { value: "fall.honey_block" },
+                { value: "jump.honey_block" }
+              ]
+            },
+            {
+              name: "ピストン",
+              sounds: [
+                { value: "tile.piston.in" },
+                { value: "tile.piston.out" }
+              ]
+            },
+            {
+              name: "ビーコン",
+              sounds: [
+                { value: "beacon.activate" },
+                { value: "beacon.ambient" },
+                { value: "beacon.deactivate" },
+                { value: "beacon.power" }
+              ]
+            },
+            {
+              name: "ぶらさがる根っこ",
+              sounds: [
+                { value: "break.hanging_roots" },
+                { value: "place.hanging_roots" },
+                { value: "use.hanging_roots" },
+                { value: "hit.hanging_roots" },
+                { value: "fall.hanging_roots" },
+                { value: "step.hanging_roots" },
+                { value: "jump.hanging_roots" },
+                { value: "land.hanging_roots" }
+              ]
+            },
+            {
+              name: "フロッグライト",
+              sounds: [
+                { value: "break.froglight" },
+                { value: "step.froglight" }
+              ]
+            },
+            {
+              name: "ベル",
+              sounds: [
+                { value: "block.bell.hit" }
+              ]
+            },
+            {
+              name: "マングローブ",
+              sounds: [
+                { value: "block.mangrove_roots.break" },
+                { value: "block.mangrove_roots.fall" },
+                { value: "block.mangrove_roots.hit" },
+                { value: "block.mangrove_roots.place" },
+                { value: "block.mangrove_roots.step" },
+                { value: "block.muddy_mangrove_roots.break" },
+                { value: "block.muddy_mangrove_roots.fall" },
+                { value: "block.muddy_mangrove_roots.hit" },
+                { value: "block.muddy_mangrove_roots.place" },
+                { value: "block.muddy_mangrove_roots.step" }
+              ]
+            },
+            {
+              name: "ランタン",
+              sounds: [
+                { value: "block.lantern.break" },
+                { value: "block.lantern.fall" },
+                { value: "block.lantern.hit" },
+                { value: "block.lantern.place" },
+                { value: "block.lantern.step" }
+              ]
+            },
+            {
+              name: "リスポーンアンカー",
+              sounds: [
+                { value: "respawn_anchor.charge" },
+                { value: "respawn_anchor.set_spawn" },
+                { value: "respawn_anchor.deplete" },
+                { value: "respawn_anchor.ambient" }
+              ]
+            },
+            {
+              name: "大釜",
+              sounds: [
+                { value: "cauldron.dyearmor" },
+                { value: "cauldron.cleanarmor" },
+                { value: "cauldron.cleanbanner" },
+                { value: "cauldron.fillpotion" },
+                { value: "cauldron.takepotion" },
+                { value: "cauldron.fillwater" },
+                { value: "cauldron.takewater" },
+                { value: "cauldron.adddye" }
+              ]
+            },
+            {
+              name: "金床",
+              sounds: [
+                { value: "random.anvil_break" },
+                { value: "random.anvil_land" },
+                { value: "random.anvil_use" },
+                { value: "hit.anvil" }
+              ]
+            },
+            {
+              name: "製図台",
+              sounds: [
+                { value: "ui.cartography_table.take_result" }
+              ]
+            },
+            {
+              name: "梯子",
+              sounds: [
+                { value: "use.ladder" },
+                { value: "hit.ladder" },
+                { value: "fall.ladder" },
+                { value: "step.ladder" }
+              ]
+            },
+            {
+              name: "額縁",
+              sounds: [
+                { value: "block.itemframe.add_item" },
+                { value: "block.itemframe.break" },
+                { value: "block.itemframe.place" },
+                { value: "block.itemframe.remove_item" },
+                { value: "block.itemframe.rotate_item" }
+              ]
+            },
+            {
+              name: "機織り器",
+              sounds: [
+                { value: "ui.loom.select_pattern" },
+                { value: "ui.loom.take_result" }
+              ]
+            },
+            {
+              name: "凝灰石",
+              sounds: [
+                { value: "break.tuff" },
+                { value: "step.tuff" },
+                { value: "place.tuff" },
+                { value: "hit.tuff" },
+                { value: "fall.tuff" }
+              ]
+            },
+            {
+              name: "玄武岩",
+              sounds: [
+                { value: "use.basalt" },
+                { value: "hit.basalt" },
+                { value: "step.basalt" },
+                { value: "land.basalt" },
+                { value: "dig.basalt" },
+                { value: "fall.basalt" },
+                { value: "jump.basalt" }
+              ]
+            },
+            {
+              name: "古代の残骸",
+              sounds: [
+                { value: "use.ancient_debris" },
+                { value: "hit.ancient_debris" },
+                { value: "step.ancient_debris" },
+                { value: "land.ancient_debris" },
+                { value: "dig.ancient_debris" },
+                { value: "fall.ancient_debris" },
+                { value: "jump.ancient_debris" }
+              ]
+            },
+            {
+              name: "骨ブロック",
+              sounds: [
+                { value: "use.bone_block" },
+                { value: "hit.bone_block" },
+                { value: "step.bone_block" },
+                { value: "land.bone_block" },
+                { value: "dig.bone_block" },
+                { value: "fall.bone_block" },
+                { value: "jump.bone_block" }
+              ]
+            },
+            {
+              name: "根",
+              sounds: [
+                { value: "use.roots" },
+                { value: "hit.roots" },
+                { value: "step.roots" },
+                { value: "land.roots" },
+                { value: "dig.roots" },
+                { value: "fall.roots" },
+                { value: "jump.roots" }
+              ]
+            },
+            {
+              name: "砂",
+              sounds: [
+                { value: "dig.sand" },
+                { value: "use.sand" },
+                { value: "hit.sand" },
+                { value: "fall.sand" },
+                { value: "step.sand" },
+                { value: "jump.sand" },
+                { value: "land.sand" }
+              ]
+            },
+            {
+              name: "砂利",
+              sounds: [
+                { value: "dig.gravel" },
+                { value: "use.gravel" },
+                { value: "hit.gravel" },
+                { value: "fall.gravel" },
+                { value: "step.gravel" },
+                { value: "jump.gravel" },
+                { value: "land.gravel" }
+              ]
+            },
+            {
+              name: "鍾乳石",
+              sounds: [
+                { value: "use.dripstone_block" },
+                { value: "break.dripstone_block" },
+                { value: "place.dripstone_block" },
+                { value: "hit.dripstone_block" },
+                { value: "fall.dripstone_block" },
+                { value: "step.dripstone_block" },
+                { value: "jump.dripstone_block" },
+                { value: "land.dripstone_block" }
+              ]
+            },
+            {
+              name: "石",
+              sounds: [
+                { value: "dig.stone" },
+                { value: "use.stone" },
+                { value: "hit.stone" },
+                { value: "fall.stone" },
+                { value: "step.stone" },
+                { value: "jump.stone" },
+                { value: "land.stone" }
+              ]
+            },
+            {
+              name: "砥石",
+              sounds: [
+                { value: "block.grindstone.use" }
+              ]
+            },
+            {
+              name: "石切り台",
+              sounds: [
+                { value: "ui.stonecutter.take_result" },
+                { value: "block.stonecutter.use" }
+              ]
+            },
+            {
+              name: "雪",
+              sounds: [
+                { value: "dig.snow" },
+                { value: "use.snow" },
+                { value: "hit.snow" },
+                { value: "fall.snow" },
+                { value: "step.snow" },
+                { value: "jump.snow" },
+                { value: "land.snow" }
+              ]
+            },
+            {
+              name: "尖った鍾乳石",
+              sounds: [
+                { value: "use.pointed_dripstone" },
+                { value: "break.pointed_dripstone" },
+                { value: "place.pointed_dripstone" },
+                { value: "hit.pointed_dripstone" },
+                { value: "fall.pointed_dripstone" },
+                { value: "step.pointed_dripstone" },
+                { value: "ump.pointed_dripstone" },
+                { value: "land.pointed_dripstone" },
+                { value: "drip.water.pointed_dripstone" },
+                { value: "cauldron_drip.water.pointed_dripstone" },
+                { value: "drip.lava.pointed_dripstone" },
+                { value: "cauldron_drip.lava.pointed_dripstone" }
+              ]
+            },
+            {
+              name: "草ブロック",
+              sounds: [
+                { value: "dig.grass" },
+                { value: "use.grass" },
+                { value: "hit.grass" },
+                { value: "fall.grass" },
+                { value: "step.grass" },
+                { value: "jump.grass" },
+                { value: "land.grass" }
+              ]
+            },
+            {
+              name: "足場",
+              sounds: [
+                { value: "block.scaffolding.break" },
+                { value: "block.scaffolding.fall" },
+                { value: "block.scaffolding.hit" },
+                { value: "block.scaffolding.place" },
+                { value: "block.scaffolding.step" },
+                { value: "block.scaffolding.climb" }
+              ]
+            },
+            {
+              name: "竹",
+              sounds: [
+                { value: "block.bamboo.break" },
+                { value: "block.bamboo.fall" },
+                { value: "block.bamboo.hit" },
+                { value: "block.bamboo.place" },
+                { value: "block.bamboo.step" },
+                { value: "block.bamboo_sapling.place" },
+                { value: "block.bamboo_sapling.break" }
+              ]
+            },
+            {
+              name: "調合台",
+              sounds: [
+                { value: "random.potion.brewed" }
+              ]
+            },
+            {
+              name: "洞窟のつた",
+              sounds: [
+                { value: "use.cave_vines" },
+                { value: "dig.cave_vines" },
+                { value: "hit.cave_vines" },
+                { value: "fall.cave_vines" },
+                { value: "step.cave_vines" },
+                { value: "jump.cave_vines" },
+                { value: "land.cave_vines" },
+                { value: "pick_berries.cave_vines" }
+              ]
+            },
+            {
+              name: "銅",
+              sounds: [
+                { value: "place.copper        step.copper" },
+                { value: "use.copper" },
+                { value: "dig.copper" },
+                { value: "fall.copper" },
+                { value: "hit.copper" },
+                { value: "copper.wax.on" },
+                { value: "copper.wax.off" },
+                { value: "scrape" }
+              ]
+            },
+            {
+              name: "パックされた泥ブロック",
+              sounds: [
+                { value: "block.packed_mud.break" },
+                { value: "block.packed_mud.fall" },
+                { value: "block.packed_mud.hit" },
+                { value: "block.packed_mud.place" },
+                { value: "block.packed_mud.step" }
+              ]
+            },
+            {
+              name: "泥ブロック",
+              sounds: [
+                { value: "block.mud.break" },
+                { value: "block.mud.fall" },
+                { value: "block.mud.hit" },
+                { value: "block.mud.place" },
+                { value: "block.mud.step" }
+              ]
+            },
+            {
+              name: "泥レンガ",
+              sounds: [
+                { value: "block.mud_bricks.break" },
+                { value: "block.mud_bricks.fall" },
+                { value: "block.mud_bricks.hit" },
+                { value: "block.mud_bricks.place" },
+                { value: "block.mud_bricks.step" }
+              ]
+            },
+            {
+              name: "焚き火",
+              sounds: [
+                { value: "block.campfire.crackle" }
+              ]
+            },
+            {
+              name: "粉雪",
+              sounds: [
+                { value: "dig.powder_snow" },
+                { value: "fall.powder_snow" },
+                { value: "hit.powder_snow" },
+                { value: "place.powder_snow" },
+                { value: "step.powder_snow" },
+                { value: "bucket.fill_powder_snow" },
+                { value: "bucket.empty_powder_snow" }
+              ]
+            },
+            {
+              name: "方解石",
+              sounds: [
+                { value: "break.calcite" },
+                { value: "step.calcite" },
+                { value: "place.calcite" },
+                { value: "hit.calcite" },
+                { value: "fall.calcite" }
+              ]
+            },
+            {
+              name: "蜂の巣",
+              sounds: [
+                { value: "block.beehive.enter" },
+                { value: "block.beehive.exit" },
+                { value: "block.beehive.shear" },
+                { value: "block.beehive.work" },
+                { value: "block.beehive.drip" }
+              ]
+            },
+            {
+              name: "木材",
+              sounds: [
+                { value: "dig.wood" },
+                { value: "use.wood" },
+                { value: "hit.wood" },
+                { value: "fall.wood" },
+                { value: "step.wood" },
+                { value: "jump.wood" },
+                { value: "land.wood" }
+              ]
+            },
+            {
+              name: "羊毛",
+              sounds: [
+                { value: "dig.cloth" },
+                { value: "use.cloth" },
+                { value: "hit.cloth" },
+                { value: "fall.cloth" },
+                { value: "step.cloth" },
+                { value: "jump.cloth" },
+                { value: "land.cloth" }
+              ]
+            },
+            {
+              name: "歪んだ木",
+              sounds: [
+                { value: "use.stem" },
+                { value: "hit.stem" },
+                { value: "step.stem" },
+                { value: "land.stem" },
+                { value: "dig.stem" },
+                { value: "fall.stem" },
+                { value: "jump.stem" }
+              ]
+            },
+            {
+              name: "燻製気",
+              sounds: [
+                { value: "block.smoker.smoke" }
+              ]
+            },
+            {
+              name: "スニッファーの卵",
+              sounds: [
+                { value: "block.sniffer_egg.crack" },
+                { value: "block.sniffer_egg.hatch" }
+              ]
+            },
+            {
+              name: "吊り看板",
+              sounds: [
+                { value: "step.hanging_sign" },
+                { value: "break.hanging_sign" },
+                { value: "step.nether_wood_hanging_sign" },
+                { value: "break.nether_wood_hanging_sign" },
+                { value: "step.bamboo_wood_hanging_sign" },
+                { value: "break.bamboo_wood_hanging_sign" },
+                { value: "step.cherry_wood_hanging_sign" },
+                { value: "break.cherry_wood_hanging_sign" }
+              ]
+            },
+            {
+              name: "竹の板",
+              sounds: [
+                { value: "break.bamboo_wood" },
+                { value: "fall.bamboo_wood" },
+                { value: "hit.bamboo_wood" },
+                { value: "place.bamboo_wood" },
+                { value: "step.bamboo_wood" }
+              ]
+            },
+            {
+              name: "模様入りの本棚",
+              sounds: [
+                { value: "break.chiseled_bookshelf" },
+                { value: "hit.chiseled_bookshelf" },
+                { value: "place.chiseled_bookshelf" },
+                { value: "step.chiseled_bookshelf" },
+                { value: "insert.chiseled_bookshelf" },
+                { value: "insert_enchanted.chiseled_bookshelf" },
+                { value: "pickup.chiseled_bookshelf" },
+                { value: "pickup_enchanted.chiseled_bookshelf" }
+              ]
+            },
+            {
+              name: "装飾的な壺",
+              sounds: [
+                { value: "break.decorated_pot" },
+                { value: "step.decorated_pot" },
+                { value: "shatter.decorated_pot" },
+                { value: "block.decorated_pot.insert" },
+                { value: "block.decorated_pot.insert_fail" }
+              ]
+            },
+            {
+              name: "あやしい砂",
+              sounds: [
+                { value: "break.suspicious_sand" },
+                { value: "hit.suspicious_sand" },
+                { value: "place.suspicious_sand" },
+                { value: "step.suspicious_sand" },
+                { value: "brush.suspicious_sand" },
+                { value: "brush_completed.suspicious_sand" }
+              ]
+            },
+            {
+              name: "あやしい砂利",
+              sounds: [
+                { value: "break.suspicious_gravel" },
+                { value: "hit.suspicious_gravel" },
+                { value: "place.suspicious_gravel" },
+                { value: "step.suspicious_gravel" },
+                { value: "brush.suspicious_gravel" },
+                { value: "brush_completed.suspicious_gravel" }
+              ]
+            },
+            {
+              name: "桜",
+              sounds: [
+                { value: "break.cherry_wood" },
+                { value: "fall.cherry_wood" },
+                { value: "hit.cherry_wood" },
+                { value: "place.cherry_wood" },
+                { value: "step.cherry_wood" },
+                { value: "break.cherry_leaves" },
+                { value: "fall.cherry_leaves" },
+                { value: "hit.cherry_leaves" },
+                { value: "place.cherry_leaves" },
+                { value: "step.cherry_leaves" }
+              ]
+            },
+            {
+              name: "ピンクの花びら",
+              sounds: [
+                { value: "break.pink_petals" },
+                { value: "fall.pink_petals" },
+                { value: "hit.pink_petals" },
+                { value: "place.pink_petals" },
+                { value: "step.pink_petals" }
+              ]
+            },
+            {
+              name: "かぼちゃ",
+              sounds: [
+                { value: "pumpkin.carve" }
+              ]
+            },
+            {
+              name: "クラフター",
+              sounds: [
+                { value: "crafter.craft" },
+                { value: "crafter.fail" },
+                { value: "crafter.disable_slot" }
+              ]
+            },
+            {
+              name: "銅の電球",
+              sounds: [
+                { value: "block.copper_bulb.turn_on" },
+                { value: "block.copper_bulb.turn_off" },
+                { value: "break.copper_bulb" },
+                { value: "fall.copper_bulb" },
+                { value: "hit.copper_bulb" },
+                { value: "place.copper_bulb" },
+                { value: "step.copper_bulb" }
+              ]
+            },
+            {
+              name: "凝灰岩レンガ",
+              sounds: [
+                { value: "place.tuff_bricks" },
+                { value: "step.tuff_bricks" }
+              ]
+            },
+            {
+              name: "銅の格子",
+              sounds: [
+                { value: "break.copper_grate" },
+                { value: "step.copper_grate" }
+              ]
+            },
+            {
+              name: "ヘビーコア",
+              sounds: [
+                { value: "break.heavy_core" },
+                { value: "step.heavy_core" }
+              ]
+            },
+            {
+              name: "トライアルスポナー",
+              sounds: [
+                { value: "trial_spawner.open_shutter" },
+                { value: "trial_spawner.eject_item" },
+                { value: "trial_spawner.ambient" },
+                { value: "trial_spawner.ambient_ominous" },
+                { value: "trial_spawner.detect_player" },
+                { value: "trial_spawner.close_shutter" },
+                { value: "trial_spawner.spawn_mob" },
+                { value: "trial_spawner.charge_activate" },
+                { value: "trial_spawner.break" },
+                { value: "trial_spawner.hit" },
+                { value: "trial_spawner.place" },
+                { value: "trial_spawner.step" }
+              ]
+            },
+            {
+              name: "宝物庫",
+              sounds: [
+                { value: "vault.open_shutter" },
+                { value: "vault.close_shutter" },
+                { value: "vault.eject_item" },
+                { value: "vault.insert_item" },
+                { value: "vault.insert_item_fail" },
+                { value: "vault.ambient" },
+                { value: "vault.activate" },
+                { value: "vault.deactivate" },
+                { value: "vault.break" },
+                { value: "vault.hit" },
+                { value: "vault.place" },
+                { value: "vault.step" }
+              ]
+            },
+            {
+              name: "クモの巣",
+              sounds: [
+                { value: "break.web" },
+                { value: "step.web" }
+              ]
+            }
+          ]
+        },
+        {
+          category: "生物",
+          subcategories: [
+            {
+              name: "アイアンゴーレム",
+              sounds: [
+                { value: "mob.irongolem.throw" },
+                { value: "mob.irongolem.death" },
+                { value: "mob.irongolem.hit" },
+                { value: "mob.irongolem.walk" },
+                { value: "mob.irongolem.crack" },
+                { value: "mob.irongolem.repair" }
+              ]
+            },
+            {
+              name: "アレイ",
+              sounds: [
+                { value: "mob.allay.death" },
+                { value: "mob.allay.hurt" },
+                { value: "mob.allay.item_given" },
+                { value: "mob.allay.item_taken" },
+                { value: "mob.allay.item_thrown" },
+                { value: "mob.allay.idle" },
+                { value: "mob.allay.idle_holding" }
+              ]
+            },
+            {
+              name: "イカ",
+              sounds: [
+                { value: "mob.squid.ambient" },
+                { value: "mob.squid.death" },
+                { value: "mob.squid.hurt" },
+                { value: "mob.squid.ink_squirt" }
+              ]
+            },
+            {
+              name: "イルカ",
+              sounds: [
+                { value: "mob.dolphin.idle_water" },
+                { value: "mob.dolphin.attack" },
+                { value: "mob.dolphin.blowhole" },
+                { value: "mob.dolphin.death" },
+                { value: "mob.dolphin.eat" },
+                { value: "mob.dolphin.hurt" },
+                { value: "mob.dolphin.idle" },
+                { value: "mob.dolphin.jump" },
+                { value: "mob.dolphin.play" },
+                { value: "mob.dolphin.splash" },
+                { value: "mob.dolphin.swim" }
+              ]
+            },
+            {
+              name: "ウィザー",
+              sounds: [
+                { value: "mob.wither.ambient" },
+                { value: "mob.wither.break_block" },
+                { value: "mob.wither.death" },
+                { value: "mob.wither.hurt" },
+                { value: "mob.wither.shoot" },
+                { value: "mob.wither.spawn" }
+              ]
+            },
+            {
+              name: "ウィッチ",
+              sounds: [
+                { value: "mob.witch.ambient" },
+                { value: "mob.witch.death" },
+                { value: "mob.witch.hurt" },
+                { value: "mob.witch.drink" },
+                { value: "mob.witch.throw" },
+                { value: "mob.witch.celebrate" }
+              ]
+            },
+            {
+              name: "ウーパールーパー",
+              sounds: [
+                { value: "mob.axolotl.attack" },
+                { value: "mob.axolotl.idle_water" },
+                { value: "mob.axolotl.idle" },
+                { value: "mob.axolotl.splash" },
+                { value: "mob.axolotl.swim" },
+                { value: "mob.axolotl.death" },
+                { value: "mob.axolotl.hurt" }
+              ]
+            },
+            {
+              name: "ヴェックス",
+              sounds: [
+                { value: "mob.vex.ambient" },
+                { value: "mob.vex.death" },
+                { value: "mob.vex.hurt" },
+                { value: "mob.vex.charge" }
+              ]
+            },
+            {
+              name: "ウォーデン",
+              sounds: [
+                { value: "mob.warden.nearby_close" },
+                { value: "mob.warden.nearby_closer" },
+                { value: "mob.warden.nearby_closest" },
+                { value: "mob.warden.agitated" },
+                { value: "mob.warden.angry" },
+                { value: "mob.warden.listening" },
+                { value: "mob.warden.listening_angry" },
+                { value: "mob.warden.sniff" },
+                { value: "mob.warden.dig" },
+                { value: "mob.warden.emerge" },
+                { value: "mob.warden.roar" },
+                { value: "mob.warden.step" },
+                { value: "mob.warden.idle" },
+                { value: "mob.warden.heartbeat" },
+                { value: "mob.warden.clicking" },
+                { value: "mob.warden.attack" },
+                { value: "mob.warden.hurt" },
+                { value: "mob.warden.death" },
+                { value: "mob.warden.sonic_boom" },
+                { value: "mob.warden.sonic_charge" }
+              ]
+            },
+            {
+              name: "ウサギ",
+              sounds: [
+                { value: "mob.rabbit.hurt" },
+                { value: "mob.rabbit.idle" },
+                { value: "mob.rabbit.hop" },
+                { value: "mob.rabbit.death" }
+              ]
+            },
+            {
+              name: "ウシ",
+              sounds: [
+                { value: "mob.cow.hurt" },
+                { value: "mob.cow.say" },
+                { value: "mob.cow.step" },
+                { value: "mob.cow.milk" }
+              ]
+            },
+            {
+              name: "エージェント",
+              sounds: [
+                { value: "mob.agent.spawn" }
+              ]
+            },
+            {
+              name: "エンダードラゴン",
+              sounds: [
+                { value: "mob.enderdragon.death" },
+                { value: "mob.enderdragon.hit" },
+                { value: "mob.enderdragon.flap" },
+                { value: "mob.enderdragon.growl" }
+              ]
+            },
+            {
+              name: "エンダーマイト",
+              sounds: [
+                { value: "mob.endermite.hit" },
+                { value: "mob.endermite.kill" },
+                { value: "mob.endermite.say" },
+                { value: "mob.endermite.step" }
+              ]
+            },
+            {
+              name: "エンダーマン",
+              sounds: [
+                { value: "mob.endermen.death" },
+                { value: "mob.endermen.hit" },
+                { value: "mob.endermen.idle" },
+                { value: "mob.endermen.portal" },
+                { value: "mob.endermen.scream" },
+                { value: "mob.endermen.stare" }
+              ]
+            },
+            {
+              name: "オウム",
+              sounds: [
+                { value: "mob.parrot.idle" },
+                { value: "mob.parrot.hurt" },
+                { value: "mob.parrot.death" },
+                { value: "mob.parrot.step" },
+                { value: "mob.parrot.eat" },
+                { value: "mob.parrot.fly" }
+              ]
+            },
+            {
+              name: "オオカミ",
+              sounds: [
+                { value: "mob.wolf.bark" },
+                { value: "mob.wolf.death" },
+                { value: "mob.wolf.growl" },
+                { value: "mob.wolf.hurt" },
+                { value: "mob.wolf.panting" },
+                { value: "mob.wolf.shake" },
+                { value: "mob.wolf.step" },
+                { value: "mob.wolf.whine" },
+                { value: "armor.equip_wolf" },
+                { value: "armor.unequip_wolf" },
+                { value: "armor.damage_wolf" },
+                { value: "armor.crack_wolf" },
+                { value: "armor.break_wolf" },
+                { value: "armor.repair_wolf" }
+              ]
+            },
+            {
+              name: "オタマジャクシ",
+              sounds: [
+                { value: "mob.tadpole.death" },
+                { value: "mob.tadpole.hurt" },
+                { value: "mob.tadpole.convert_to_frog" }
+              ]
+            },
+            {
+              name: "ガーディアン",
+              sounds: [
+                { value: "mob.guardian.ambient" },
+                { value: "mob.guardian.attack_loop" },
+                { value: "mob.elderguardian.curse" },
+                { value: "mob.elderguardian.death" },
+                { value: "mob.elderguardian.hit" },
+                { value: "mob.elderguardian.idle" },
+                { value: "mob.guardian.flop" },
+                { value: "mob.guardian.death" },
+                { value: "mob.guardian.hit" },
+                { value: "mob.guardian.land_death" },
+                { value: "mob.guardian.land_hit" },
+                { value: "mob.guardian.land_idle" }
+              ]
+            },
+            {
+              name: "カエル",
+              sounds: [
+                { value: "mob.frog.death" },
+                { value: "mob.frog.eat" },
+                { value: "mob.frog.hurt" },
+                { value: "mob.frog.ambient" },
+                { value: "mob.frog.jump_to_block" },
+                { value: "mob.frog.step" },
+                { value: "mob.frog.tongue" },
+                { value: "mob.frog.lay_spawn" },
+                { value: "break.frog_spawn" },
+                { value: "hatch.frog_spawn" },
+                { value: "step.frog_spawn" }
+              ]
+            },
+            {
+              name: "ガスト",
+              sounds: [
+                { value: "mob.ghast.affectionate_scream" },
+                { value: "mob.ghast.charge" },
+                { value: "mob.ghast.death" },
+                { value: "mob.ghast.fireball" },
+                { value: "mob.ghast.moan" },
+                { value: "mob.ghast.scream" }
+              ]
+            },
+            {
+              name: "カメ",
+              sounds: [
+                { value: "mob.turtle.ambient" },
+                { value: "mob.turtle_baby.born" },
+                { value: "mob.turtle.death" },
+                { value: "mob.turtle_baby.death" },
+                { value: "mob.turtle.hurt" },
+                { value: "mob.turtle_baby.hurt" },
+                { value: "mob.turtle.step" },
+                { value: "mob.turtle_baby.step" },
+                { value: "mob.turtle.swim" }
+              ]
+            },
+            {
+              name: "キツネ",
+              sounds: [
+                { value: "mob.fox.ambient" },
+                { value: "mob.fox.hurt" },
+                { value: "mob.fox.death" },
+                { value: "mob.fox.aggro" },
+                { value: "mob.fox.sniff" },
+                { value: "mob.fox.bite" },
+                { value: "mob.fox.eat" },
+                { value: "mob.fox.screech" },
+                { value: "mob.fox.sleep" },
+                { value: "mob.fox.spit" }
+              ]
+            },
+            {
+              name: "クモ",
+              sounds: [
+                { value: "mob.spider.death" },
+                { value: "mob.spider.say" },
+                { value: "mob.spider.step" }
+              ]
+            },
+            {
+              name: "クリーパー",
+              sounds: [
+                { value: "mob.creeper.death" },
+                { value: "mob.creeper.say" }
+              ]
+            },
+            {
+              name: "コウモリ",
+              sounds: [
+                { value: "mob.bat.death" },
+                { value: "mob.bat.hurt" },
+                { value: "mob.bat.idle" },
+                { value: "mob.bat.takeoff" }
+              ]
+            },
+            {
+              name: "シュルカー",
+              sounds: [
+                { value: "mob.shulker.ambient" },
+                { value: "mob.shulker.close" },
+                { value: "mob.shulker.death" },
+                { value: "mob.shulker.close.hurt" },
+                { value: "mob.shulker.hurt" },
+                { value: "mob.shulker.open" },
+                { value: "mob.shulker.shoot" },
+                { value: "mob.shulker.teleport" },
+                { value: "mob.shulker.bullet.hit" }
+              ]
+            },
+            {
+              name: "シルバーフィッシュ",
+              sounds: [
+                { value: "mob.silverfish.hit" },
+                { value: "mob.silverfish.kill" },
+                { value: "mob.silverfish.say" },
+                { value: "mob.silverfish.step" }
+              ]
+            },
+            {
+              name: "シロクマ",
+              sounds: [
+                { value: "mob.polarbear.idle" },
+                { value: "mob.polarbear_baby.idle" },
+                { value: "mob.polarbear.step" },
+                { value: "mob.polarbear.warning" },
+                { value: "mob.polarbear.hurt" },
+                { value: "mob.polarbear.death" }
+              ]
+            },
+            {
+              name: "スケルトン",
+              sounds: [
+                { value: "mob.horse.skeleton.death" },
+                { value: "mob.horse.skeleton.hit" },
+                { value: "mob.horse.skeleton.idle" },
+                { value: "mob.skeleton.convert_to_stray" }
+              ]
+            },
+            {
+              name: "ストライダー",
+              sounds: [
+                { value: "mob.strider.death" },
+                { value: "mob.strider.step" },
+                { value: "mob.strider.tempt" },
+                { value: "mob.strider.hurt" },
+                { value: "mob.strider.step_lava" },
+                { value: "mob.strider.panic" },
+                { value: "mob.strider.idle" },
+                { value: "mob.strider.eat" }
+              ]
+            },
+            {
+              name: "ストレイ",
+              sounds: [
+                { value: "mob.stray.ambient" },
+                { value: "mob.stray.death" },
+                { value: "mob.stray.hurt" },
+                { value: "mob.stray.step" }
+              ]
+            },
+            {
+              name: "スノーゴーレム",
+              sounds: [
+                { value: "mob.snowgolem.death" },
+                { value: "mob.snowgolem.hurt" },
+                { value: "mob.snowgolem.shoot" }
+              ]
+            },
+            {
+              name: "スライム",
+              sounds: [
+                { value: "mob.slime.big" },
+                { value: "mob.slime.small" },
+                { value: "mob.slime.attack" },
+                { value: "mob.slime.death" },
+                { value: "mob.slime.hurt" },
+                { value: "mob.slime.jump" },
+                { value: "mob.slime.squish" }
+              ]
+            },
+            {
+              name: "ゾグリン",
+              sounds: [
+                { value: "mob.zoglin.death" },
+                { value: "mob.zoglin.say" },
+                { value: "mob.zoglin.boost" },
+                { value: "mob.zoglin.step" }
+              ]
+            },
+            {
+              name: "ゾンビ",
+              sounds: [
+                { value: "mob.zombie.death" },
+                { value: "mob.zombie.hurt" },
+                { value: "mob.zombie.remedy" },
+                { value: "mob.zombie.unfect" },
+                { value: "mob.zombie.say" },
+                { value: "mob.zombie.step" },
+                { value: "mob.zombie.wood" },
+                { value: "mob.zombie.woodbreak" }
+              ]
+            },
+            {
+              name: "ゾンビピッグマン",
+              sounds: [
+                { value: "mob.zombiepig.zpig" },
+                { value: "mob.zombiepig.zpigangry" },
+                { value: "mob.zombiepig.zpigdeath" },
+                { value: "mob.zombiepig.zpighurt" }
+              ]
+            },
+            {
+              name: "ドラウンド",
+              sounds: [
+                { value: "mob.drowned.say_water" },
+                { value: "mob.drowned.death_water" },
+                { value: "mob.drowned.hurt_water" },
+                { value: "mob.drowned.say" },
+                { value: "mob.drowned.death" },
+                { value: "mob.drowned.hurt" },
+                { value: "mob.drowned.shoot" },
+                { value: "mob.drowned.step" },
+                { value: "mob.drowned.swim" },
+                { value: "entity.zombie.converted_to_drowned" }
+              ]
+            },
+            {
+              name: "ニワトリ",
+              sounds: [
+                { value: "mob.chicken.hurt" },
+                { value: "mob.chicken.plop" },
+                { value: "mob.chicken.say" },
+                { value: "mob.chicken.step" }
+              ]
+            },
+            {
+              name: "ネコ",
+              sounds: [
+                { value: "mob.cat.eat" },
+                { value: "mob.cat.hiss" },
+                { value: "mob.cat.hit" },
+                { value: "mob.cat.meow" },
+                { value: "mob.cat.beg" },
+                { value: "mob.cat.straymeow" },
+                { value: "mob.cat.purr" },
+                { value: "mob.cat.purreow" },
+                { value: "mob.cat.beg_for_food" }
+              ]
+            },
+            {
+              name: "ハスク",
+              sounds: [
+                { value: "mob.husk.ambient" },
+                { value: "mob.husk.death" },
+                { value: "mob.husk.hurt" },
+                { value: "mob.husk.step" },
+                { value: "mob.husk.convert_to_zombie" }
+              ]
+            },
+            {
+              name: "ハチ",
+              sounds: [
+                { value: "mob.bee.aggressive" },
+                { value: "mob.bee.death" },
+                { value: "mob.bee.hurt" },
+                { value: "mob.bee.loop" },
+                { value: "mob.bee.pollinate" },
+                { value: "mob.bee.sting" }
+              ]
+            },
+            {
+              name: "パンダ",
+              sounds: [
+                { value: "mob.panda_baby.idle" },
+                { value: "mob.panda.idle" },
+                { value: "mob.panda.idle.aggressive" },
+                { value: "mob.panda.idle.worried" },
+                { value: "mob.panda.step" },
+                { value: "mob.panda.presneeze" },
+                { value: "mob.panda.sneeze" },
+                { value: "mob.panda.hurt" },
+                { value: "mob.panda.death" },
+                { value: "mob.panda.bite" },
+                { value: "mob.panda.eat" },
+                { value: "mob.panda.cant_breed" }
+              ]
+            },
+            {
+              name: "ピグリン",
+              sounds: [
+                { value: "mob.piglin.ambient" },
+                { value: "mob.piglin.converted_to_zombified" },
+                { value: "mob.piglin.retreat" },
+                { value: "mob.piglin.admiring_item" },
+                { value: "mob.piglin.angry" },
+                { value: "mob.piglin.hurt" },
+                { value: "mob.piglin.step" },
+                { value: "mob.piglin.celebrate" },
+                { value: "mob.piglin.death" },
+                { value: "mob.piglin.jealous" }
+              ]
+            },
+            {
+              name: "ピグリンブルート",
+              sounds: [
+                { value: "mob.piglin_brute.ambient" },
+                { value: "mob.piglin_brute.angry" },
+                { value: "mob.piglin_brute.converted_to_zombified" },
+                { value: "mob.piglin_brute.hurt" },
+                { value: "mob.piglin_brute.death" },
+                { value: "mob.piglin_brute.step" }
+              ]
+            },
+            {
+              name: "ヒツジ",
+              sounds: [
+                { value: "mob.sheep.say" },
+                { value: "mob.sheep.shear" },
+                { value: "mob.sheep.step" }
+              ]
+            },
+            {
+              name: "ファントム",
+              sounds: [
+                { value: "mob.phantom.bite" },
+                { value: "mob.phantom.death" },
+                { value: "mob.phantom.hurt" },
+                { value: "mob.phantom.idle" },
+                { value: "mob.phantom.swoop" },
+                { value: "mob.phantom.flap" }
+              ]
+            },
+            {
+              name: "ブタ",
+              sounds: [
+                { value: "mob.pig.death" },
+                { value: "mob.pig.boost" },
+                { value: "mob.pig.say" },
+                { value: "mob.pig.step" }
+              ]
+            },
+            {
+              name: "ブレイズ",
+              sounds: [
+                { value: "mob.blaze.breathe" },
+                { value: "mob.blaze.death" },
+                { value: "mob.blaze.hit" },
+                { value: "mob.blaze.shoot" }
+              ]
+            },
+            {
+              name: "プレイヤー",
+              sounds: [
+                { value: "armor.equip_chain" },
+                { value: "armor.equip_diamond" },
+                { value: "armor.equip_generic" },
+                { value: "armor.equip_gold" },
+                { value: "armor.equip_iron" },
+                { value: "armor.equip_leather" },
+                { value: "armor.equip_netherite" },
+                { value: "damage.fallbig" },
+                { value: "damage.fallsmall" },
+                { value: "game.player.hurt" },
+                { value: "game.player.die" },
+                { value: "game.player.attack.nodamage" },
+                { value: "game.player.attack.strong" },
+                { value: "random.hurt" },
+                { value: "random.break" },
+                { value: "random.burp" },
+                { value: "random.drink" },
+                { value: "random.eat" },
+                { value: "random.swim" },
+                { value: "random.splash" },
+                { value: "random.drink_honey" },
+                { value: "mob.player.hurt_drown" },
+                { value: "mob.player.hurt_on_fire" },
+                { value: "mob.player.hurt_freeze" }
+              ]
+            },
+            {
+              name: "ホグリン",
+              sounds: [
+                { value: "mob.hoglin.angry" },
+                { value: "mob.hoglin.howl" },
+                { value: "mob.hoglin.step" },
+                { value: "mob.hoglin.attack" },
+                { value: "mob.hoglin.death" },
+                { value: "mob.hoglin.ambient" },
+                { value: "mob.hoglin.hurt" },
+                { value: "mob.hoglin.retreat" },
+                { value: "mob.hoglin.converted_to_zombified" }
+              ]
+            },
+            {
+              name: "マグマキューブ",
+              sounds: [
+                { value: "mob.magmacube.big" },
+                { value: "mob.magmacube.jump" },
+                { value: "mob.magmacube.small" }
+              ]
+            },
+            {
+              name: "ムーシュルーム",
+              sounds: [
+                { value: "mob.mooshroom.convert" },
+                { value: "mob.mooshroom.eat" },
+                { value: "mob.mooshroom.suspicious_milk" }
+              ]
+            },
+            {
+              name: "ヤギ",
+              sounds: [
+                { value: "mob.goat.prepare_ram" },
+                { value: "mob.goat.prepare_ram.screamer" },
+                { value: "mob.goat.ram_impact" },
+                { value: "mob.goat.ram_impact.screamer" },
+                { value: "mob.goat.eat" },
+                { value: "mob.goat.ambient" },
+                { value: "mob.goat.ambient.screamer" },
+                { value: "mob.goat.death" },
+                { value: "mob.goat.death.screamer" },
+                { value: "mob.goat.hurt" },
+                { value: "mob.goat.hurt.screamer" },
+                { value: "mob.goat.milk.screamer" },
+                { value: "mob.goat.step" },
+                { value: "mob.goat.horn_break" }
+              ]
+            },
+            {
+              name: "ヤマネコ",
+              sounds: [
+                { value: "mob.ocelot.idle" },
+                { value: "mob.ocelot.death" }
+              ]
+            },
+            {
+              name: "ラヴィッジャー",
+              sounds: [
+                { value: "mob.ravager.ambient" },
+                { value: "mob.ravager.bite" },
+                { value: "mob.ravager.death" },
+                { value: "mob.ravager.hurt" },
+                { value: "mob.ravager.roar" },
+                { value: "mob.ravager.step" },
+                { value: "mob.ravager.stun" },
+                { value: "mob.ravager.celebrate" }
+              ]
+            },
+            {
+              name: "ラマ",
+              sounds: [
+                { value: "mob.llama.angry" },
+                { value: "mob.llama.death" },
+                { value: "mob.llama.idle" },
+                { value: "mob.llama.spit" },
+                { value: "mob.llama.hurt" },
+                { value: "mob.llama.eat" },
+                { value: "mob.llama.step" },
+                { value: "mob.llama.swag" }
+              ]
+            },
+            {
+              name: "輝くイカ",
+              sounds: [
+                { value: "mob.glow_squid.ambient" },
+                { value: "mob.glow_squid.death" },
+                { value: "mob.glow_squid.hurt" },
+                { value: "mob.glow_squid.ink_squirt" }
+              ]
+            },
+            {
+              name: "行商人",
+              sounds: [
+                { value: "mob.wanderingtrader.drink_potion" },
+                { value: "mob.wanderingtrader.drink_milk" }
+              ]
+            },
+            {
+              name: "魚",
+              sounds: [
+                { value: "mob.fish.flop" },
+                { value: "mob.fish.hurt" },
+                { value: "mob.fish.step" }
+              ]
+            },
+            {
+              name: "邪悪な村人",
+              sounds: [
+                { value: "mob.evocation_illager.ambient" },
+                { value: "mob.evocation_illager.cast_spell" },
+                { value: "mob.evocation_fangs.attack" },
+                { value: "mob.evocation_illager.death" },
+                { value: "mob.evocation_illager.hurt" },
+                { value: "mob.evocation_illager.prepare_attack" },
+                { value: "mob.evocation_illager.prepare_summon" },
+                { value: "mob.evocation_illager.prepare_wololo" },
+                { value: "mob.evocation_illager.celebrate" },
+                { value: "mob.vindicator.death" },
+                { value: "mob.vindicator.hurt" },
+                { value: "mob.vindicator.idle" },
+                { value: "mob.vindicator.celebrate" },
+                { value: "mob.pillager.death" },
+                { value: "mob.pillager.hurt" },
+                { value: "mob.pillager.idle" },
+                { value: "mob.pillager.celebrate" }
+              ]
+            },
+            {
+              name: "村人",
+              sounds: [
+                { value: "mob.villager.death" },
+                { value: "mob.villager.haggle" },
+                { value: "mob.villager.hit" },
+                { value: "mob.villager.idle" },
+                { value: "mob.villager.no" },
+                { value: "mob.villager.yes" }
+              ]
+            },
+            {
+              name: "村人ゾンビ",
+              sounds: [
+                { value: "mob.zombie_villager.say" },
+                { value: "mob.zombie_villager.death" },
+                { value: "mob.zombie_villager.hurt" }
+              ]
+            },
+            {
+              name: "馬",
+              sounds: [
+                { value: "mob.horse.angry" },
+                { value: "mob.horse.armor" },
+                { value: "mob.horse.breathe" },
+                { value: "mob.horse.death" },
+                { value: "mob.horse.donkey.angry" },
+                { value: "mob.horse.donkey.death" },
+                { value: "mob.horse.donkey.hit" },
+                { value: "mob.horse.donkey.idle" },
+                { value: "mob.horse.eat" },
+                { value: "mob.horse.gallop" },
+                { value: "mob.horse.hit" },
+                { value: "mob.horse.idle" },
+                { value: "mob.horse.jump" },
+                { value: "mob.horse.land" },
+                { value: "mob.horse.leather" },
+                { value: "mob.horse.soft" },
+                { value: "mob.horse.wood" },
+                { value: "mob.horse.zombie.death" },
+                { value: "mob.horse.zombie.hit" },
+                { value: "mob.horse.zombie.idle" }
+              ]
+            },
+            {
+              name: "防具立て",
+              sounds: [
+                { value: "mob.armor_stand.break" },
+                { value: "mob.armor_stand.hit" },
+                { value: "mob.armor_stand.land" },
+                { value: "mob.armor_stand.place" }
+              ]
+            },
+            {
+              name: "スニッファー",
+              sounds: [
+                { value: "mob.sniffer.death" },
+                { value: "mob.sniffer.stand_up" },
+                { value: "mob.sniffer.digging" },
+                { value: "mob.sniffer.eat" },
+                { value: "mob.sniffer.happy" },
+                { value: "mob.sniffer.hurt" },
+                { value: "mob.sniffer.idle" },
+                { value: "mob.sniffer.sniffsniff" },
+                { value: "mob.sniffer.searching" },
+                { value: "mob.sniffer.long_sniff" },
+                { value: "mob.sniffer.step" },
+                { value: "mob.sniffer.plop" },
+                { value: "mob.sniffer.drop_seed" }
+              ]
+            },
+            {
+              name: "ラクダ",
+              sounds: [
+                { value: "mob.camel.ambient" },
+                { value: "mob.camel.dash" },
+                { value: "mob.camel.dash_ready" },
+                { value: "mob.camel.death" },
+                { value: "mob.camel.eat" },
+                { value: "mob.camel.hurt" },
+                { value: "mob.camel.sit" },
+                { value: "mob.camel.stand" },
+                { value: "mob.camel.step" },
+                { value: "mob.camel.step_sand" }
+              ]
+            },
+            {
+              name: "ウィザースケルトン",
+              sounds: [
+                { value: "entity.wither_skeleton.ambient" },
+                { value: "entity.wither_skeleton.hurt" },
+                { value: "entity.wither_skeleton.death" },
+                { value: "entity.wither_skeleton.step" }
+              ]
+            },
+            {
+              name: "アルマジロ",
+              sounds: [
+                { value: "mob.armadillo.ambient" },
+                { value: "mob.armadillo.death" },
+                { value: "mob.armadillo.eat" },
+                { value: "mob.armadillo.hurt" },
+                { value: "mob.armadillo.hurt_reduced" },
+                { value: "mob.armadillo.step" },
+                { value: "mob.armadillo.roll" },
+                { value: "mob.armadillo.land" },
+                { value: "mob.armadillo.peek" },
+                { value: "mob.armadillo.unroll_start" },
+                { value: "mob.armadillo.unroll_finish" },
+                { value: "mob.armadillo.brush" },
+                { value: "mob.armadillo.scute_drop" }
+              ]
+            },
+            {
+              name: "ブリーズ",
+              sounds: [
+                { value: "mob.breeze.inhale" },
+                { value: "mob.breeze.charge" },
+                { value: "mob.breeze.death" },
+                { value: "mob.breeze.deflect" },
+                { value: "mob.breeze.hurt" },
+                { value: "mob.breeze.idle_air" },
+                { value: "mob.breeze.idle_ground" },
+                { value: "mob.breeze.jump" },
+                { value: "mob.breeze.land" },
+                { value: "mob.breeze.shoot" },
+                { value: "mob.breeze.slide" },
+                { value: "mob.breeze.whirl" },
+                { value: "breeze_wind_charge.burst" }
+              ]
+            },
+            {
+              name: "ボグド",
+              sounds: [
+                { value: "mob.bogged.death" },
+                { value: "mob.bogged.hurt" },
+                { value: "mob.bogged.step" },
+                { value: "mob.bogged.ambient" }
+              ]
+            }
+          ]
+        },
+        {
+          category: "環境",
+          subcategories: [
+            {
+              name: "エリトラ",
+              sounds: [
+                { value: "elytra.loop" }
+              ]
+            },
+            {
+              name: "カメラ",
+              sounds: [
+                { value: "camera.take_picture" }
+              ]
+            },
+            {
+              name: "クロスボウ",
+              sounds: [
+                { value: "crossbow.loading.start" },
+                { value: "crossbow.loading.middle" },
+                { value: "crossbow.loading.end" },
+                { value: "crossbow.shoot" },
+                { value: "crossbow.quick_charge.start" },
+                { value: "crossbow.quick_charge.middle" },
+                { value: "crossbow.quick_charge.end" }
+              ]
+            },
+            {
+              name: "ソウルサンドの谷",
+              sounds: [
+                { value: "ambient.soulsand_valley.loop" },
+                { value: "ambient.soulsand_valley.additions" }
+              ]
+            },
+            {
+              name: "チェスト",
+              sounds: [
+                { value: "random.chestclosed" },
+                { value: "random.chestopen" }
+              ]
+            },
+            {
+              name: "ドア",
+              sounds: [
+                { value: "random.door_close" },
+                { value: "random.door_open" },
+                { value: "close.nether_wood_door" },
+                { value: "open.nether_wood_door" },
+                { value: "open.iron_door" },
+                { value: "close.iron_door" },
+                { value: "open.wooden_door" },
+                { value: "close.wooden_door" },
+                { value: "close.bamboo_wood_door" },
+                { value: "open.bamboo_wood_door" },
+                { value: "close.cherry_wood_door" },
+                { value: "open.cherry_wood_door" },
+                { value: "open_door.copper" },
+                { value: "close_door.copper" }
+              ]
+            },
+            {
+              name: "トーテム",
+              sounds: [
+                { value: "random.totem" }
+              ]
+            },
+            {
+              name: "トライデント",
+              sounds: [
+                { value: "item.trident.hit_ground" },
+                { value: "item.trident.hit" },
+                { value: "item.trident.return" },
+                { value: "item.trident.riptide_1" },
+                { value: "item.trident.riptide_2" },
+                { value: "item.trident.riptide_3" },
+                { value: "item.trident.throw" },
+                { value: "item.trident.thunder" }
+              ]
+            },
+            {
+              name: "トラップドア",
+              sounds: [
+                { value: "close.nether_wood_trapdoor" },
+                { value: "open.nether_wood_trapdoor" },
+                { value: "close.wooden_trapdoor" },
+                { value: "open.wooden_trapdoor" },
+                { value: "close.iron_trapdoor" },
+                { value: "open.iron_trapdoor" },
+                { value: "close.bamboo_wood_trapdoor" },
+                { value: "open.bamboo_wood_trapdoor" },
+                { value: "close.cherry_wood_trapdoor" },
+                { value: "open.cherry_wood_trapdoor" },
+                { value: "open_trapdoor.copper" }
+              ]
+            },
+            {
+              name: "トロッコ",
+              sounds: [
+                { value: "minecart.base" },
+                { value: "minecart.inside" }
+              ]
+            },
+            {
+              name: "ネザーゲート",
+              sounds: [
+                { value: "portal.portal" },
+                { value: "portal.travel" },
+                { value: "portal.trigger" }
+              ]
+            },
+            {
+              name: "ネザーの荒地",
+              sounds: [
+                { value: "ambient.nether_wastes.loop" },
+                { value: "ambient.nether_wastes.additions" }
+              ]
+            },
+            {
+              name: "バケツ",
+              sounds: [
+                { value: "bucket.empty_lava" },
+                { value: "bucket.empty_water" },
+                { value: "bucket.fill_lava" },
+                { value: "bucket.fill_water" },
+                { value: "bucket.fill_fish" },
+                { value: "bucket.empty_fish" }
+              ]
+            },
+            {
+              name: "フェンスゲート",
+              sounds: [
+                { value: "close.nether_wood_fence_gate" },
+                { value: "open.nether_wood_fence_gate" },
+                { value: "close.fence_gate" },
+                { value: "open.fence_gate" },
+                { value: "close.bamboo_wood_fence_gate" },
+                { value: "open.bamboo_wood_fence_gate" },
+                { value: "close.cherry_wood_fence_gate" },
+                { value: "open.cherry_wood_fence_gate" }
+              ]
+            },
+            {
+              name: "ボタン",
+              sounds: [
+                { value: "click_off.nether_wood_button" },
+                { value: "click_on.nether_wood_button" },
+                { value: "click_off.bamboo_wood_button" },
+                { value: "click_on.bamboo_wood_button" },
+                { value: "click_off.cherry_wood_button" },
+                { value: "click_on.cherry_wood_button" }
+              ]
+            },
+            {
+              name: "感圧版",
+              sounds: [
+                { value: "click_off.nether_wood_pressure_plate" },
+                { value: "click_on.nether_wood_pressure_plate" },
+                { value: "click_off.stone_pressure_plate" },
+                { value: "click_on.stone_pressure_plate" },
+                { value: "click_off.wooden_pressure_plate" },
+                { value: "click_on.wooden_pressure_plate" },
+                { value: "click_off.metal_pressure_plate" },
+                { value: "click_on.metal_pressure_plate" },
+                { value: "click_off.bamboo_wood_pressure_plate" },
+                { value: "click_on.bamboo_wood_pressure_plate" },
+                { value: "click_off.cherry_wood_pressure_plate" },
+                { value: "click_on.cherry_wood_pressure_plate" }
+              ]
+            },
+            {
+              name: "炎",
+              sounds: [
+                { value: "fire.fire" },
+                { value: "fire.ignite" }
+              ]
+            },
+            {
+              name: "花火",
+              sounds: [
+                { value: "firework.blast" },
+                { value: "firework.large_blast" },
+                { value: "firework.launch" },
+                { value: "firework.shoot" },
+                { value: "firework.twinkle" }
+              ]
+            },
+            {
+              name: "環境",
+              sounds: [
+                { value: "ambient.crimson_forest.mood" },
+                { value: "ambient.warped_forest.mood" },
+                { value: "ambient.soulsand_valley.mood" },
+                { value: "ambient.nether_wastes.mood" },
+                { value: "ambient.basalt_deltas.mood" }
+              ]
+            },
+            {
+              name: "看板に染料",
+              sounds: [
+                { value: "sign.dye.use" }
+              ]
+            },
+            {
+              name: "看板に墨袋",
+              sounds: [
+                { value: "sign.ink_sac.use" }
+              ]
+            },
+            {
+              name: "弓",
+              sounds: [
+                { value: "random.bow" },
+                { value: "random.bowhit" }
+              ]
+            },
+            {
+              name: "空洞",
+              sounds: [
+                { value: "ambient.cave" }
+              ]
+            },
+            {
+              name: "玄武岩デルタ",
+              sounds: [
+                { value: "ambient.basalt_deltas.loop" },
+                { value: "ambient.basalt_deltas.additions" }
+              ]
+            },
+            {
+              name: "骨粉を使用",
+              sounds: [
+                { value: "item.bone_meal.use" }
+              ]
+            },
+            {
+              name: "首ひも",
+              sounds: [
+                { value: "leashknot.break" },
+                { value: "leashknot.place" }
+              ]
+            },
+            {
+              name: "襲撃イベント",
+              sounds: [
+                { value: "raid.horn" }
+              ]
+            },
+            {
+              name: "盾",
+              sounds: [
+                { value: "item.shield.block" }
+              ]
+            },
+            {
+              name: "書見台",
+              sounds: [
+                { value: "item.book.page_turn" },
+                { value: "item.book.put" }
+              ]
+            },
+            {
+              name: "消火",
+              sounds: [
+                { value: "random.fizz" }
+              ]
+            },
+            {
+              name: "真紅の森",
+              sounds: [
+                { value: "ambient.crimson_forest.loop" },
+                { value: "ambient.crimson_forest.additions" }
+              ]
+            },
+            {
+              name: "着火",
+              sounds: [
+                { value: "random.fuse" }
+              ]
+            },
+            {
+              name: "天候",
+              sounds: [
+                { value: "ambient.weather.thunder" },
+                { value: "ambient.weather.lightning.impact" },
+                { value: "ambient.weather.rain" }
+              ]
+            },
+            {
+              name: "爆発",
+              sounds: [
+                { value: "cauldron.explode" },
+                { value: "random.explode" }
+              ]
+            },
+            {
+              name: "発泡音",
+              sounds: [
+                { value: "bubble.pop" },
+                { value: "bubble.up" },
+                { value: "bubble.upinside" },
+                { value: "bubble.down" },
+                { value: "bubble.downinside" },
+                { value: "liquid.lava" },
+                { value: "liquid.lavapop" },
+                { value: "liquid.water" }
+              ]
+            },
+            {
+              name: "瓶",
+              sounds: [
+                { value: "bottle.dragonbreath" },
+                { value: "bottle.fill" },
+                { value: "bottle.empty" }
+              ]
+            },
+            {
+              name: "望遠鏡",
+              sounds: [
+                { value: "item.spyglass.use" },
+                { value: "item.spyglass.stop_using" }
+              ]
+            },
+            {
+              name: "歪んだ森",
+              sounds: [
+                { value: "ambient.warped_forest.loop" },
+                { value: "ambient.warped_forest.additions" }
+              ]
+            },
+            {
+              name: "ブラシ",
+              sounds: [
+                { value: "brush.generic" }
+              ]
+            },
+            {
+              name: "看板のワックス",
+              sounds: [
+                { value: "block.sign.waxed_interact_fail" }
+              ]
+            },
+            {
+              name: "水上移動",
+              sounds: [
+                { value: "ambient.underwater.enter" },
+                { value: "ambient.underwater.exit" }
+              ]
+            },
+            {
+              name: "不吉なアイテムスポナー",
+              sounds: [
+                { value: "ominous_item_spawner.spawn_item" },
+                { value: "ominous_item_spawner.spawn_item_begin" },
+                { value: "ominous_item_spawner.about_to_spawn_item" }
+              ]
+            },
+            {
+              name: "不吉な瓶",
+              sounds: [
+                { value: "ominous_bottle.end_use" }
+              ]
+            },
+            {
+              name: "ウィンドチャージ",
+              sounds: [
+                { value: "wind_charge.burst" }
+              ]
+            },
+            {
+              name: "メイス",
+              sounds: [
+                { value: "mace.smash_air" },
+                { value: "mace.smash_ground" },
+                { value: "mace.heavy_smash_ground" }
+              ]
+            },
+            {
+              name: "不吉な予感",
+              sounds: [
+                { value: "apply_effect.bad_omen" }
+              ]
+            },
+            {
+              name: "襲撃の予感",
+              sounds: [
+                { value: "apply_effect.raid_omen" }
+              ]
+            },
+            {
+              name: "試練の予感",
+              sounds: [
+                { value: "apply_effect.trial_omen" }
+              ]
+            }
+          ]
+        },
+        {
+          category: "その他",
+          subcategories: [
+            {
+              name: "アイテム",
+              sounds: [
+                { value: "random.pop" },
+                { value: "random.pop2" },
+                { value: "BGM" },
+                { value: "music.game.deep_dark" },
+                { value: "music.game.swamp_music" },
+                { value: "music.game_and_wild_equal_chance" },
+                { value: "music.game_and_wild_favor_game" },
+                { value: "music.game.lush_caves" },
+                { value: "music.overworld.desert" },
+                { value: "music.overworld.mesa" },
+                { value: "music.overworld.bamboo_jungle" },
+                { value: "music.overworld.cherry_grove" },
+                { value: "music.overworld.flower_forest" },
+                { value: "music.overworld.jungle" },
+                { value: "music.overworld.jungle_edge" },
+                { value: "music.overworld.deep_dark" },
+                { value: "music.overworld.dripstone_caves" },
+                { value: "music.overworld.jagged_peaks" },
+                { value: "music.overworld.lush_caves" },
+                { value: "music.overworld.snowy_slopes" },
+                { value: "music.overworld.stony_peaks" }
+              ]
+            },
+            {
+              name: "エンドBGM",
+              sounds: [
+                { value: "music.game.end" },
+                { value: "music.game.endboss" },
+                { value: "music.game.credits" }
+              ]
+            },
+            {
+              name: "クリエイティブBGM",
+              sounds: [
+                { value: "music.game.creative" }
+              ]
+            },
+            {
+              name: "クリック",
+              sounds: [
+                { value: "random.click" },
+                { value: "random.wood_click" },
+                { value: "random.stone_click" },
+                { value: "random.lever_click" }
+              ]
+            },
+            {
+              name: "スクリーンショット",
+              sounds: [
+                { value: "random.screenshot" }
+              ]
+            },
+            {
+              name: "ネザーBGM",
+              sounds: [
+                { value: "music.game.nether" },
+                { value: "music.game.soulsand_valley" },
+                { value: "music.game.crimson_forest" },
+                { value: "music.game.nether_wastes" }
+              ]
+            },
+            {
+              name: "メニューBGM",
+              sounds: [
+                { value: "music.menu" }
+              ]
+            },
+            {
+              name: "レコード",
+              sounds: [
+                { value: "record.13" },
+                { value: "record.cat" },
+                { value: "record.blocks" },
+                { value: "record.chirp" },
+                { value: "record.far" },
+                { value: "record.mall" },
+                { value: "record.mellohi" },
+                { value: "record.stal" },
+                { value: "record.strad" },
+                { value: "record.ward" },
+                { value: "record.11" },
+                { value: "record.wait" },
+                { value: "record.pigstep" },
+                { value: "record.otherside" },
+                { value: "record.5" },
+                { value: "record.relic" },
+                { value: "record.creator" },
+                { value: "record.creator_music_box" },
+                { value: "record.precipice" }
+              ]
+            },
+            {
+              name: "音符",
+              sounds: [
+                { value: "note.bass" },
+                { value: "note.bassattack" },
+                { value: "note.bd" },
+                { value: "note.harp" },
+                { value: "note.hat" },
+                { value: "note.pling" },
+                { value: "note.snare" },
+                { value: "note.banjo" },
+                { value: "note.bell" },
+                { value: "note.bit" },
+                { value: "note.cow_bell" },
+                { value: "note.didgeridoo" },
+                { value: "note.flute" },
+                { value: "note.guitar" },
+                { value: "note.chime" },
+                { value: "note.iron_xylophone" },
+                { value: "note.xylophone" },
+                { value: "note.enderdragon" },
+                { value: "note.skeleton" },
+                { value: "note.witherskeleton" },
+                { value: "note.zombie" },
+                { value: "note.creeper" },
+                { value: "note.piglin" }
+              ]
+            },
+            {
+              name: "角笛",
+              sounds: [
+                { value: "horn.call.0" },
+                { value: "horn.call.1" },
+                { value: "horn.call.2" },
+                { value: "horn.call.3" },
+                { value: "horn.call.4" },
+                { value: "horn.call.5" },
+                { value: "horn.call.6" },
+                { value: "horn.call.7" }
+              ]
+            },
+            {
+              name: "経験値",
+              sounds: [
+                { value: "random.levelup" },
+                { value: "random.orb" }
+              ]
+            },
+            {
+              name: "通常BGM",
+              sounds: [
+                { value: "music.game" },
+                { value: "music.game.water" }
+              ]
+            },
+            {
+              name: "通知",
+              sounds: [
+                { value: "random.toast" }
+              ]
+            },
+            {
+              name: "洞窟",
+              sounds: [
+                { value: "music.game.dripstone_caves" },
+                { value: "music.game.grove" },
+                { value: "music.game.jagged_peaks" },
+                { value: "music.game.lush_caves" },
+                { value: "music.game.meadow" },
+                { value: "music.game.nether_wastes" },
+                { value: "music.game.soul_sand_valley" },
+                { value: "music.game.warped_forest" },
+                { value: "music.game.frozen_peaks" },
+                { value: "music.game.snowy_slopes" },
+                { value: "music.game.stony_peaks" },
+                { value: "music.game.basalt_deltas" },
+                { value: "music.game.crimson_forest" }
+              ]
+            },
+            {
+              name: "未分類",
+              sounds: [
+                { value: "vr.stutterturn" },
+                { value: "block.false_permissions" },
+                { value: "lodestone_compass.link_compass_to_lodestone" },
+                { value: "dig.lodestone" },
+                { value: "particle.soul_escape" },
+                { value: "smithing_table.use" },
+                { value: "component.jump_to_block" },
+                { value: "damage.thorns" },
+                { value: "entity.generic.splash" },
+                { value: "hud.bubble.pop" },
+                { value: "Education要素" },
+                { value: "balloon.pop" },
+                { value: "lt.reaction.fire" },
+                { value: "sparkler.active" },
+                { value: "elemconstruct.active" }
+              ]
+            },
+            {
+              name: "レシピ開放",
+              sounds: [
+                { value: "random.toast_recipe_unlocking_in" },
+                { value: "random.toast_recipe_unlocking_out" }
+              ]
+            },
+            {
+              name: "ユーザーインタフェース",
+              sounds: [
+                { value: "ui.drawer_open" },
+                { value: "ui.drawer_close" }
+              ]
+            }
+          ]
+        }
+      ];
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const container = document.getElementById("sound-list-container");
+        const filterCheckbox = document.getElementById("filter-recommended");
+        const showCategoryOnlyCheckbox = document.getElementById("show-category-only");
+
+        // サウンドリストをレンダリングする関数
+        const renderSounds = () => {
+          container.innerHTML = ""; // コンテナをクリア
+          soundData.forEach((category) => {
+            const categoryWrapper = document.createElement("div");
+
+            const categoryTitle = document.createElement("h2");
+            categoryTitle.className =
+              "text-xl md:text-2xl font-normal text-gray-800 border-l-4 border-gray-500 pl-4 mb-6";
+            categoryTitle.textContent = category.category;
+            categoryWrapper.appendChild(categoryTitle);
+
+            const subcategoriesWrapper = document.createElement("div");
+            subcategoriesWrapper.className = "space-y-8";
+
+            category.subcategories.forEach((sub) => {
+              const subWrapper = document.createElement("div");
+              subWrapper.setAttribute("data-subcategory", "true");
+              subWrapper.className = "pl-2";
+
+              const subTitle = document.createElement("h3");
+              subTitle.className = "text-lg font-medium text-gray-700 mb-3";
+              subTitle.textContent = sub.name;
+              subWrapper.appendChild(subTitle);
+
+              // グリッドレイアウトをulリストに変更
+              const soundsList = document.createElement("ul");
+              soundsList.className = "list-disc space-y-1";
+
+              sub.sounds.forEach((sound) => {
+                // p要素をli要素に変更
+                const li = document.createElement("li");
+                // flexを使用してテキストと星を両端に配置
+                li.className =
+                  "sound-item text-gray-600 p-2 rounded-md transition-colors duration-200 hover:bg-gray-100 cursor-pointer flex justify-between items-center";
+                li.setAttribute("data-sound-value", sound.value);
+                li.setAttribute("data-recommended", !!sound.recommended);
+                // 星マークを右側に移動
+                li.innerHTML = `
+                                <span class="sound-text">${sound.value}</span>
+                                <span>
+                                    ${sound.recommended ? "⭐" : ""}
+                                </span>
+                                <span class="copy-feedback">Copied!</span>`;
+
+                soundsList.appendChild(li);
+
+                // コピー機能のイベントリスナー
+                li.addEventListener("click", () => copyToClipboard(li));
+              });
+
+              subWrapper.appendChild(soundsList);
+              subcategoriesWrapper.appendChild(subWrapper);
+            });
+
+            categoryWrapper.appendChild(subcategoriesWrapper);
+            container.appendChild(categoryWrapper);
+          });
+        };
+
+        // サウンドリストをカテゴリ名・サブカテゴリ名だけでレンダリングする関数
+        const renderCategoryOnly = () => {
+          container.innerHTML = "";
+          soundData.forEach((category) => {
+            const categoryWrapper = document.createElement("div");
+
+            const categoryTitle = document.createElement("h2");
+            categoryTitle.className =
+              "text-xl md:text-2xl font-normal text-gray-800 border-l-4 border-gray-500 pl-4 mb-6";
+            categoryTitle.textContent = category.category;
+            categoryWrapper.appendChild(categoryTitle);
+
+            const subcategoriesWrapper = document.createElement("div");
+            subcategoriesWrapper.className = "space-y-8";
+
+            category.subcategories.forEach((sub) => {
+              const subWrapper = document.createElement("div");
+              subWrapper.setAttribute("data-subcategory", "true");
+              subWrapper.className = "pl-2";
+
+              const subTitle = document.createElement("h3");
+              subTitle.className = "text-lg font-medium text-gray-700 mb-3";
+              subTitle.textContent = sub.name;
+              subWrapper.appendChild(subTitle);
+
+              // サウンドリストは表示しない
+
+              subcategoriesWrapper.appendChild(subWrapper);
+            });
+
+            categoryWrapper.appendChild(subcategoriesWrapper);
+            container.appendChild(categoryWrapper);
+          });
+        };
+
+        // クリップボードにコピーする関数
+        const copyToClipboard = (element) => {
+          const soundId = element.querySelector(".sound-text").textContent;
+          const textToCopy = `/playsound ${soundId} @a ~~~`;
+          const textarea = document.createElement("textarea");
+          textarea.value = textToCopy;
+          textarea.style.position = "fixed"; // 画面外に
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand("copy");
+            showCopyFeedback(element);
+          } catch (err) {
+            console.error("クリップボードへのコピーに失敗しました", err);
+          }
+          document.body.removeChild(textarea);
+        };
+
+        // コピー成功のフィードバックを表示する関数
+        const showCopyFeedback = (element) => {
+          const feedback = element.querySelector(".copy-feedback");
+          if (feedback.classList.contains("show")) return; // すでに表示中は無視
+
+          feedback.classList.add("show");
+          setTimeout(() => {
+            feedback.classList.remove("show");
+          }, 1500);
+        };
+
+        // フィルタリング処理の関数
+        const filterSounds = () => {
+          const showOnlyRecommended = filterCheckbox.checked;
+
+          document
+            .querySelectorAll("#sound-list-container > div")
+            .forEach((categoryWrapper) => {
+              let categoryHasVisibleItems = false;
+              categoryWrapper
+                .querySelectorAll('[data-subcategory="true"]')
+                .forEach((subCat) => {
+                  let subCatHasVisibleItems = false;
+                  subCat.querySelectorAll(".sound-item").forEach((item) => {
+                    const isRecommended =
+                      item.getAttribute("data-recommended") === "true";
+                    if (showOnlyRecommended && !isRecommended) {
+                      item.classList.add("hidden");
+                    } else {
+                      item.classList.remove("hidden");
+                      subCatHasVisibleItems = true;
+                      categoryHasVisibleItems = true;
+                    }
+                  });
+
+                  if (!subCatHasVisibleItems) {
+                    subCat.classList.add("hidden");
+                  } else {
+                    subCat.classList.remove("hidden");
+                  }
+                });
+
+              if (!categoryHasVisibleItems) {
+                categoryWrapper.classList.add("hidden");
+              } else {
+                categoryWrapper.classList.remove("hidden");
+              }
+            });
+        };
+
+        // チェックボックスの状態に応じて表示を切り替える関数
+        const updateView = () => {
+          if (showCategoryOnlyCheckbox.checked) {
+            renderCategoryOnly();
+          } else {
+            renderSounds();
+            // 推奨サウンドのみ表示がONならフィルタも適用
+            if (filterCheckbox.checked) {
+              filterSounds();
+            }
+          }
+        };
+
+        // イベントリスナーの設定
+        filterCheckbox.addEventListener("change", () => {
+          if (!showCategoryOnlyCheckbox.checked) {
+            filterSounds();
+          }
+        });
+        showCategoryOnlyCheckbox.addEventListener("change", updateView);
+
+        // 初期レンダリング
+        renderSounds();
+      });
+    </script>
+  </body>
+</html>
