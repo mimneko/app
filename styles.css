@@ -1,0 +1,322 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* === セクション === */
+
+body {
+    font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic Medium', 'Hiragino Sans', 'Meiryo', 'Noto Sans CJK JP', 'Roboto', 'MS PGothic', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #2c3e50;
+    min-height: 100vh;
+    background-color: #f9fafb;
+}
+
+header {
+    background-color: #ffffff;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+main, aside {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    main, aside {
+        padding: 20px;
+    }
+}
+
+footer {
+    background-color: #ffffff;
+    padding: 20px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+article, section {
+    margin: 40px 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #1a252f;
+    font-weight: 400;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    letter-spacing: 1px;
+    padding-top: 5px;
+    padding-bottom: 6px;
+}
+
+h2:first-child,
+h3:first-child,
+h4:first-child,
+h5:first-child,
+h6:first-child {
+    margin-top: 0;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.2em;
+    letter-spacing: 2px;
+    border-top: 1px solid #cbd5e0;
+    border-bottom: 1px solid #cbd5e0;
+    padding-top: 20px;
+    padding-bottom: 23px;
+    margin-top: 0.8em;
+}
+
+h2 {
+    font-size: 1.5em;
+    border-left: 4px solid #4a5568;
+    padding-left: 16px;
+}
+
+h3 {
+    font-size: 1.2em;
+    border-left: 3px solid #4a5568;
+    padding-left: 17px;
+}
+
+h4 {
+    font-size: 1.05em;
+    border-left: 2px solid #4a5568;
+    padding-left: 18px;
+}
+
+h5 {
+    font-size: 1em;
+    border-left: 2px solid #cbd5e0;
+    padding-left: 18px;
+}
+
+h6 {
+    font-size: 0.95em;
+    border-left: 2px dotted #cbd5e0;
+    padding-left: 18px;
+}
+
+/* === コンテンツのグループ化 === */
+
+p {
+    padding-bottom: 1em;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #d1d5db;
+    margin: 40px 0;
+}
+
+ol, dl {
+    padding-inline-start: 40px;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+ol li {
+    padding-left: 5px;
+    margin-bottom: 5px;
+}
+
+ul {
+    padding-inline-start: 45px;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+ul li {
+    padding-left: 0;
+    margin-bottom: 5px;
+}
+
+dl dt {
+    font-weight: bold;
+}
+
+dl dd {
+    margin-left: 1em;
+    margin-bottom: 0.5em;
+}
+
+pre, code:not(pre code), kbd, samp {
+    font-family: 'Roboto Mono', 'Kosugi Maru', Consolas, monospace, sans-serif;
+    background-color: #f3f4f6;
+    border-radius: 4px;
+    padding: 1px 5px 2px;
+}
+
+pre {
+    padding: 20px;
+    overflow-x: auto;
+}
+
+code {
+    font-family: 'Roboto Mono', 'Kosugi Maru', Consolas, monospace, sans-serif;
+}
+
+/* https://pote-chil.com/css-stock/ja/quote#1, 参照2025-06-19 */
+blockquote {
+    background: #f8fafc;
+    padding: 2em 1.5em 1.9em;
+    border-left: 4px solid #cbd5e0;
+    margin: 20px auto;
+    width: 90%;
+}
+
+blockquote:has(cite) {
+    padding-bottom: 1em;
+}
+
+blockquote > :last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+blockquote cite {
+    display: block;
+    font-size: .8em;
+    text-align: right;
+}
+
+/* === テキストの意味 === */
+
+a {
+    color: #4590b8;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #1d4ed8;
+}
+
+mark {
+    background-color: #fef08a;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* === テーブル === */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9em;
+}
+
+caption {
+    caption-side: bottom;
+    margin-top: 10px;
+    color: #6b7280;
+    font-size: 0.9em;
+}
+
+thead, tfoot {
+    background-color: #1a252f;
+    color: #ffffff;
+}
+
+th {
+    /*background: #1a252f;
+    color: #ffffff;*/
+    font-size: 0.85em;
+    padding: 15px 12px;
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 10px 8px;
+    font-size: 0.85em;
+    text-align: center;
+    vertical-align: middle;
+}
+
+tbody td {
+    border: 1px solid #e2e8f0;
+}
+
+tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+tbody tr:hover {
+    background: #edf2f7;
+}
+
+/* === インタラクティブ === */
+
+/* https://pote-chil.com/css-stock/ja/accordion#3, 参照2025-06-19 */
+details {
+    margin-bottom: 7px;
+    border-bottom: 2px solid #cbd5e0;
+}
+
+details summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding: 1em 2em 1.1em;
+    color: #1a252f;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details summary::before,
+details summary::after {
+    width: 2px;
+    height: .9em;
+    border-radius: 5px;
+    background-color: #1a252fb3;
+    content: '';
+}
+
+details summary::before {
+    position: absolute;
+    right: 2em;
+    rotate: 90deg;
+}
+
+details summary::after {
+    transition: rotate .3s;
+}
+
+details[open] summary::after {
+    rotate: 90deg;
+}
+
+details > summary + * {
+    transform: translateY(-10px);
+    opacity: 0;
+    margin: 0;
+    padding: .3em 2em 1.5em;
+    transition: transform .5s, opacity .5s;
+}
+
+details[open] > summary + * {
+    transform: none;
+    opacity: 1;
+}
+

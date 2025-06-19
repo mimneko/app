@@ -8,41 +8,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Kosugi|Kosugi+Maru" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium", "Hiragino Sans", "Meiryo", "Noto Sans CJK JP", "Roboto", "MS PGothic", "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.7;
-            color: #1a252f;
-            background-color: #f9fafb;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background: white;
-        }
-        
         /* === ヘッダー、フッター、ナビゲーション === */
-        header, footer {
-            background-color: white;
-            padding: 20px;
-            text-align: center;
-            border-top: 1px solid #e5e7eb;
-            border-bottom: 1px solid #e5e7eb;
-            margin: 10px 0;
-        }
-        
         nav {
             padding: 15px;
             margin: 20px auto 0 auto;
-            background: #f3f4f6;
             border-radius: 8px;
         }
         
@@ -55,154 +26,12 @@
         }
 
         /* === 見出し === */
-        h1, h2, h3, h4, h5, h6 {
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            margin-top: 1.5em;
-            margin-bottom: 0.8em;
-        }
         hgroup {
             margin: 0;
             padding: 0;
         }
         hgroup > h1 { margin-bottom: 0.2em; }
         hgroup > p { margin-top: 0; color: #6b7280; font-size: 1.1em;}
-
-
-        h1 {
-            font-size: 2.5em;
-            font-weight: 700;
-            text-align: center;
-            border: none;
-            padding: 10px 0;
-        }
-        
-        h2 {
-            font-size: 1.8em;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        h3 {
-            font-size: 1.4em;
-            border-left: 4px solid #6b7280;
-            padding-left: 15px;
-        }
-
-        h4 {
-            font-size: 1.2em;
-            color: #4b5563;
-        }
-
-        /* === コンテンツブロック === */
-        article, section, aside {
-            margin: 20px 0;
-            padding: 20px;
-            background-color: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-        }
-
-        aside {
-            background-color: #f9fafb;
-        }
-        
-        p {
-            margin-bottom: 1em;
-        }
-
-        a {
-            color: #4590b8;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        a:hover {
-            text-decoration: underline;
-            color: #1d4ed8;
-        }
-
-        hr {
-            border: 0;
-            height: 1px;
-            background-color: #d1d5db;
-            margin: 40px 0;
-        }
-
-        /* === リスト === */
-        ul, ol, dl {
-            padding-left: 2em;
-            margin-bottom: 1em;
-        }
-        dl dt { font-weight: bold; }
-        dl dd { margin-left: 1em; margin-bottom: 0.5em; }
-
-
-        /* === 引用・コード === */
-        blockquote {
-            background: #f9fafb;
-            border-left: 5px solid #d1d5db;
-            padding: 15px 20px;
-            margin: 20px 0;
-        }
-        blockquote p {
-            margin-bottom: 0.5em;
-        }
-        blockquote footer {
-            text-align: right;
-            color: #6b7280;
-        }
-
-        pre, code, kbd, samp {
-            font-family: "Roboto Mono", 'Kosugi Maru', Consolas, monospace, sans-serif;
-            background-color: #f3f4f6;
-            border-radius: 4px;
-        }
-        pre {
-            padding: 20px;
-            overflow-x: auto;
-        }
-        pre, code:not(pre code), kbd, samp {
-            padding: 2px 4px;
-            border-radius: 3px;
-        }
-        
-        /* === テーブル === */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 25px 0;
-            font-size: 0.95em;
-        }
-        
-        caption {
-            caption-side: bottom;
-            margin-top: 10px;
-            color: #6b7280;
-            font-size: 0.9em;
-        }
-        
-        th, td {
-            border: 1px solid #e5e7eb;
-            padding: 12px 15px;
-            text-align: left;
-        }
-        
-        thead, tfoot {
-            background-color: #1a252f;
-            color: white;
-        }
-
-        th {
-            font-weight: 600;
-        }
-        
-        tbody tr:nth-child(even) {
-            background-color: #f9fafb;
-        }
-        
-        tbody tr:hover {
-            background-color: #f3f4f6;
-        }
 
         /* === メディア === */
         img, video, audio, iframe, embed, object, picture { 
@@ -294,26 +123,6 @@
             background-color: #377191;
         }
 
-        /* === インタラクティブ要素 === */
-        mark {
-            background-color: #fef08a;
-            padding: 2px 4px;
-            border-radius: 3px;
-        }
-        
-        details {
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border: 1px solid #e5e7eb;
-        }
-        
-        summary {
-            cursor: pointer;
-            font-weight: 500;
-        }
-
         dialog {
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -328,290 +137,299 @@
 </head>
 <body>
 
-    <div class="container">
-
-        <!-- ==== ヘッダーとナビゲーション ==== -->
-        <header>
-        <hgroup>
-            <p>サイトのメインタイトル (h1)</p>
-            <p>これはhgroup内の副題です。</p>
-        </hgroup>
-        <nav>
-            <ul>
+    <!-- ==== ヘッダーとナビゲーション ==== -->
+    <header>
+    <hgroup>
+        <span>サイトのメインタイトル</span>
+        <span>これはhgroup内の副題です。</span>
+    </hgroup>
+    <nav>
+        <ul>
             <li><a href="#text">テキスト関連</a></li>
             <li><a href="#media">メディア関連</a></li>
             <li><a href="#form">フォーム関連</a></li>
-            </ul>
-        </nav>
+        </ul>
+    </nav>
+    </header>
+
+    <main>
+    <!-- ==== 自己完結したコンテンツ (article) ==== -->
+    <article>
+        <h1>記事のタイトル (article > header > h1)</h1>
+        <p>公開日: <time datetime="2025-06-16">2025年6月16日</time></p>
+        <address>
+            著者: <a href="mailto:dummy@example.com">田中 太郎</a>
+        </address>
         </header>
 
-        <main>
-        <!-- ==== 自己完結したコンテンツ (article) ==== -->
-        <article>
-            <header>
-            <h1>記事のタイトル (article > header > h1)</h1>
-            <p>公開日: <time datetime="2025-06-16">2025年6月16日</time></p>
-            <address>
-                著者: <a href="mailto:dummy@example.com">田中 太郎</a>
-            </address>
-            </header>
-
-            <!-- ==== 一般的なセクション (section) ==== -->
-            <section id="text">
-            <h2>テキスト関連のタグ (section > h2)</h2>
-            
-            <p>これは通常の段落(p)です。文章の中に、<a href="#">リンク(a)</a>を設置できます。</p>
-            <p>テキストを<em>強調(em)</em>したり、<strong>重要性(strong)</strong>を示したりできます。</p>
-            <p><small>これは細目のような注釈(small)です。</small> <s>この内容は古く、正確ではありません(s)。</s></p>
-            <p>作品名<cite>HTML Living Standard</cite>を参照し、<q>短い引用句(q)はインラインで表示されます</q>。</p>
-            <p><dfn>HTML</dfn>はHyperText Markup Languageの略です。この<dfn>タグは定義される用語(dfn)を表します。</p>
-            <p>略語<abbr title="World Wide Web Consortium">W3C</abbr>には説明を付けられます。</p>
-            <p>これはコンピュータの<code>ソースコード(code)</code>です。変数を<var>x</var>とし、<samp>プログラムの出力サンプル(samp)</samp>を表示し、<kbd>Enter</kbd>キーのようにユーザー入力を示します。</p>
-            <p>水の化学式はH<sub>2</sub>O(sub)で、xの2乗はx<sup>2</sup>(sup)と書きます。</p>
-            <p>これは<data value="item-2025">2025年のアイテム</data>(data)のようにコンピュータ向けのデータを指定します。</p>
-            <p><i>専門用語(i)</i>や<b>キーワード(b)</b>、<u>ラベル付け(u)</u>などを区別して表示します。</p>
-            <p>この部分を<mark>ハイライト(mark)</mark>します。</p>
-            <p><ruby>漢<rp>(</rp><rt>かん</rt><rp>)</rp>字<rp>(</rp><rt>じ</rt><rp>)</rp></ruby>のようにルビを振ります。</p>
-            <p><bdi>א</bdi>のように書字方向が異なる文字を隔離できます。 <bdo dir="rtl">右から左へ</bdo>書字方向を指定できます。</p>
-            <p><span style="color: #1d4ed8;">spanタグ</span>で一部分だけスタイルを変えられます。</p>
-            <p>長いURL: http://example.com/this/is/a/very/long/<wbr>url/that/might/<wbr>need/a/line-break. (wbrは改行位置の候補)</p>
-            <p><ins>これは追加されたテキスト(ins)</ins>で、<del>これは削除されたテキスト(del)</del>です。</p>
-
-            <hr> <!-- テーマの区切り -->
-
-            <h3>リストの例 (h3)</h3>
-            <h4>順序付きリスト (ol)</h4>
-            <ol>
-                <li>項目1</li>
-                <li>項目2</li>
-            </ol>
-            <h4>順序なしリスト (ul)</h4>
-            <ul>
-                <li>項目A</li>
-                <li>項目B</li>
-            </ul>
-            <h4>定義リスト (dl)</h4>
-            <dl>
-                <dt>用語(dt)</dt>
-                <dd>用語の説明(dd)です。</dd>
-                <dt>HTML</dt>
-                <dd>ウェブページを作成するためのマークアップ言語です。</dd>
-            </dl>
-
-            <h3>引用と整形済みテキスト (h3)</h3>
-            <blockquote>
-                <p>これは長い引用ブロック(blockquote)です。独立したセクションとして表示されます。</p>
-                <footer>— <cite>引用元</cite></footer>
-            </blockquote>
-
-            <pre>
-    これは整形済みテキスト(pre)です。
-    スペースや改行が
-    そのまま表示されます。
-            </pre>
-            </section>
-
-            <section id="media">
-            <h2>図版とメディア関連タグ (h2)</h2>
-
-            <figure>
-                <picture>
-                <source srcset="https://placehold.jp/1200x400/333/fff?text=広い画面用" media="(min-width: 800px)">
-                <img src="https://placehold.jp/600x200/555/fff?text=狭い画面用" alt="レスポンシブ画像">
-                </picture>
-                <figcaption>pictureタグによるレスポンシブ画像</figcaption>
-            </figure>
-            
-            <figure>
-                <map name="infomap">
-                <area shape="rect" coords="0,0,100,100" href="#form" alt="フォームへ">
-                <area shape="circle" coords="150,50,50" href="#text" alt="テキストへ">
-                </map>
-                <img usemap="#infomap" src="https://placehold.co/300x100/ccc/333?text=(map/area)" alt="イメージマップ">
-                <figcaption>イメージマップ（左の四角形と中央の円がリンク）</figcaption>
-            </figure>
-
-            <h3>音声と動画 (h3)</h3>
-            <audio controls src="dummy.mp3">
-                <source src="dummy.ogg" type="audio/ogg">
-                <track kind="captions" src="captions_ja.vtt" srclang="ja" label="日本語">
-                お使いのブラウザはaudioタグをサポートしていません。
-            </audio>
-            <br>
-            <video controls width="400" poster="https://placehold.co/400x225/e8e8e8/666?text=video">
-                <source src="dummy.mp4" type="video/mp4">
-                <source src="dummy.webm" type="video/webm">
-                <track kind="subtitles" src="subtitles_ja.vtt" srclang="ja" label="日本語" default>
-                お使いのブラウザはvideoタグをサポートしていません。
-            </video>
-            
-            <h3>埋め込みコンテンツ (h3)</h3>
-            <iframe src="https://example.com" width="100%" height="200" title="iframeのサンプル">インラインフレーム(iframe)</iframe>
-            <embed src="dummy.pdf" type="application/pdf" width="100%" height="200">
-            <object data="dummy.swf" type="application/x-shockwave-flash" width="300" height="120">
-                <p>objectタグの代替コンテンツ</p>
-            </object>
-            </section>
-            
-            <section>
-                <h2>表 (table)</h2>
-                <table>
-                    <caption>テーブルのキャプション(caption)</caption>
-                    <colgroup>
-                        <col span="1" style="background-color: #f9fafb;">
-                        <col>
-                        <col>
-                        <col>
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th>見出しセル1(th)</th>
-                            <th>見出しセル2</th>
-                            <th>見出しセル3</th>
-                            <th>見出しセル4</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>データセル(td)</td>
-                            <td>1-2</td>
-                            <td>1-3</td>
-                            <td>1-4</td>
-                        </tr>
-                        <tr>
-                            <td>2-1</td>
-                            <td>2-2</td>
-                            <td>2-3</td>
-                            <td>2-4</td>
-                        </tr>
-                        <tr>
-                            <td>3-1</td>
-                            <td>3-2</td>
-                            <td>3-3</td>
-                            <td>3-4</td>
-                        </tr>
-                        <tr>
-                            <td>4-1</td>
-                            <td>4-2</td>
-                            <td>4-3</td>
-                            <td>4-4</td>
-                        </tr>
-                        <tr>
-                            <td>5-1</td>
-                            <td>5-2</td>
-                            <td>5-3</td>
-                            <td>5-4</td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td>フッタセル</td>
-                            <td>フッタセル</td>
-                            <td>フッタセル</td>
-                            <td>フッタセル</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </section>
-
-            <footer>
-            <p>記事のフッター (article > footer)</p>
-            </footer>
-        </article>
-
-        <!-- ==== フォーム関連 ==== -->
-        <section id="form">
-            <h1>お問い合わせフォーム (h1)</h1>
-            <form action="#" method="post" oninput="result.value=parseInt(a.value)+parseInt(b.value)">
-            <fieldset>
-                <legend>情報入力</legend>
-                <label for="name">お名前:</label>
-                <input type="text" id="name" name="user_name" required>
-                <label for="email">メールアドレス:</label>
-                <input type="email" id="email" name="user_email">
-                <label for="browser">お使いのブラウザ:</label>
-                <input list="browsers" id="browser" name="browser">
-                <datalist id="browsers">
-                    <option value="Chrome">
-                    <option value="Firefox">
-                    <option value="Safari">
-                </datalist>
-            </fieldset>
-
-            <fieldset>
-                <legend>お問い合わせ内容</legend>
-                <label for="category">カテゴリ:</label>
-                <select id="category" name="category">
-                <optgroup label="製品について">
-                    <option value="product_a">製品A</option>
-                    <option value="product_b">製品B</option>
-                </optgroup>
-                <optgroup label="その他">
-                    <option value="other">その他</option>
-                </optgroup>
-                </select>
-                <br><br>
-                <label for="message">内容:</label>
-                <textarea id="message" name="user_message" rows="5"></textarea>
-            </fieldset>
-            
-            <fieldset>
-                <legend>その他のフォーム要素</legend>
-                <div>
-                    計算 (output): 
-                    <input type="number" id="a" name="a" value="50"> +
-                    <input type="number" id="b" name="b" value="50"> =
-                    <output name="result" for="a b">100</output>
-                </div>
-                <div>
-                    <label for="progress">進捗 (progress):</label>
-                    <progress id="progress" value="70" max="100">70%</progress>
-                </div>
-                <div>
-                    <label for="meter">使用量 (meter):</label>
-                    <meter id="meter" min="0" max="100" low="30" high="75" optimum="80" value="25">25%</meter>
-                </div>
-            </fieldset>
-
-            <button type="submit">送信する (button)</button>
-            </form>
-        </section>
-        </main>
-
-        <!-- ==== 補足情報 (aside) ==== -->
-        <aside>
-        <h3>補足情報 (aside & h3)</h3>
-        <p>ここにはメインコンテンツとは直接関係の薄い補足情報を配置します。</p>
+        <!-- ==== 一般的なセクション (section) ==== -->
+        <section id="text">
+        <h2>テキスト関連のタグ (section > h2)</h2>
         
-        <details>
-            <summary>詳細情報を開く (summary)</summary>
-            <p>detailsタグの中身です。クリックすると表示されます。</p>
-        </details>
+        <p>これは通常の段落(p)です。文章の中に、<a href="#">リンク(a)</a>を設置できます。</p>
+        <p>テキストを<em>強調(em)</em>したり、<strong>重要性(strong)</strong>を示したりできます。</p>
+        <p><small>これは細目のような注釈(small)です。</small> <s>この内容は古く、正確ではありません(s)。</s></p>
+        <p>作品名<cite>HTML Living Standard</cite>を参照し、<q>短い引用句(q)はインラインで表示されます</q>。</p>
+        <p><dfn>HTML</dfn>はHyperText Markup Languageの略です。この<dfn>タグは定義される用語(dfn)を表します。</p>
+        <p>略語<abbr title="World Wide Web Consortium">W3C</abbr>には説明を付けられます。</p>
+        <p>これはコンピュータの<code>ソースコード(code)</code>です。変数を<var>x</var>とし、<samp>プログラムの出力サンプル(samp)</samp>を表示し、<kbd>Enter</kbd>キーのようにユーザー入力を示します。</p>
+        <p>水の化学式はH<sub>2</sub>O(sub)で、xの2乗はx<sup>2</sup>(sup)と書きます。</p>
+        <p>これは<data value="item-2025">2025年のアイテム</data>(data)のようにコンピュータ向けのデータを指定します。</p>
+        <p><i>専門用語(i)</i>や<b>キーワード(b)</b>、<u>ラベル付け(u)</u>などを区別して表示します。</p>
+        <p>この部分を<mark>ハイライト(mark)</mark>します。</p>
+        <p><ruby>漢<rp>(</rp><rt>かん</rt><rp>)</rp>字<rp>(</rp><rt>じ</rt><rp>)</rp></ruby>のようにルビを振ります。</p>
+        <p><bdi>א</bdi>のように書字方向が異なる文字を隔離できます。 <bdo dir="rtl">右から左へ</bdo>書字方向を指定できます。</p>
+        <p><span style="color: #1d4ed8;">spanタグ</span>で一部分だけスタイルを変えられます。</p>
+        <p>長いURL: http://example.com/this/is/a/very/long/<wbr>url/that/might/<wbr>need/a/line-break. (wbrは改行位置の候補)</p>
+        <p><ins>これは追加されたテキスト(ins)</ins>で、<del>これは削除されたテキスト(del)</del>です。</p>
 
-        <menu>
-            <li><button onclick="document.getElementById('dialog-box').showModal()">ダイアログを開く</button></li>
-            <li>メニュー項目B</li>
-        </menu>
-        </aside>
+        <hr> <!-- テーマの区切り -->
 
-        <dialog id="dialog-box">
-        <h1>ダイアログ (dialog)</h1>
-        <p>これはダイアログボックスです。</p>
-        <form method="dialog">
-            <button>閉じる</button>
-        </form>
-        </dialog>
+        <h3>リストの例 (h3)</h3>
+        <h4>順序付きリスト (ol)</h4>
+        <ol>
+            <li>項目1</li>
+            <li>項目2</li>
+        </ol>
+        <h4>順序なしリスト (ul)</h4>
+        <ul>
+            <li>項目A</li>
+            <li>項目B</li>
+        </ul>
+        <h4>定義リスト (dl)</h4>
+        <dl>
+            <dt>用語(dt)</dt>
+            <dd>用語の説明(dd)です。</dd>
+            <dt>HTML</dt>
+            <dd>ウェブページを作成するためのマークアップ言語です。</dd>
+        </dl>
 
+        <h3>引用と整形済みテキスト (h3)</h3>
+        <blockquote>
+            <p>左に線を付けたシンプルな引用ボックスです。</p>
+            <p>これは長い引用ブロック(blockquote)です。独立したセクションです。</p>
+            <cite>出典：ここに引用元を入れる</cite>
+        </blockquote>
+        <blockquote>
+            <p>左に線を付けたシンプルな引用ボックスです。</p>
+            <p>これは長い引用ブロック(blockquote)です。独立したセクションです。</p>
+        </blockquote>
 
-        <!-- ==== フッター ==== -->
+        <p>これはコンピュータの<code>ソースコード(code)</code>です。変数を<var>x</var>とし、<samp>プログラムの出力サンプル(samp)</samp>を表示し、<kbd>Enter</kbd>キーのようにユーザー入力を示します。</p>
+
+        <pre><code>/*
+これは整形済みテキスト(pre)です。
+スペースや改行が
+そのまま表示されます。
+*/
+h2 {
+    border-bottom: 3px solid #aaa; 
+    color: #aaa;
+}
+</code></pre>
+        </section>
+
+        <section id="media">
+        <h2>図版とメディア関連タグ (h2)</h2>
+
+        <figure>
+            <picture>
+            <source srcset="https://placehold.jp/1200x400/333/fff?text=広い画面用" media="(min-width: 800px)">
+            <img src="https://placehold.jp/600x200/555/fff?text=狭い画面用" alt="レスポンシブ画像">
+            </picture>
+            <figcaption>pictureタグによるレスポンシブ画像</figcaption>
+        </figure>
+        
+        <figure>
+            <map name="infomap">
+            <area shape="rect" coords="0,0,100,100" href="#form" alt="フォームへ">
+            <area shape="circle" coords="150,50,50" href="#text" alt="テキストへ">
+            </map>
+            <img usemap="#infomap" src="https://placehold.co/300x100/ccc/333?text=(map/area)" alt="イメージマップ">
+            <figcaption>イメージマップ（左の四角形と中央の円がリンク）</figcaption>
+        </figure>
+
+        <h3>音声と動画 (h3)</h3>
+        <audio controls src="dummy.mp3">
+            <source src="dummy.ogg" type="audio/ogg">
+            <track kind="captions" src="captions_ja.vtt" srclang="ja" label="日本語">
+            お使いのブラウザはaudioタグをサポートしていません。
+        </audio>
+        <br>
+        <video controls width="400" poster="https://placehold.co/400x225/e8e8e8/666?text=video">
+            <source src="dummy.mp4" type="video/mp4">
+            <source src="dummy.webm" type="video/webm">
+            <track kind="subtitles" src="subtitles_ja.vtt" srclang="ja" label="日本語" default>
+            お使いのブラウザはvideoタグをサポートしていません。
+        </video>
+        
+        <h3>埋め込みコンテンツ (h3)</h3>
+        <iframe src="https://example.com" width="100%" height="200" title="iframeのサンプル">インラインフレーム(iframe)</iframe>
+        <embed src="dummy.pdf" type="application/pdf" width="100%" height="200">
+        <object data="dummy.swf" type="application/x-shockwave-flash" width="300" height="120">
+            <p>objectタグの代替コンテンツ</p>
+        </object>
+        </section>
+        
+        <section>
+            <h2>表 (table)</h2>
+            <table>
+                <caption>テーブルのキャプション(caption)</caption>
+                <colgroup>
+                    <col span="1" style="background-color: #f9fafb;">
+                    <col>
+                    <col>
+                    <col>
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>見出しセル1(th)</th>
+                        <th>見出しセル2</th>
+                        <th>見出しセル3</th>
+                        <th>見出しセル4</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>データセル(td)</td>
+                        <td>1-2</td>
+                        <td>1-3</td>
+                        <td>1-4</td>
+                    </tr>
+                    <tr>
+                        <td>2-1</td>
+                        <td>2-2</td>
+                        <td>2-3</td>
+                        <td>2-4</td>
+                    </tr>
+                    <tr>
+                        <td>3-1</td>
+                        <td>3-2</td>
+                        <td>3-3</td>
+                        <td>3-4</td>
+                    </tr>
+                    <tr>
+                        <td>4-1</td>
+                        <td>4-2</td>
+                        <td>4-3</td>
+                        <td>4-4</td>
+                    </tr>
+                    <tr>
+                        <td>5-1</td>
+                        <td>5-2</td>
+                        <td>5-3</td>
+                        <td>5-4</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>フッタセル</td>
+                        <td>フッタセル</td>
+                        <td>フッタセル</td>
+                        <td>フッタセル</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+
         <footer>
-        <p>&copy; <time>2025</time> サイトのフッター情報</p>
-        <address>
-            連絡先: <a href="tel:00-0000-0000">00-0000-0000</a>
-        </address>
+        <p>記事のフッター (article > footer)</p>
         </footer>
+    </article>
 
-    </div> <!-- .container -->
+    <!-- ==== フォーム関連 ==== -->
+    <section id="form">
+        <h1>お問い合わせフォーム (h1)</h1>
+        <form action="#" method="post" oninput="result.value=parseInt(a.value)+parseInt(b.value)">
+        <fieldset>
+            <legend>情報入力</legend>
+            <label for="name">お名前:</label>
+            <input type="text" id="name" name="user_name" required>
+            <label for="email">メールアドレス:</label>
+            <input type="email" id="email" name="user_email">
+            <label for="browser">お使いのブラウザ:</label>
+            <input list="browsers" id="browser" name="browser">
+            <datalist id="browsers">
+                <option value="Chrome">
+                <option value="Firefox">
+                <option value="Safari">
+            </datalist>
+        </fieldset>
+
+        <fieldset>
+            <legend>お問い合わせ内容</legend>
+            <label for="category">カテゴリ:</label>
+            <select id="category" name="category">
+            <optgroup label="製品について">
+                <option value="product_a">製品A</option>
+                <option value="product_b">製品B</option>
+            </optgroup>
+            <optgroup label="その他">
+                <option value="other">その他</option>
+            </optgroup>
+            </select>
+            <br><br>
+            <label for="message">内容:</label>
+            <textarea id="message" name="user_message" rows="5"></textarea>
+        </fieldset>
+        
+        <fieldset>
+            <legend>その他のフォーム要素</legend>
+            <div>
+                計算 (output): 
+                <input type="number" id="a" name="a" value="50"> +
+                <input type="number" id="b" name="b" value="50"> =
+                <output name="result" for="a b">100</output>
+            </div>
+            <div>
+                <label for="progress">進捗 (progress):</label>
+                <progress id="progress" value="70" max="100">70%</progress>
+            </div>
+            <div>
+                <label for="meter">使用量 (meter):</label>
+                <meter id="meter" min="0" max="100" low="30" high="75" optimum="80" value="25">25%</meter>
+            </div>
+        </fieldset>
+
+        <button type="submit">送信する (button)</button>
+        </form>
+    </section>
+    </main>
+
+    <!-- ==== 補足情報 (aside) ==== -->
+    <aside>
+    <h3>補足情報 (aside & h3)</h3>
+    <p>ここにはメインコンテンツとは直接関係の薄い補足情報を配置します。</p>
+    
+    <details>
+        <summary>詳細情報を開く (summary)</summary>
+        <p>detailsタグの中身です。クリックすると表示されます。</p>
+    </details>
+
+    <menu>
+        <li><button onclick="document.getElementById('dialog-box').showModal()">ダイアログを開く</button></li>
+        <li>メニュー項目B</li>
+    </menu>
+    </aside>
+
+    <dialog id="dialog-box">
+    <h1>ダイアログ (dialog)</h1>
+    <p>これはダイアログボックスです。</p>
+    <form method="dialog">
+        <button>閉じる</button>
+    </form>
+    </dialog>
+
+
+    <!-- ==== フッター ==== -->
+    <footer>
+    <small>
+    <p>&copy; <time>2025</time> サイトのフッター情報</p>
+    <address>
+        連絡先: <a href="tel:00-0000-0000">00-0000-0000</a>
+    </address>
+    </footer>
+    </small>
     
 </body>
 </html>
