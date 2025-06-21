@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2階建て迷路</title>
+    <style>
+        :root {
+            --cell-size: 24px;
+            --wall-color: #2c3e50;
+            --player-color: #4590b8;
+            --start-color: #90ee90;
+            --goal-color: #f08080;
+            --stair-color: #e2e8f0;
+            --solution-color: #fef08a;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic Medium', 'Meiryo', 'Roboto', Arial, sans-serif;
+            background-color: #f9fafb;
+            color: #2c3e50;
+            margin: 0;
+            padding: 1em;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        h1 {
+            margin-top: 0.8em;
+            padding-top: 20px;
+            padding-bottom: 23px;
+            border-top: 1px solid #cbd5e0;
+            border-bottom: 1px solid #cbd5e0;
+            text-align: center;
+            font-size: 2.2em;
+            letter-spacing: 2px;
+            color: #1a252f;
+        }
+
+        h2 {
+            border-left: 4px solid #4a5568;
+            padding-left: 16px;
+            font-size: 1.5em;
+            color: #1a252f;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .controls label {
+            font-weight: bold;
+            color: #1a252f;
+        }
+
+        .controls input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            background: #f3f4f6;
+            color: #2c3e50;
+        }
+
+        .controls button {
+            margin: 10px auto;
+            padding: .6em 1.2em .7em;
+            border: 1px solid #4590b8;
+            border-radius: 5px;
+            background-color: #4590b8;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .controls button:focus-visible {
+            background-color: #fff;
+            color: #4590b8;
+        }
+
+        @media (any-hover: hover) {
+            .controls button:hover {
+                background-color: #fff;
+                color: #4590b8;
+            }
+        }
+
+        #all-mazes-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .maze-grid {
+            display: grid;
+            border: 2px solid var(--wall-color);
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(44,62,80,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            position: relative;
+            border: 1px solid var(--wall-color);
+            box-sizing: border-box;
+            transition: background-color 0.3s;
+            background: #fff;
+        }
+
+        .no-wall-top { border-top-color: transparent !important; }
+        .no-wall-right { border-right-color: transparent !important; }
+        .no-wall-bottom { border-bottom-color: transparent !important; }
+        .no-wall-left { border-left-color: transparent !important; }
+
+        .start { background-color: var(--start-color); }
+        .goal { background-color: var(--goal-color); }
+
+        .stair { 
+            background-color: var(--stair-color); 
+            font-size: calc(var(--cell-size) * 0.6);
+            line-height: var(--cell-size);
+            font-weight: bold;
+            border-radius: 3px;
+        }
+        .stair::before { content: '↨'; color: #555; }
+
+        .player::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 60%;
+            background-color: var(--player-color);
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 0 4px #4590b8;
+        }
+
+        .solution-path {
+            background-color: var(--solution-color);
+            border-radius: 2px;
+        }
+
+        .instructions {
+            margin-top: 20px;
+            color: #6b7280;
+            line-height: 1.6;
+            background: #f8fafc;
+            border-left: 4px solid #cbd5e0;
+            padding: 1em 1.5em;
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 4px;
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            #all-mazes-wrapper {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .maze-grid {
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>2階建て迷路</h1>
+
+    <!-- 操作パネル -->
+    <div class="controls">
+        <div>
+            <label for="width">幅:</label>
+            <input type="number" id="width" value="20" min="5" max="50">
+            <label for="height">高さ:</label>
+            <input type="number" id="height" value="15" min="5" max="50">
+        </div>
+        <div>
+            <button id="generate-btn">新しい迷路を生成</button>
+            <button id="solve-btn">正解のルートを表示</button>
+        </div>
+    </div>
+    
+    <!-- 2つの迷路を表示するラッパー -->
+    <div id="all-mazes-wrapper">
+        <div>
+            <h2>1階</h2>
+            <div id="maze-container-1f" class="maze-grid"></div>
+        </div>
+        <div>
+            <h2>2階</h2>
+            <div id="maze-container-2f" class="maze-grid"></div>
+        </div>
+    </div>
+
+    <!-- 操作説明 -->
+    <p class="instructions">
+        <b>矢印キー (↑↓←→)</b>: 移動<br>
+        <b>Enterキー</b>: 階段を上る/下りる<br>
+        緑のマスからスタートし、赤のゴールを目指しましょう！
+    </p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // HTML要素の取得
+            const mazeContainer1F = document.getElementById('maze-container-1f');
+            const mazeContainer2F = document.getElementById('maze-container-2f');
+            const widthInput = document.getElementById('width');
+            const heightInput = document.getElementById('height');
+            const generateBtn = document.getElementById('generate-btn');
+            const solveBtn = document.getElementById('solve-btn');
+            
+            // ゲームの状態変数
+            let mazes = [];
+            let playerPosition = { x: 0, y: 0, floor: 0 };
+            let width, height;
+            let isSolutionVisible = false;
+            let solutionPath = [];
+            const NUM_STAIRS = 8; // 階段の数を少し増やす
+            const MIN_FLOOR_CHANGES = 4; // ゴールに必要な最低階移動回数
+
+            /**
+             * ★ 新しいゲームを開始する (複雑な経路が保証されるまで再生成)
+             */
+            function startNewGame() {
+                width = parseInt(widthInput.value, 10);
+                height = parseInt(heightInput.value, 10);
+                
+                let attempts = 0;
+                // 条件を満たす迷路ができるまでループ
+                while(attempts < 50) { // 無限ループを避けるためのカウンター
+                    generateAllMazes();
+                    placeStairs();
+                    
+                    solutionPath = solveMaze();
+                    const floorChanges = countFloorChanges(solutionPath);
+                    
+                    // 解があり、かつ階移動が規定回数以上ならループを抜ける
+                    if (solutionPath.length > 0 && floorChanges >= MIN_FLOOR_CHANGES) {
+                        break;
+                    }
+                    attempts++;
+                }
+                
+                if (attempts >= 50) {
+                    console.warn(`After 50 attempts, could not generate a maze with ${MIN_FLOOR_CHANGES} floor changes. Using the last generated one.`);
+                }
+
+                // 描画とプレイヤー設定
+                isSolutionVisible = false;
+                drawAllMazes();
+                setupPlayer();
+                clearSolutionDisplay();
+                solveBtn.textContent = '正解のルートを表示';
+            }
+            
+            function generateAllMazes() {
+                mazes = [generateMazeData(), generateMazeData()];
+            }
+            
+            function generateMazeData() {
+                const maze = Array.from({ length: height }, (_, y) =>
+                    Array.from({ length: width }, (_, x) => ({
+                        x, y,
+                        walls: { top: true, right: true, bottom: true, left: true },
+                        visited: false,
+                        stair: false
+                    }))
+                );
+                const stack = [];
+                let current = maze[0][0];
+                current.visited = true;
+                stack.push(current);
+                while (stack.length > 0) {
+                    current = stack.pop();
+                    const neighbors = getUnvisitedNeighbors(current, maze);
+                    if (neighbors.length > 0) {
+                        stack.push(current);
+                        const neighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+                        removeWall(current, neighbor);
+                        neighbor.visited = true;
+                        stack.push(neighbor);
+                    }
+                }
+                return maze;
+            }
+
+            /**
+             * 迷路全体にランダムに階段を配置する
+             */
+            function placeStairs() {
+                // 既存の階段情報をリセット
+                mazes.forEach(floor => floor.forEach(row => row.forEach(cell => cell.stair = false)));
+
+                let placedCount = 0;
+                let attempts = 0;
+                while (placedCount < NUM_STAIRS && attempts < 200) {
+                    const sx = Math.floor(Math.random() * width);
+                    const sy = Math.floor(Math.random() * height);
+
+                    const isStartOrGoal = (sx === 0 && sy === 0) || (sx === width - 1 && sy === height - 1);
+                    if (!isStartOrGoal && !mazes[0][sy][sx].stair) {
+                        mazes[0][sy][sx].stair = true;
+                        mazes[1][sy][sx].stair = true;
+                        placedCount++;
+                    }
+                    attempts++;
+                }
+            }
+            
+            function getUnvisitedNeighbors(cell, maze) {
+                const { x, y } = cell;
+                const neighbors = [];
+                if (y > 0 && !maze[y - 1][x].visited) neighbors.push(maze[y - 1][x]);
+                if (x < width - 1 && !maze[y][x + 1].visited) neighbors.push(maze[y][x + 1]);
+                if (y < height - 1 && !maze[y + 1][x].visited) neighbors.push(maze[y + 1][x]);
+                if (x > 0 && !maze[y][x - 1].visited) neighbors.push(maze[y][x - 1]);
+                return neighbors;
+            }
+
+            function removeWall(a, b) {
+                const dx = a.x - b.x;
+                if (dx === 1) { a.walls.left = false; b.walls.right = false; } 
+                else if (dx === -1) { a.walls.right = false; b.walls.left = false; }
+                const dy = a.y - b.y;
+                if (dy === 1) { a.walls.top = false; b.walls.bottom = false; }
+                else if (dy === -1) { a.walls.bottom = false; b.walls.top = false; }
+            }
+
+            function drawAllMazes() {
+                drawMazeForFloor(0, mazeContainer1F);
+                drawMazeForFloor(1, mazeContainer2F);
+            }
+            
+            function drawMazeForFloor(floorIndex, container) {
+                const mazeData = mazes[floorIndex];
+                container.innerHTML = '';
+                container.style.gridTemplateColumns = `repeat(${width}, var(--cell-size))`;
+
+                mazeData.forEach(row => {
+                    row.forEach(cellData => {
+                        const cellElement = document.createElement('div');
+                        cellElement.className = 'cell';
+                        cellElement.dataset.x = cellData.x;
+                        cellElement.dataset.y = cellData.y;
+                        
+                        if (!cellData.walls.top) cellElement.classList.add('no-wall-top');
+                        if (!cellData.walls.right) cellElement.classList.add('no-wall-right');
+                        if (!cellData.walls.bottom) cellElement.classList.add('no-wall-bottom');
+                        if (!cellData.walls.left) cellElement.classList.add('no-wall-left');
+                        
+                        if (cellData.stair) cellElement.classList.add('stair');
+                        if (floorIndex === 0) {
+                            if (cellData.x === 0 && cellData.y === 0) cellElement.classList.add('start');
+                            if (cellData.x === width - 1 && cellData.y === height - 1) cellElement.classList.add('goal');
+                        }
+                        container.appendChild(cellElement);
+                    });
+                });
+            }
+
+            function setupPlayer() {
+                playerPosition = { x: 0, y: 0, floor: 0 };
+                updatePlayerPosition();
+            }
+
+            function updatePlayerPosition() {
+                document.querySelectorAll('.player').forEach(el => el.classList.remove('player'));
+                const container = playerPosition.floor === 0 ? mazeContainer1F : mazeContainer2F;
+                const cell = container.querySelector(`.cell[data-x='${playerPosition.x}'][data-y='${playerPosition.y}']`);
+                if (cell) cell.classList.add('player');
+                
+                if (playerPosition.floor === 0 && playerPosition.x === width - 1 && playerPosition.y === height - 1) {
+                    setTimeout(() => {
+                        alert('クリア！おめでとうございます！');
+                        startNewGame();
+                    }, 100);
+                }
+            }
+            
+            function movePlayer(e) {
+                e.preventDefault();
+                const { x, y, floor } = playerPosition;
+                const currentCell = mazes[floor][y][x];
+                let moved = false;
+                
+                switch (e.key) {
+                    case 'ArrowUp': if (!currentCell.walls.top) { playerPosition.y--; moved = true; } break;
+                    case 'ArrowDown': if (!currentCell.walls.bottom) { playerPosition.y++; moved = true; } break;
+                    case 'ArrowLeft': if (!currentCell.walls.left) { playerPosition.x--; moved = true; } break;
+                    case 'ArrowRight': if (!currentCell.walls.right) { playerPosition.x++; moved = true; } break;
+                    case 'Enter':
+                        if (currentCell.stair) {
+                            playerPosition.floor = 1 - playerPosition.floor;
+                            updatePlayerPosition();
+                        }
+                        break;
+                }
+                if (moved) updatePlayerPosition();
+            }
+            
+            function solveMaze() {
+                const startNode = { x: 0, y: 0, floor: 0, path: [{x: 0, y: 0, floor: 0}] };
+                const queue = [startNode];
+                const visited = new Set(['0,0,0']);
+
+                while (queue.length > 0) {
+                    const current = queue.shift();
+                    if (current.x === width - 1 && current.y === height - 1 && current.floor === 0) {
+                        return current.path;
+                    }
+                    
+                    const { x, y, floor, path } = current;
+                    const currentCellData = mazes[floor][y][x];
+                    
+                    const moves = [ { dx: 0, dy: -1, wall: 'top' }, { dx: 0, dy: 1, wall: 'bottom' }, { dx: -1, dy: 0, wall: 'left' }, { dx: 1, dy: 0, wall: 'right' }];
+                    for (const move of moves) {
+                        if (!currentCellData.walls[move.wall]) {
+                            const newX = x + move.dx;
+                            const newY = y + move.dy;
+                            const state = `${newX},${newY},${floor}`;
+                            if (!visited.has(state)) {
+                                visited.add(state);
+                                const newPath = [...path, {x: newX, y: newY, floor: floor}];
+                                queue.push({ x: newX, y: newY, floor: floor, path: newPath });
+                            }
+                        }
+                    }
+
+                    if (currentCellData.stair) {
+                        const newFloor = 1 - floor;
+                        const state = `${x},${y},${newFloor}`;
+                        if (!visited.has(state)) {
+                            visited.add(state);
+                            const newPath = [...path, {x: x, y: y, floor: newFloor}];
+                            queue.push({ x: x, y: y, floor: newFloor, path: newPath });
+                        }
+                    }
+                }
+                return []; 
+            }
+
+            /** ★ 解答経路の階移動の回数を数える */
+            function countFloorChanges(path) {
+                if (!path || path.length < 2) return 0;
+                let changes = 0;
+                for (let i = 1; i < path.length; i++) {
+                    if (path[i].floor !== path[i-1].floor) {
+                        changes++;
+                    }
+                }
+                return changes;
+            }
+
+            /** ★ 解答表示/非表示を切り替える (解がない場合のアラート追加) */
+            function toggleSolution() {
+                isSolutionVisible = !isSolutionVisible;
+                if (isSolutionVisible) {
+                    if (solutionPath.length > 0) {
+                        drawSolutionDisplay();
+                        solveBtn.textContent = '正解を隠す';
+                    } else {
+                        // 解がない場合
+                        alert('正解ルートが見つかりませんでした。');
+                        isSolutionVisible = false; // ボタンの状態を元に戻す
+                    }
+                } else {
+                    clearSolutionDisplay();
+                    solveBtn.textContent = '正解のルートを表示';
+                }
+            }
+            
+            function drawSolutionDisplay() {
+                solutionPath.forEach(step => {
+                    const container = step.floor === 0 ? mazeContainer1F : mazeContainer2F;
+                    const cell = container.querySelector(`.cell[data-x='${step.x}'][data-y='${step.y}']`);
+                    if (cell) cell.classList.add('solution-path');
+                });
+            }
+            
+            function clearSolutionDisplay() {
+                 document.querySelectorAll('.solution-path').forEach(el => el.classList.remove('solution-path'));
+            }
+
+            generateBtn.addEventListener('click', startNewGame);
+            solveBtn.addEventListener('click', toggleSolution);
+            document.addEventListener('keydown', movePlayer);
+            startNewGame();
+        });
+    </script>
+
+</body>
+</html>
