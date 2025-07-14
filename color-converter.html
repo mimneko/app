@@ -1,294 +1,648 @@
----
-title: 色形式変換アプリ
-date: 2024-10-04
-layout: empty
----
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>色形式変換アプリ</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+    <title>色形式の変換</title>
+    <!-- Google Fonts (Inter) と Font Awesome Icons を読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /*
+         * ===============================================
+         * 基本スタイルとリセット
+         * ===============================================
+         */
         :root {
-            --primary-color: #273747;
-            --background-color: #f5f6fa;
-            --text-color: #2c3e50;
-            --border-color: #dcdde1;
+            --color-primary: #3b82f6;
+            --color-text: #1f2937;
+            --color-text-muted: #6b7280;
+            --color-bg: #f3f4f6;
+            --color-surface: #ffffff;
+            --color-border: #d1d5db;
+            --color-red: #ef4444;
+            --color-green: #22c55e;
+            --color-blue: #3b82f6;
+
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --border-radius: 0.5rem;
         }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: var(--background-color);
-            color: var(--text-color);
+            min-height: 100vh;
+            padding: 1.5rem;
         }
+
+        /*
+         * ===============================================
+         * レイアウトコンポーネント
+         * ===============================================
+         */
         .container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            max-width: 600px;
             width: 100%;
+            max-width: 64rem; /* 1024px */
+            margin: 0 auto;
+        }
+
+        .page-header {
             text-align: center;
+            margin-bottom: 2rem;
         }
-        .color-sample {
-            width: 100%;
-            height: 150px;
-            margin: 1.5rem 0;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            user-select: none;  /* テキスト選択を無効にする */
-            -webkit-user-select: none; /* Chrome, Safari, Opera */
-            -moz-user-select: none;    /* Firefox */
-            -ms-user-select: none;     /* Internet Explorer/Edge */
-        }
-        .panes {
-            display: flex;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-        }
-        .pane {
-            flex: 1;
-            padding: 1rem;
-            border-radius: 10px;
-            background-color: var(--background-color);
-        }
-        .input-group {
-            margin-bottom: 1rem;
-        }
-        input[type="text"], input[type="number"] {
-            width: 5.5rem;
-            padding: 0.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            font-size: 1rem;
-            text-align: right;
-        }
-        input[type="number"] {
-            width: 4rem;
-        }
-        input[type="range"] {
-            width: 100%;
-            margin-top: 0.5rem;
-        }
-        .current-values {
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-align: center;
-        }
-        .hex-group {
-            display: inline-block;
-            text-align: center;
-        }
-        .hex-group * {
-            margin: 0 5px;
-        }
-        button {
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            transition: background-color 0.3s;
-            user-select: none;  /* テキスト選択を無効にする */
-            -webkit-user-select: none; /* Chrome, Safari, Opera */
-            -moz-user-select: none;    /* Firefox */
-            -ms-user-select: none;     /* Internet Explorer/Edge */
-        }
-        button:hover {
-            background-color: #3b5163;
-        }
-        h3 {
+
+        .page-header__title {
             margin-top: 0;
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: #111827;
         }
-        label {
-            display: inline-block;
-            text-align: right;
+
+        .page-header__subtitle {
+            margin-top: 0.5rem;
+            color: var(--color-text-muted);
         }
-    </style>
-    <!-- Toastr CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <style>
-        #toast-container>div {
-            background-color: white;
-            color: var(--text-color);
-            padding: 15px;
-            margin: 10px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .converters-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /*
+         * ===============================================
+         * カードコンポーネント
+         * ===============================================
+         */
+        .card {
+            background-color: var(--color-surface);
+            padding: 1.25rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--color-border);
+        }
+
+        .card__title {
+            display: block;
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+            color: #111827;
+        }
+
+        /*
+         * ===============================================
+         * フォーム要素コンポーネント
+         * ===============================================
+         */
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background-color: #f9fafb;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .input-group__prefix {
+            padding-left: 0.5rem;
+            font-size: 1.125rem;
+            color: var(--color-text-muted);
+        }
+
+        .input-field {
+            width: 100%;
+            background-color: transparent;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 1.125rem;
+            letter-spacing: 0.1em;
+            border: none;
+            outline: none;
+        }
+
+        .copy-button {
+            padding: 0.5rem;
+            color: var(--color-text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            transition: color 150ms, background-color 150ms;
+        }
+
+        .copy-button:hover {
+            color: #1f2937;
+            background-color: #e5e7eb;
+        }
+
+        /*
+         * ===============================================
+         * スライダーと数値入力ステッパー
+         * ===============================================
+         */
+        .slider-group-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .slider-group {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider-group__label {
+            font-weight: 700;
+            justify-self: start;
+        }
+        .slider-group__label--red { color: var(--color-red); }
+        .slider-group__label--green { color: var(--color-green); }
+        .slider-group__label--blue { color: var(--color-blue); }
+
+        .slider-group__control {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #d1d5db;
+            border-radius: 9999px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        .slider-group__control:hover {
+            opacity: 1;
+        }
+        .slider-group__control::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--color-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 4px solid var(--color-surface);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+        }
+        .slider-group__control::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: var(--color-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 4px solid var(--color-surface);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+        }
+        
+        .number-input-stepper {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--color-border);
+            border-radius: 0.375rem;
+            overflow: hidden;
+            transition: box-shadow 150ms;
+        }
+        .number-input-stepper:focus-within {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px var(--color-primary);
+        }
+
+        .stepper-button {
+            background-color: #f9fafb;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text-muted);
+            font-weight: bold;
+            transition: background-color 150ms;
+        }
+        .stepper-button:hover {
+            background-color: #e5e7eb;
+        }
+
+        .slider-group__value {
+            width: 4em;
+            background-color: var(--color-surface);
             text-align: center;
+            border: none;
+            border-left: 1px solid var(--color-border);
+            border-right: 1px solid var(--color-border);
+            padding: 0.4rem 0.25rem;
+            outline: none;
+            -moz-appearance: textfield;
         }
-        #toast-container>div:hover {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            opacity: .8;
-            filter: alpha(opacity=80);
-            cursor: initial;
+        .slider-group__value::-webkit-outer-spin-button,
+        .slider-group__value::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /*
+         * ===============================================
+         * カラーピッカーコンポーネント
+         * ===============================================
+         */
+        .color-picker-container {
+            min-height: 24rem;
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        .color-picker {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 100%;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 0;
+        }
+        .color-picker::-moz-color-swatch {
+            border: none;
+            border-radius: 0;
+        }
+
+        /*
+         * ===============================================
+         * トースト通知コンポーネント
+         * ===============================================
+         */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 2rem;
+            color: white;
+            padding: 0.75rem 1.5rem 0.9rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-xl);
+            font-size: 1.125rem;
+            opacity: 0;
+            transform: translateY(2rem);
+            transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+        }
+        .toast--visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast--success {
+            background-color: #a9e48b;
+            color: #111827;
+        }
+        .toast--error {
+            background-color: #f74141;
+            color: #f9fafb;
+        }
+
+        /*
+         * ===============================================
+         * レスポンシブデザイン
+         * ===============================================
+         */
+        @media (min-width: 768px) {
+            .page-header__title {
+                font-size: 3rem;
+                line-height: 1;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .main-content {
+                grid-template-columns: 2fr 3fr;
+            }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <div class="color-sample" id="colorSample"></div>
-        <div class="hex-group">
-            <label>カラーコード：</label>
-            <input type="text" id="hexInput" maxlength="7">
-            <button id="toggleCase"><i class="fas fa-text-height"></i></button>
-            <button id="copyHex"><i class="fa-solid fa-clipboard"></i></button>
-        </div>
-        <div style="margin-top: 1.5rem;">
-            <label>カラーピッカー：</label>
-            <input type="color" id="colorPicker" name="pickedColor">
-        </div>
-        <div class="panes">
-            <div class="pane">
-                <h3><div class="current-values" id="rgbValues"></div></h3>
-                <div class="input-group">
-                    <label>R:</label>
-                    <input type="number" id="rInput" min="0" max="255">
-                    <input type="range" id="rSlider" min="0" max="255">
+        <header class="page-header">
+            <h1 class="page-header__title">色形式の変換</h1>
+            <p class="page-header__subtitle">HEX, RGB, HSV の相互変換</p>
+        </header>
+
+        <main class="main-content">
+
+            <!-- 左側: カラーピッカー -->
+            <div class="color-picker-container">
+                <input type="color" id="colorPicker" class="color-picker">
+            </div>
+
+            <!-- 右側: 各種コンバーター -->
+            <div class="converters-container">
+                <!-- HEX -->
+                <div class="card">
+                    <h3 class="card__title">HEX</h3>
+                    <div class="input-group">
+                        <span class="input-group__prefix">#</span>
+                        <input type="text" id="hexInput" class="input-field">
+                        <button id="copyHex" title="コピー" class="copy-button">
+                            <i class="fa-solid fa-clipboard"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label>G:</label>
-                    <input type="number" id="gInput" min="0" max="255">
-                    <input type="range" id="gSlider" min="0" max="255">
+
+                <!-- RGB -->
+                <div class="card">
+                    <h3 class="card__title">RGB</h3>
+                    <div class="slider-group-container">
+                        <!-- R -->
+                        <div class="slider-group">
+                            <label for="rInput" class="slider-group__label slider-group__label--red">R</label>
+                            <input type="range" id="rSlider" min="0" max="255" class="slider-group__control">
+                            <div class="number-input-stepper">
+                                <button class="stepper-button" type="button" data-target="rInput" data-step="-1">-</button>
+                                <input type="number" id="rInput" min="0" max="255" class="slider-group__value">
+                                <button class="stepper-button" type="button" data-target="rInput" data-step="1">+</button>
+                            </div>
+                        </div>
+                        <!-- G -->
+                        <div class="slider-group">
+                            <label for="gInput" class="slider-group__label slider-group__label--green">G</label>
+                            <input type="range" id="gSlider" min="0" max="255" class="slider-group__control">
+                            <div class="number-input-stepper">
+                                <button class="stepper-button" type="button" data-target="gInput" data-step="-1">-</button>
+                                <input type="number" id="gInput" min="0" max="255" class="slider-group__value">
+                                <button class="stepper-button" type="button" data-target="gInput" data-step="1">+</button>
+                            </div>
+                        </div>
+                        <!-- B -->
+                        <div class="slider-group">
+                            <label for="bInput" class="slider-group__label slider-group__label--blue">B</label>
+                            <input type="range" id="bSlider" min="0" max="255" class="slider-group__control">
+                            <div class="number-input-stepper">
+                                <button class="stepper-button" type="button" data-target="bInput" data-step="-1">-</button>
+                                <input type="number" id="bInput" min="0" max="255" class="slider-group__value">
+                                <button class="stepper-button" type="button" data-target="bInput" data-step="1">+</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label>B:</label>
-                    <input type="number" id="bInput" min="0" max="255">
-                    <input type="range" id="bSlider" min="0" max="255">
+
+                <!-- HSV -->
+                <div class="card">
+                    <h3 class="card__title">HSV</h3>
+                    <div class="slider-group-container">
+                        <!-- H -->
+                        <div class="slider-group">
+                            <label for="hInput" class="slider-group__label">H</label>
+                            <input type="range" id="hSlider" min="0" max="360" class="slider-group__control">
+                            <div class="number-input-stepper">
+                                <button class="stepper-button" type="button" data-target="hInput" data-step="-1">-</button>
+                                <input type="number" id="hInput" min="0" max="360" class="slider-group__value">
+                                <button class="stepper-button" type="button" data-target="hInput" data-step="1">+</button>
+                            </div>
+                        </div>
+                        <!-- S -->
+                        <div class="slider-group">
+                            <label for="sInput" class="slider-group__label">S</label>
+                            <input type="range" id="sSlider" min="0" max="100" class="slider-group__control">
+                            <div class="number-input-stepper">
+                                <button class="stepper-button" type="button" data-target="sInput" data-step="-1">-</button>
+                                <input type="number" id="sInput" min="0" max="100" class="slider-group__value">
+                                <button class="stepper-button" type="button" data-target="sInput" data-step="1">+</button>
+                            </div>
+                        </div>
+                        <!-- V -->
+                        <div class="slider-group">
+                            <label for="vInput" class="slider-group__label">V</label>
+                            <input type="range" id="vSlider" min="0" max="100" class="slider-group__control">
+                            <div class="number-input-stepper">
+                                <button class="stepper-button" type="button" data-target="vInput" data-step="-1">-</button>
+                                <input type="number" id="vInput" min="0" max="100" class="slider-group__value">
+                                <button class="stepper-button" type="button" data-target="vInput" data-step="1">+</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="pane">
-                <h3><div class="current-values" id="hsvValues"></div></h3>
-                <div class="input-group">
-                    <label>H:</label>
-                    <input type="number" id="hInput" min="0" max="360">
-                    <input type="range" id="hSlider" min="0" max="360">
-                </div>
-                <div class="input-group">
-                    <label>S:</label>
-                    <input type="number" id="sInput" min="0" max="100">
-                    <input type="range" id="sSlider" min="0" max="100">
-                </div>
-                <div class="input-group">
-                    <label>L:</label>
-                    <input type="number" id="vInput" min="0" max="100">
-                    <input type="range" id="vSlider" min="0" max="100">
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
+
+    <!-- カスタム通知（トースト） -->
+    <div id="toast" class="toast">
+        Copied to clipboard!
+    </div>
+
     <script>
-        const colorSample = document.getElementById('colorSample');
+        // DOM要素の取得
+        const colorPicker = document.getElementById('colorPicker');
         const hexInput = document.getElementById('hexInput');
-        const toggleCase = document.getElementById('toggleCase');
         const copyHex = document.getElementById('copyHex');
+
         const rInput = document.getElementById('rInput');
         const gInput = document.getElementById('gInput');
         const bInput = document.getElementById('bInput');
-        const hInput = document.getElementById('hInput');
-        const sInput = document.getElementById('sInput');
-        const vInput = document.getElementById('vInput');
         const rSlider = document.getElementById('rSlider');
         const gSlider = document.getElementById('gSlider');
         const bSlider = document.getElementById('bSlider');
+
+        const hInput = document.getElementById('hInput');
+        const sInput = document.getElementById('sInput');
+        const vInput = document.getElementById('vInput');
         const hSlider = document.getElementById('hSlider');
         const sSlider = document.getElementById('sSlider');
         const vSlider = document.getElementById('vSlider');
-        const rgbValues = document.getElementById('rgbValues');
-        const hsvValues = document.getElementById('hsvValues');
-        const colorPicker = document.getElementById('colorPicker');
 
-        function initializeColorPicker() {
-            const initialColor = rgbToHex(217, 236, 239); // #colorSampleの初期RGB値
-            colorPicker.value = initialColor;
-            hexInput.value = initialColor;
-            updateColor(); // 他の要素も更新
-        }
+        // 状態管理用のフラグ
+        let isUpdating = false;
 
-        function updateColor() {
-            const r = parseInt(rInput.value);
-            const g = parseInt(gInput.value);
-            const b = parseInt(bInput.value);
-            colorSample.style.backgroundColor = `rgb(${r},${g},${b})`;
-            hexInput.value = rgbToHex(r, g, b);
-            colorPicker.value = hexInput.value; // Update the color picker when RGB values change
-            const hsv = rgbToHsv(r, g, b);
-            hInput.value = hsv.h;
-            sInput.value = hsv.s;
-            vInput.value = hsv.v;
-            updateSliders();
-            updateCurrentValues();
-        }
+        // --- メインの更新関数 ---
+        function updateColor(source) {
+            if (isUpdating) return;
+            isUpdating = true;
 
-        function updateFromHex() {
-            const hex = hexInput.value;
-            const rgb = hexToRgb(hex);
-            if (rgb) {
-                rInput.value = rgb.r;
-                gInput.value = rgb.g;
-                bInput.value = rgb.b;
-                colorPicker.value = hex; // Update the color picker when hex value changes
-                updateColor();
+            let r, g, b, h, s, v;
+
+            try {
+                switch (source) {
+                    case 'rgb':
+                        r = parseInt(rInput.value || 0, 10);
+                        g = parseInt(gInput.value || 0, 10);
+                        b = parseInt(bInput.value || 0, 10);
+                        ({ h, s, v } = rgbToHsv(r, g, b));
+                        break;
+                    case 'hsv':
+                        h = parseInt(hInput.value || 0, 10);
+                        s = parseInt(sInput.value || 0, 10);
+                        v = parseInt(vInput.value || 0, 10);
+                        ({ r, g, b } = hsvToRgb(h, s, v));
+                        break;
+                    case 'hex':
+                        const hexValue = hexInput.value.startsWith('#') ? hexInput.value : '#' + hexInput.value;
+                        const rgb = hexToRgb(hexValue);
+                        if (rgb) {
+                            ({ r, g, b } = rgb);
+                            ({ h, s, v } = rgbToHsv(r, g, b));
+                        } else {
+                            throw new Error("Invalid HEX value");
+                        }
+                        break;
+                    case 'picker':
+                         const pickerRgb = hexToRgb(colorPicker.value);
+                         if (pickerRgb) {
+                            ({ r, g, b } = pickerRgb);
+                            ({ h, s, v } = rgbToHsv(r, g, b));
+                         } else {
+                            throw new Error("Invalid picker value");
+                         }
+                        break;
+                    default:
+                        throw new Error("Unknown source");
+                }
+                
+                // 全てのUI要素を更新
+                updateUI(r, g, b, h, s, v);
+
+            } catch (error) {
+                // console.error("Color update error:", error.message);
+            } finally {
+                isUpdating = false;
             }
         }
 
-        function updateFromHsv() {
-            const h = parseInt(hInput.value);
-            const s = parseInt(sInput.value);
-            const v = parseInt(vInput.value);
-            const rgb = hsvToRgb(h, s, v);
-            rInput.value = rgb.r;
-            gInput.value = rgb.g;
-            bInput.value = rgb.b;
-            colorPicker.value = rgbToHex(rgb.r, rgb.g, rgb.b); // Update the color picker when HSV values change
-            updateColor();
+        function updateUI(r, g, b, h, s, v) {
+            // RGB
+            rInput.value = r;
+            gInput.value = g;
+            bInput.value = b;
+            rSlider.value = r;
+            gSlider.value = g;
+            bSlider.value = b;
+
+            // HSV
+            hInput.value = h;
+            sInput.value = s;
+            vInput.value = v;
+            hSlider.value = h;
+            sSlider.value = s;
+            vSlider.value = v;
+
+            // HEX
+            const hex = rgbToHex(r, g, b);
+            hexInput.value = hex.replace('#','').toUpperCase();
+            
+            // Color Picker
+            colorPicker.value = hex;
         }
 
-        function updateSliders() {
-            rSlider.value = rInput.value;
-            gSlider.value = gInput.value;
-            bSlider.value = bInput.value;
-            hSlider.value = hInput.value;
-            sSlider.value = sInput.value;
-            vSlider.value = vInput.value;
+
+        // --- イベントリスナー ---
+        function addEventListeners() {
+            // RGB
+            [rInput, gInput, bInput].forEach(input => input.addEventListener('input', () => updateColor('rgb')));
+            [rSlider, gSlider, bSlider].forEach(slider => {
+                slider.addEventListener('input', () => {
+                    document.getElementById(slider.id.replace('Slider', 'Input')).value = slider.value;
+                    updateColor('rgb');
+                });
+            });
+
+            // HSV
+            [hInput, sInput, vInput].forEach(input => input.addEventListener('input', () => updateColor('hsv')));
+            [hSlider, sSlider, vSlider].forEach(slider => {
+                slider.addEventListener('input', () => {
+                    document.getElementById(slider.id.replace('Slider', 'Input')).value = slider.value;
+                    updateColor('hsv');
+                });
+            });
+            
+            // HEX
+            hexInput.addEventListener('input', () => updateColor('hex'));
+
+            // Color Picker
+            colorPicker.addEventListener('input', () => updateColor('picker'));
+
+            // Copy Button
+            copyHex.addEventListener('click', () => copyToClipboard('#' + hexInput.value));
+
+            // Stepper Buttons
+            document.querySelectorAll('.stepper-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const targetId = button.dataset.target;
+                    const step = parseInt(button.dataset.step, 10);
+                    const input = document.getElementById(targetId);
+
+                    if (!input) return;
+
+                    const min = parseInt(input.min, 10);
+                    const max = parseInt(input.max, 10);
+                    let currentValue = parseInt(input.value, 10);
+
+                    if (isNaN(currentValue)) currentValue = 0;
+
+                    let newValue = currentValue + step;
+                    
+                    newValue = Math.max(min, Math.min(max, newValue));
+
+                    input.value = newValue;
+
+                    // Dispatch input event to trigger color updates
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+            });
         }
 
-        function updateCurrentValues() {
-            rgbValues.textContent = `RGB(${rInput.value}, ${gInput.value}, ${bInput.value})`;
-            hsvValues.textContent = `HSL(${hInput.value}, ${sInput.value}, ${vInput.value})`;
-        }
-
-        function updateFromPicker() {
-            const hex = colorPicker.value;
-            hexInput.value = hex;
-            updateFromHex();
-        }
-
+        // --- 色変換関数 ---
         function rgbToHex(r, g, b) {
-            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
         }
 
         function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
+            if (!hex || typeof hex !== 'string') return null;
+            let hexValue = hex.startsWith('#') ? hex.slice(1) : hex;
+            
+            if (hexValue.length === 3) {
+                hexValue = hexValue.split('').map(char => char + char).join('');
+            }
+
+            if (hexValue.length !== 6) return null;
+
+            const r = parseInt(hexValue.substring(0, 2), 16);
+            const g = parseInt(hexValue.substring(2, 4), 16);
+            const b = parseInt(hexValue.substring(4, 6), 16);
+            
+            if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
+
+            return { r, g, b };
         }
 
         function rgbToHsv(r, g, b) {
-            r /= 255, g /= 255, b /= 255;
+            r /= 255; g /= 255; b /= 255;
             const max = Math.max(r, g, b), min = Math.min(r, g, b);
             let h, s, v = max;
             const d = max - min;
@@ -307,93 +661,67 @@ layout: empty
         }
 
         function hsvToRgb(h, s, v) {
-            h /= 360;
-            s /= 100;
-            v /= 100;
+            s /= 100; v /= 100;
             let r, g, b;
-            const i = Math.floor(h * 6);
-            const f = h * 6 - i;
+            const i = Math.floor((h / 360) * 6);
+            const f = (h / 360) * 6 - i;
             const p = v * (1 - s);
             const q = v * (1 - f * s);
             const t = v * (1 - (1 - f) * s);
             switch (i % 6) {
-                case 0: r = v, g = t, b = p; break;
-                case 1: r = q, g = v, b = p; break;
-                case 2: r = p, g = v, b = t; break;
-                case 3: r = p, g = q, b = v; break;
-                case 4: r = t, g = p, b = v; break;
-                case 5: r = v, g = p, b = q; break;
+                case 0: r = v; g = t; b = p; break;
+                case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break;
+                case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break;
+                case 5: r = v; g = p; b = q; break;
             }
-            return {
-                r: Math.round(r * 255),
-                g: Math.round(g * 255),
-                b: Math.round(b * 255)
-            };
+            return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
         }
 
-        document.addEventListener('DOMContentLoaded', initializeColorPicker);
+        // --- ユーティリティ関数 ---
+        function copyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast(`コピーしました: ${text}`);
+            } catch (err) {
+                console.error('コピーに失敗しました: ', err);
+                showToast('コピーに失敗しました', true);
+            }
+            document.body.removeChild(textArea);
+        }
 
-        rInput.addEventListener('input', updateColor);
-        gInput.addEventListener('input', updateColor);
-        bInput.addEventListener('input', updateColor);
-        hexInput.addEventListener('input', updateFromHex);
-        hInput.addEventListener('input', updateFromHsv);
-        sInput.addEventListener('input', updateFromHsv);
-        vInput.addEventListener('input', updateFromHsv);
-        colorPicker.addEventListener('input', updateFromPicker);
-        rSlider.addEventListener('input', () => { rInput.value = rSlider.value; updateColor(); });
-        gSlider.addEventListener('input', () => { gInput.value = gSlider.value; updateColor(); });
-        bSlider.addEventListener('input', () => { bInput.value = bSlider.value; updateColor(); });
-        hSlider.addEventListener('input', () => { hInput.value = hSlider.value; updateFromHsv(); });
-        sSlider.addEventListener('input', () => { sInput.value = sSlider.value; updateFromHsv(); });
-        vSlider.addEventListener('input', () => { vInput.value = vSlider.value; updateFromHsv(); });
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            
+            toast.classList.remove('toast--success', 'toast--error');
+            toast.classList.add(isError ? 'toast--error' : 'toast--success');
+            
+            toast.classList.add('toast--visible');
 
-        toggleCase.addEventListener('click', () => {
-            hexInput.value = hexInput.value.toLowerCase() === hexInput.value ? 
-                hexInput.value.toUpperCase() : hexInput.value.toLowerCase();
-        });
+            setTimeout(() => {
+                toast.classList.remove('toast--visible');
+            }, 2500);
+        }
 
-        // コピー時にトースト（メッセージ）を表示
-        copyHex.addEventListener('click', () => {
-            navigator.clipboard.writeText(hexInput.value).then(() => {
-                toastr["info"]("カラーコードをクリップボードにコピーしました！", "コピー成功");
-            }).catch(err => {
-                console.error('コピーに失敗しました:', err);
-                toastr["error"]("コピーに失敗しました", "エラー");
-            });
-        });
+        // --- 初期化 ---
+        function initialize() {
+            addEventListeners();
+            // 初期カラーを設定
+            const initialRgb = { r: 227, g: 145, b: 254 };
+            const initialHsv = rgbToHsv(initialRgb.r, initialRgb.g, initialRgb.b);
+            updateUI(initialRgb.r, initialRgb.g, initialRgb.b, initialHsv.h, initialHsv.s, initialHsv.v);
+        }
 
-        // 初期カラーを設定
-        rInput.value = 217;
-        gInput.value = 236;
-        bInput.value = 239;
-        updateColor();
-    </script>
+        document.addEventListener('DOMContentLoaded', initialize);
 
-    <!-- https://codeseven.github.io/toastr/demo.html -->
-    <!-- Toastr JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-    <script>
-        // Toastr options
-        toastr.options = {
-            "closeButton": false,
-            "debug": false,
-            "newestOnTop": false,
-            "progressBar": false,
-            "positionClass": "toast-top-center",
-            "preventDuplicates": true,
-            "onclick": null,
-            "showDuration": "300",
-            "hideDuration": "1000",
-            "timeOut": "2000",
-            "extendedTimeOut": "0",
-            "showEasing": "swing",
-            "hideEasing": "linear",
-            "showMethod": "fadeIn",
-            "hideMethod": "fadeOut"
-        };
     </script>
 </body>
 </html>
