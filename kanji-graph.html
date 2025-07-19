@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漢字構成要素グラフ</title>
+
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://unpkg.com/cytoscape@3.19.1/dist/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/layout-base@2.0.0/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base@2.1.0/cose-base.js"></script>
+    <script src="https://unpkg.com/cytoscape-fcose@2.1.0/cytoscape-fcose.js"></script>
+    <script src="https://unpkg.com/cytoscape-panzoom@2.5.3/cytoscape-panzoom.js"></script>
+
+    <!-- Fonts and Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        /* --- Base Styles (New Design) --- */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --primary-color: #007bff;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin: 0 0 24px;
+            font-weight: 700;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+        }
+
+        /* --- Legend (New Design) --- */
+        .legend {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .legend-item span {
+            font-size: 0.9rem;
+        }
+
+        /* --- Cytoscape Graph Area (Old Design) --- */
+        #IdCytoscape {
+            width: 100%;
+            height: 580px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background-color: #ffffff;
+            position: relative;
+        }
+
+        /* Cytoscape Panzoom 非表示 */
+        .cy-panzoom {
+            display: none;
+        }
+
+        /* --- Controls (Old Design) --- */
+        #IdLayoutContainer,
+        #IdSearchContainer {
+            position: absolute;
+            z-index: 10;
+            right: 10px;
+        }
+
+        #IdLayoutContainer {
+            top: 10px;
+        }
+
+        #IdSearchContainer {
+            top: 60px;
+        }
+        
+        /* Form elements (Old Design) */
+        select, input[type="text"], button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            font-size: 16px;
+            color: #2c3e50;
+            background-color: #f9f9f9;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        select:hover, input[type="text"]:hover, button:hover {
+            background-color: #f0f0f0;
+        }
+
+        select:focus, input[type="text"]:focus, button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+        }
+        
+        input[type="text"] {
+            cursor: text;
+        }
+
+        #IdSearch {
+            width: 120px;
+            margin-right: 5px;
+        }
+
+        #IdSearchButton {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+        }
+
+        #IdSearchButton:hover {
+            background-color: #273747;
+        }
+
+
+        /* --- Accordion for Kanji List (New Design) --- */
+        details {
+            background-color: var(--card-bg);
+            margin: 30px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        details summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1em 1.5em;
+            background-color: #f8f9fa;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+        }
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+        }
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+        details summary::after {
+            content: '\f078'; /* Font Awesome chevron-down */
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            transition: transform 0.3s ease;
+            font-size: 0.9em;
+        }
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+        .accordion-content {
+            padding: 1.5em;
+        }
+        #kanji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .kanji-item {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        .alternative {
+            background-color: #e9ecef;
+        }
+
+        .kanji-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        .id-number {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+        .kanji {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 5px;
+        }
+        .origin {
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        /* Kanji type color styles */
+        .shokei { color: #3498db; } /* 象形 */
+        .shiji { color: #e74c3c; } /* 指事 */
+        .kaii { color: #2ecc71; } /* 会意 */
+        .keisei { color: #f39c12; } /* 形声 */
+        .kaiikeisei { color: #9b59b6; } /* 会意形声 */
+        .parts { color: #343a40; } /* パーツ */
+
+        /* --- Notification Message (New Design) --- */
+        #notification {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #dc3545;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: top 0.5s ease-in-out;
+            font-weight: 500;
+        }
+        #notification.show {
+            top: 20px;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            #IdCytoscape {
+                height: 450px;
+            }
+            #kanji-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>漢字構成要素グラフ</h1>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background-color: #3498db;"></div><span>象形：実物の形を表した文字</span></div>
+            <div class="legend-item"><div class="legend-color" style="background-color: #e74c3c;"></div><span>指事：抽象的な概念を図形化した文字</span></div>
+            <div class="legend-item"><div class="legend-color" style="background-color: #2ecc71;"></div><span>会意：複数の意味を組み合わせた文字</span></div>
+            <div class="legend-item"><div class="legend-color" style="background-color: #f39c12;"></div><span>形声：意味と音の組み合わせ</span></div>
+            <div class="legend-item"><div class="legend-color" style="background-color: #9b59b6;"></div><span>会意形声：会意と形声の併用</span></div>
+            <div class="legend-item"><div class="legend-color" style="background-color: #000000;"></div><span>パーツ：漢字の構成要素</span></div>
+        </div>
+
+        <div id="IdCytoscape">
+            <div id="IdLayoutContainer">
+                <select name="NmLayout" id="IdLayout">
+                    <option value="fcose" selected>Force-directed (F-CoSE)</option>
+                    <option value="grid">Grid</option>
+                    <option value="circle">Circle</option>
+                    <option value="concentric">Concentric</option>
+                    <option value="breadthfirst">Breadth-first</option>
+                </select>
+            </div>
+            <div id="IdSearchContainer">
+                <input type="text" id="IdSearch" placeholder="漢字を入力">
+                <button id="IdSearchButton">検索</button>
+            </div>
+        </div>
+        
+        <details open>
+            <summary>対応字体リスト</summary>
+            <div class="accordion-content">
+                <div id="kanji-grid">
+                    <!-- Kanji data will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </details>
+
+    </div>
+
+    <div id="notification"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // --- Configuration ---
+            const KANJI_DATA_URL = 'https://mimneko.github.io/kanji-graph/kanji-list.json';
+            // Node colors from the old design
+            const NODE_COLORS = {
+                '象形': '#3498db',
+                '指事': '#e74c3c',
+                '会意': '#2ecc71',
+                '形声': '#f39c12',
+                '会意形声': '#9b59b6',
+                'パーツ': '#000000'
+            };
+
+            // --- Main Initialization ---
+            fetchKanjiData();
+
+            /**
+             * Fetches data and initializes the application
+             */
+            function fetchKanjiData() {
+                fetch(KANJI_DATA_URL)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        initializeCytoscape(data);
+                        populateKanjiGrid(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching or processing kanji data:', error);
+                        showNotification('データの読み込みに失敗しました。');
+                    });
+            }
+
+            /**
+             * Initializes the Cytoscape graph
+             * @param {Array} nodesData - The raw node data from JSON
+             */
+            function initializeCytoscape(nodesData) {
+                const { nodes, edges } = processGraphData(nodesData);
+
+                const cy = cytoscape({
+                    container: $("#IdCytoscape"),
+                    elements: {
+                        nodes: nodes.map(node => ({ data: node })),
+                        edges: edges
+                    },
+                    // Basic styles are set here, but overridden by setStyles function
+                    style: [
+                        { selector: 'node', style: { 'background-color': '#666', 'label': '' } },
+                        { selector: 'edge', style: { 'width': 3, 'line-color': '#ccc', 'target-arrow-color': '#ccc', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier' } }
+                    ]
+                });
+
+                setStyles(cy.nodes(), cy.edges()); // Use the old styling function
+                setupPanzoom(cy);
+                setupEventListeners(cy);
+
+                // Set initial layout
+                runLayout(cy, "fcose");
+            }
+
+            /**
+             * Processes raw node data to create nodes and edges for Cytoscape
+             * @param {Array} nodesData - The raw node data
+             * @returns {Object} - An object containing processed nodes and edges
+             */
+            function processGraphData(nodesData) {
+                const nodes = JSON.parse(JSON.stringify(nodesData)); // Deep copy
+                const nodeMap = new Map(nodes.map(node => [node.id, node]));
+                const existingNodeIds = new Set(nodeMap.keys());
+                const edges = [];
+                
+                nodes.forEach(node => {
+                    if (node.alternative && nodeMap.has(node.alternative)) {
+                        const parentValue = "g_" + node.alternative;
+                        node.parent = parentValue;
+                        const altNode = nodeMap.get(node.alternative);
+                        if (altNode) altNode.parent = parentValue;
+                    }
+
+                    if (node.parent && !existingNodeIds.has(node.parent)) {
+                        nodes.push({ id: node.parent });
+                        existingNodeIds.add(node.parent);
+                    }
+
+                    if (node.components) {
+                        node.components.forEach(targetId => {
+                            edges.push({
+                                data: {
+                                    id: `${node.id}-${targetId}`,
+                                    source: targetId,
+                                    target: node.id
+                                }
+                            });
+                        });
+                    }
+                });
+                return { nodes, edges };
+            }
+
+            /**
+             * Applies visual styles to nodes and edges (Old Design)
+             * @param {Object} nodes - Cytoscape nodes collection
+             * @param {Object} edges - Cytoscape edges collection
+             */
+            function setStyles(nodes, edges) {
+                nodes.forEach(function (node) {
+                    var nodeColor = NODE_COLORS[node.data('type')] || '#ffffff';
+                    var borderColor = node.data('type') ? '#ffffff' : '#dddddd';
+                    node.style({
+                        "width": 80,
+                        "height": 80,
+                        "content": node.data('label') || ' ',
+                        "text-valign": "center",
+                        "text-halign": "center",
+                        "background-color": nodeColor,
+                        "color": "#ffffff",
+                        "font-size": "24px",
+                        "font-weight": "bold",
+                        "border-width": "2px",
+                        "border-color": borderColor,
+                        "transition-property": "background-color, border-color",
+                        "transition-duration": "0.3s"
+                    });
+                });
+                edges.forEach(function (edge) {
+                    edge.style({
+                        "curve-style": "bezier",
+                        "target-arrow-shape": "triangle",
+                        "line-color": "#95a5a6",
+                        "target-arrow-color": "#95a5a6",
+                        "width": 3,
+                        "opacity": 0.7
+                    });
+                });
+            }
+
+
+            /**
+             * Runs a specified layout on the graph
+             * @param {Object} cy - The Cytoscape instance
+             * @param {string} layoutName - The name of the layout to run
+             */
+            function runLayout(cy, layoutName) {
+                const layout = cy.layout({
+                    name: layoutName,
+                    fit: true,
+                    animate: true,
+                    animationDuration: 500,
+                    padding: 50
+                });
+                layout.run();
+            }
+            
+            /**
+             * Configures the panzoom UI
+             * @param {Object} cy - The Cytoscape instance
+             */
+            function setupPanzoom(cy) {
+                cy.panzoom({ /* Default options */ });
+            }
+
+            /**
+             * Sets up all UI event listeners
+             * @param {Object} cy - The Cytoscape instance
+             */
+            function setupEventListeners(cy) {
+                $("#IdLayout").change(() => runLayout(cy, $("#IdLayout").val()));
+
+                $("#IdSearchButton").on('click', () => focusOnNode(cy));
+                $("#IdSearch").keypress(e => {
+                    if (e.which == 13) {
+                        e.preventDefault();
+                        focusOnNode(cy);
+                    }
+                });
+                
+                // Stop propagation on controls (Old Design)
+                $('#IdLayoutContainer').on('mousedown mouseup click dblclick', e => e.stopPropagation());
+                $('#IdSearchContainer').on('mousedown mouseup click dblclick', e => e.stopPropagation());
+            }
+
+            /**
+             * Finds and centers the view on a specific node
+             * @param {Object} cy - The Cytoscape instance
+             */
+            function focusOnNode(cy) {
+                const searchTerm = $("#IdSearch").val();
+                if (!searchTerm) return;
+
+                const foundNode = cy.nodes().filter(ele => ele.data('label') === searchTerm);
+
+                if (foundNode.length > 0) {
+                    cy.animate({
+                        center: { eles: foundNode },
+                        zoom: 1, // Zoom level from old design
+                        duration: 1000
+                    });
+                } else {
+                    showNotification(`「${searchTerm}」は見つかりませんでした。`);
+                }
+            }
+            
+            /**
+             * Populates the grid with Kanji items
+             * @param {Array} data - The raw kanji data from JSON
+             */
+            function populateKanjiGrid(data) {
+                const grid = document.getElementById('kanji-grid');
+                if (!grid) return;
+
+                const sortedData = [...data].sort((a, b) => {
+                    const aPrefix = a.id.charAt(0);
+                    const bPrefix = b.id.charAt(0);
+                    const aNum = parseInt(a.id.slice(1), 10);
+                    const bNum = parseInt(b.id.slice(1), 10);
+
+                    if (aPrefix < bPrefix) return -1;
+                    if (aPrefix > bPrefix) return 1;
+                    return aNum - bNum;
+                });
+
+                const fragment = document.createDocumentFragment();
+                sortedData.forEach(kanji => {
+                    if (!kanji.label) return; 
+
+                    const kanjiItem = document.createElement('div');
+                    kanjiItem.classList.add('kanji-item');
+                    if (kanji.alternative) {
+                        kanjiItem.classList.add('alternative');
+                    }
+
+                    let typeClass = '';
+                    switch (kanji.type) {
+                        case '象形': typeClass = 'shokei'; break;
+                        case '指事': typeClass = 'shiji'; break;
+                        case '会意': typeClass = 'kaii'; break;
+                        case '形声': typeClass = 'keisei'; break;
+                        case '会意形声': typeClass = 'kaiikeisei'; break;
+                        case 'パーツ': typeClass = 'parts'; break;
+                    }
+
+                    kanjiItem.innerHTML = `
+                        <div class="id-number">${kanji.id}</div>
+                        <div class="kanji">${kanji.label}</div>
+                        <div class="origin ${typeClass}">${kanji.type || ''}</div>
+                    `;
+                    fragment.appendChild(kanjiItem);
+                });
+                grid.appendChild(fragment);
+            }
+
+            /**
+             * Shows a notification message at the top of the screen
+             * @param {string} message - The message to display
+             */
+            function showNotification(message) {
+                const notification = document.getElementById('notification');
+                if (!notification) return;
+
+                notification.textContent = message;
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
