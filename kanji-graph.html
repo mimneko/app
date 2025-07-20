@@ -112,7 +112,7 @@
         #IdSearchContainer {
             top: 60px;
         }
-        
+
         /* フォーム要素のスタイル */
         select, input[type="text"], button {
             padding: 10px 15px;
@@ -133,7 +133,7 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
         }
-        
+
         input[type="text"] {
             cursor: text;
         }
@@ -300,7 +300,7 @@
                 <button id="IdSearchButton">検索</button>
             </div>
         </div>
-        
+
         <details open>
             <summary>対応字体リスト</summary>
             <div class="accordion-content">
@@ -315,23 +315,19 @@
     <div id="notification"></div>
 
     <script>
-        // DOM（HTMLの構造）が完全に読み込まれたら、中の処理を実行する
         document.addEventListener("DOMContentLoaded", function () {
-            // --- 設定項目 ---
-            // 漢字データが格納されているJSONファイルのURL
             const KANJI_DATA_URL = 'https://mimneko.github.io/kanji-graph/kanji-list.json';
-            // 漢字の種別ごとのノード（グラフの点）の色を定義
             const NODE_COLORS = {
                 '象形': '#3498db',
                 '指事': '#e74c3c',
                 '会意': '#2ecc71',
                 '形声': '#f39c12',
                 '会意形声': '#9b59b6',
-                'パーツ': '#000000'
+                'パーツ': '#000000',
+                'default': '#6c757d'
             };
+            const getNodeColor = (type) => NODE_COLORS[type] || NODE_COLORS['default'];
 
-            // --- メイン処理の開始 ---
-            // 漢字データを取得し、アプリケーションの初期化を行う
             fetchKanjiData();
 
             /**
@@ -340,20 +336,16 @@
             function fetchKanjiData() {
                 fetch(KANJI_DATA_URL)
                     .then(response => {
-                        // HTTPレスポンスが正常でない場合はエラーを投げる
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
-                        // レスポンスをJSON形式に変換して返す
                         return response.json();
                     })
                     .then(data => {
-                        // データの取得に成功した場合、Cytoscapeグラフと漢字グリッドを初期化する
                         initializeCytoscape(data);
                         populateKanjiGrid(data);
                     })
                     .catch(error => {
-                        // データ取得や処理中にエラーが発生した場合の処理
                         console.error('漢字データの取得または処理中にエラーが発生しました:', error);
                         showNotification('データの読み込みに失敗しました。');
                     });
@@ -364,28 +356,62 @@
              * @param {Array} nodesData - JSONから読み込んだ生の漢字データ
              */
             function initializeCytoscape(nodesData) {
-                // グラフ描画用にデータを加工する
                 const { nodes, edges } = processGraphData(nodesData);
 
-                // Cytoscapeインスタンスを生成
                 const cy = cytoscape({
-                    container: $("#IdCytoscape"), // グラフを描画するHTML要素
+                    container: document.getElementById('IdCytoscape'),
                     elements: {
-                        nodes: nodes.map(node => ({ data: node })), // ノードデータ
-                        edges: edges // エッジ（ノード間の線）データ
+                        nodes: nodes.map(node => ({ data: node })),
+                        edges: edges
                     },
-                    // 基本的なスタイル。setStyles関数で上書きされる
                     style: [
-                        { selector: 'node', style: { 'background-color': '#666', 'label': '' } },
-                        { selector: 'edge', style: { 'width': 3, 'line-color': '#ccc', 'target-arrow-color': '#ccc', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier' } }
+                        {
+                            selector: 'node',
+                            style: {
+                                "width": 80,
+                                "height": 80,
+                                "content": 'data(label)',
+                                "text-valign": "center",
+                                "text-halign": "center",
+                                "color": "#ffffff",
+                                "font-size": "24px",
+                                "font-weight": "bold",
+                                "border-width": "2px",
+                                "border-color": "#ffffff",
+                                "transition-property": "background-color, border-color",
+                                "transition-duration": "0.3s",
+                                'background-color': 'data(color)' // ノードの色をデータから取得
+                            }
+                        },
+                        // 部品構成エッジ（有向）
+                        {
+                            selector: 'edge[type="component"]',
+                            style: {
+                                "curve-style": "bezier",
+                                "target-arrow-shape": "triangle",
+                                "width": 6,
+                                "opacity": 0.7,
+                                'line-color': 'data(color)', // エッジの色をデータから取得
+                                'target-arrow-color': 'data(color)' // 矢印の色をデータから取得
+                            }
+                        },
+                        // 異体字エッジ（無向、点線）
+                        {
+                            selector: 'edge[type="alternative"]',
+                            style: {
+                                "curve-style": "bezier",
+                                "target-arrow-shape": "none",
+                                "line-style": "dashed",
+                                "width": 7,
+                                "opacity": 0.8,
+                                'line-color': 'data(color)' // エッジの色をデータから取得
+                            }
+                        }
                     ]
                 });
 
-                setStyles(cy.nodes(), cy.edges()); // ノードとエッジに詳細なスタイルを適用
-                setupPanzoom(cy); // パン・ズーム機能を設定
-                setupEventListeners(cy); // UI操作のイベントリスナーを設定
-
-                // 初期レイアウトを適用
+                setupPanzoom(cy);
+                setupEventListeners(cy);
                 runLayout(cy, "fcose");
             }
 
@@ -395,81 +421,55 @@
              * @returns {Object} - 処理済みのノードとエッジを含むオブジェクト
              */
             function processGraphData(nodesData) {
-                const nodes = JSON.parse(JSON.stringify(nodesData)); // 元データを変更しないようにディープコピー
-                const nodeMap = new Map(nodes.map(node => [node.id, node])); // IDをキーとしてノードを高速に検索するためのMap
-                const existingNodeIds = new Set(nodeMap.keys()); // 既存のノードIDのセット
+                const nodes = JSON.parse(JSON.stringify(nodesData));
+                const nodeMap = new Map(nodes.map(node => [node.id, node]));
                 const edges = [];
-                
-                nodes.forEach(node => {
-                    // 異体字（alternative）を持つノードをグループ化するための処理
-                    if (node.alternative && nodeMap.has(node.alternative)) {
-                        const parentValue = "g_" + node.alternative; // 親ノードのIDを生成
-                        node.parent = parentValue; // 自分自身の親を設定
-                        const altNode = nodeMap.get(node.alternative);
-                        if (altNode) altNode.parent = parentValue; // 対応する異体字の親も設定
-                    }
+                const alternativePairs = new Set(); // 異体字ペアの重複を避けるためのセット
 
-                    // 親ノードが存在しない場合は、新しい親ノードを追加する
-                    if (node.parent && !existingNodeIds.has(node.parent)) {
-                        nodes.push({ id: node.parent });
-                        existingNodeIds.add(node.parent);
+                // 最初に各ノードに色情報を付与する
+                nodes.forEach(node => {
+                    node.color = getNodeColor(node.type);
+                });
+
+                nodes.forEach(node => {
+                    // 異体字（alternative）からエッジを生成する
+                    if (node.alternative && nodeMap.has(node.alternative)) {
+                        const sourceId = node.id;
+                        const targetId = node.alternative;
+                        const pairKey = [sourceId, targetId].sort().join('-');
+
+                        if (!alternativePairs.has(pairKey)) {
+                            edges.push({
+                                data: {
+                                    id: `alt-${sourceId}-${targetId}`,
+                                    source: sourceId,
+                                    target: targetId,
+                                    type: 'alternative',
+                                    color: node.color // 始点ノードの色を使用
+                                }
+                            });
+                            alternativePairs.add(pairKey);
+                        }
                     }
 
                     // 構成要素（components）からエッジを生成する
                     if (node.components) {
-                        node.components.forEach(targetId => {
-                            edges.push({
-                                data: {
-                                    id: `${node.id}-${targetId}`, // エッジの一意なID
-                                    source: targetId, // エッジの始点（部品）
-                                    target: node.id   // エッジの終点（漢字）
-                                }
-                            });
+                        node.components.forEach(sourceId => { // 部品が始点なのでsourceId
+                            if (nodeMap.has(sourceId)) {
+                                edges.push({
+                                    data: {
+                                        id: `${node.id}-${sourceId}`,
+                                        source: sourceId,
+                                        target: node.id,
+                                        type: 'component',
+                                        color: node.color // 終点ノード（自身）の色を使用
+                                    }
+                                });
+                            }
                         });
                     }
                 });
                 return { nodes, edges };
-            }
-
-            /**
-             * ノードとエッジに視覚的なスタイルを適用する
-             * @param {Object} nodes - Cytoscapeのノードコレクション
-             * @param {Object} edges - Cytoscapeのエッジコレクション
-             */
-            function setStyles(nodes, edges) {
-                // 全てのノードに対してスタイルを設定
-                nodes.forEach(function (node) {
-                    // ノードの種別に応じて色を決定。定義がなければ白
-                    var nodeColor = NODE_COLORS[node.data('type')] || '#ffffff';
-                    // 種別があるノードは白、ないノード（親ノードなど）はグレーの枠線
-                    var borderColor = node.data('type') ? '#ffffff' : '#dddddd';
-                    node.style({
-                        "width": 80, // 幅
-                        "height": 80, // 高さ
-                        "content": node.data('label') || ' ', // 表示するテキスト（漢字）
-                        "text-valign": "center", // テキストの垂直位置
-                        "text-halign": "center", // テキストの水平位置
-                        "background-color": nodeColor, // 背景色
-                        "color": "#ffffff", // テキストの色
-                        "font-size": "24px", // フォントサイズ
-                        "font-weight": "bold", // フォントの太さ
-                        "border-width": "2px", // 枠線の太さ
-                        "border-color": borderColor, // 枠線の色
-                        "transition-property": "background-color, border-color", // アニメーション効果の対象
-                        "transition-duration": "0.3s" // アニメーションの時間
-                    });
-                });
-                // 全てのエッジに対してスタイルを設定
-                edges.forEach(function (edge) {
-                    edge.style({
-                        "curve-style": "bezier", // 線の種類（ベジェ曲線）
-                        "target-arrow-shape": "triangle", // 矢印の形
-                        "line-color": "#95a5a6", // 線の色
-                        "target-arrow-color": "#95a5a6", // 矢印の色
-                        "width": 3, // 線の太さ
-                        "opacity": 0.7 // 透明度
-                    });
-                });
             }
 
             /**
@@ -479,15 +479,18 @@
              */
             function runLayout(cy, layoutName) {
                 const layout = cy.layout({
-                    name: layoutName, // レイアウト名
-                    fit: true, // グラフ全体が画面に収まるように調整
-                    animate: true, // レイアウト変更時にアニメーションを実行
-                    animationDuration: 500, // アニメーションの時間
-                    padding: 50 // 画面の端からの余白
+                    name: layoutName,
+                    fit: true,
+                    animate: true,
+                    animationDuration: 500,
+                    padding: 50,
+                    nodeRepulsion: 4500,
+                    idealEdgeLength: 100,
+                    gravity: 80
                 });
-                layout.run(); // レイアウトを実行
+                layout.run();
             }
-            
+
             /**
              * グラフのパン（移動）・ズーム機能を設定する
              * @param {Object} cy - Cytoscapeインスタンス
@@ -501,20 +504,16 @@
              * @param {Object} cy - Cytoscapeインスタンス
              */
             function setupEventListeners(cy) {
-                // レイアウト選択ドロップダウンが変更されたときの処理
                 $("#IdLayout").change(() => runLayout(cy, $("#IdLayout").val()));
 
-                // 検索ボタンがクリックされたときの処理
                 $("#IdSearchButton").on('click', () => focusOnNode(cy));
-                // 検索ボックスでEnterキーが押されたときの処理
                 $("#IdSearch").keypress(e => {
-                    if (e.which == 13) { // 13はEnterキーのキーコード
-                        e.preventDefault(); // フォームのデフォルト送信をキャンセル
+                    if (e.which == 13) {
+                        e.preventDefault();
                         focusOnNode(cy);
                     }
                 });
-                
-                // コントロールUI上でのマウスクリックがグラフに伝播しないようにする
+
                 $('#IdLayoutContainer').on('mousedown mouseup click dblclick', e => e.stopPropagation());
                 $('#IdSearchContainer').on('mousedown mouseup click dblclick', e => e.stopPropagation());
             }
@@ -524,25 +523,22 @@
              * @param {Object} cy - Cytoscapeインスタンス
              */
             function focusOnNode(cy) {
-                const searchTerm = $("#IdSearch").val(); // 検索ボックスから入力値を取得
-                if (!searchTerm) return; // 入力がなければ何もしない
+                const searchTerm = $("#IdSearch").val();
+                if (!searchTerm) return;
 
-                // 入力された漢字と一致するラベルを持つノードを検索
                 const foundNode = cy.nodes().filter(ele => ele.data('label') === searchTerm);
 
                 if (foundNode.length > 0) {
-                    // ノードが見つかった場合、そのノードが中心になるようにアニメーションさせる
                     cy.animate({
                         center: { eles: foundNode },
-                        zoom: 1,
+                        zoom: 1.2,
                         duration: 1000
                     });
                 } else {
-                    // ノードが見つからなかった場合、通知メッセージを表示
                     showNotification(`「${searchTerm}」は見つかりませんでした。`);
                 }
             }
-            
+
             /**
              * ページ下部のグリッドに、対応している漢字のリストを生成して表示する
              * @param {Array} data - JSONから読み込んだ生の漢字データ
@@ -551,7 +547,6 @@
                 const grid = document.getElementById('kanji-grid');
                 if (!grid) return;
 
-                // ID（例: k001, p001）のアルファベット順、次に数字順でソートする
                 const sortedData = [...data].sort((a, b) => {
                     const aPrefix = a.id.charAt(0);
                     const bPrefix = b.id.charAt(0);
@@ -563,19 +558,16 @@
                     return aNum - bNum;
                 });
 
-                // DOM操作のパフォーマンスを向上させるためにDocumentFragmentを使用
                 const fragment = document.createDocumentFragment();
                 sortedData.forEach(kanji => {
-                    if (!kanji.label) return; // ラベルがないデータ（親ノードなど）はスキップ
+                    if (!kanji.label) return;
 
                     const kanjiItem = document.createElement('div');
                     kanjiItem.classList.add('kanji-item');
-                    // 異体字の場合は背景色を変えるためのクラスを追加
                     if (kanji.alternative) {
                         kanjiItem.classList.add('alternative');
                     }
 
-                    // 漢字の種別に応じてCSSクラスを割り当てる
                     let typeClass = '';
                     switch (kanji.type) {
                         case '象形': typeClass = 'shokei'; break;
@@ -586,7 +578,6 @@
                         case 'パーツ': typeClass = 'parts'; break;
                     }
 
-                    // 表示するHTMLを生成
                     kanjiItem.innerHTML = `
                         <div class="id-number">${kanji.id}</div>
                         <div class="kanji">${kanji.label}</div>
@@ -594,7 +585,6 @@
                     `;
                     fragment.appendChild(kanjiItem);
                 });
-                // 完成した要素群を一度にDOMに追加する
                 grid.appendChild(fragment);
             }
 
@@ -607,8 +597,7 @@
                 if (!notification) return;
 
                 notification.textContent = message;
-                notification.classList.add('show'); // 'show'クラスを追加して表示
-                // 3秒後に'show'クラスを削除して非表示にする
+                notification.classList.add('show');
                 setTimeout(() => {
                     notification.classList.remove('show');
                 }, 3000);
