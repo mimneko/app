@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>漢字構成要素グラフ</title>
 
-    <!-- External Libraries -->
+    <!-- 外部ライブラリの読み込み -->
     <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://unpkg.com/cytoscape@3.19.1/dist/cytoscape.min.js"></script>
     <script src="https://unpkg.com/layout-base@2.0.0/layout-base.js"></script>
@@ -13,12 +13,12 @@
     <script src="https://unpkg.com/cytoscape-fcose@2.1.0/cytoscape-fcose.js"></script>
     <script src="https://unpkg.com/cytoscape-panzoom@2.5.3/cytoscape-panzoom.js"></script>
 
-    <!-- Fonts and Icons -->
+    <!-- フォントとアイコンの読み込み -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <style>
-        /* --- Base Styles (New Design) --- */
+        /* --- 基本スタイル --- */
         :root {
             --bg-color: #f8f9fa;
             --text-color: #212529;
@@ -53,7 +53,7 @@
             letter-spacing: 1px;
         }
 
-        /* --- Legend (New Design) --- */
+        /* --- 凡例 --- */
         .legend {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -81,7 +81,7 @@
             font-size: 0.9rem;
         }
 
-        /* --- Cytoscape Graph Area (Old Design) --- */
+        /* --- Cytoscape グラフエリア --- */
         #IdCytoscape {
             width: 100%;
             height: 580px;
@@ -92,12 +92,12 @@
             position: relative;
         }
 
-        /* Cytoscape Panzoom 非表示 */
+        /* Cytoscape Panzoom UIは非表示にする */
         .cy-panzoom {
             display: none;
         }
 
-        /* --- Controls (Old Design) --- */
+        /* --- 操作コントロール --- */
         #IdLayoutContainer,
         #IdSearchContainer {
             position: absolute;
@@ -113,7 +113,7 @@
             top: 60px;
         }
         
-        /* Form elements (Old Design) */
+        /* フォーム要素のスタイル */
         select, input[type="text"], button {
             padding: 10px 15px;
             border-radius: 8px;
@@ -154,7 +154,7 @@
         }
 
 
-        /* --- Accordion for Kanji List (New Design) --- */
+        /* --- 漢字リスト用アコーディオン --- */
         details {
             background-color: var(--card-bg);
             margin: 30px 0;
@@ -227,7 +227,7 @@
             font-size: 0.9em;
             font-weight: 500;
         }
-        /* Kanji type color styles */
+        /* 漢字の由来による色のスタイル */
         .shokei { color: #3498db; } /* 象形 */
         .shiji { color: #e74c3c; } /* 指事 */
         .kaii { color: #2ecc71; } /* 会意 */
@@ -235,7 +235,7 @@
         .kaiikeisei { color: #9b59b6; } /* 会意形声 */
         .parts { color: #343a40; } /* パーツ */
 
-        /* --- Notification Message (New Design) --- */
+        /* --- 通知メッセージ --- */
         #notification {
             position: fixed;
             top: -100px;
@@ -254,7 +254,7 @@
             top: 20px;
         }
 
-        /* --- Responsive Design --- */
+        /* --- レスポンシブデザイン --- */
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -305,7 +305,7 @@
             <summary>対応字体リスト</summary>
             <div class="accordion-content">
                 <div id="kanji-grid">
-                    <!-- Kanji data will be inserted here by JavaScript -->
+                    <!-- 漢字データはJavaScriptによってここに挿入されます -->
                 </div>
             </div>
         </details>
@@ -315,10 +315,12 @@
     <div id="notification"></div>
 
     <script>
+        // DOM（HTMLの構造）が完全に読み込まれたら、中の処理を実行する
         document.addEventListener("DOMContentLoaded", function () {
-            // --- Configuration ---
+            // --- 設定項目 ---
+            // 漢字データが格納されているJSONファイルのURL
             const KANJI_DATA_URL = 'https://mimneko.github.io/kanji-graph/kanji-list.json';
-            // Node colors from the old design
+            // 漢字の種別ごとのノード（グラフの点）の色を定義
             const NODE_COLORS = {
                 '象形': '#3498db',
                 '指事': '#e74c3c',
@@ -328,89 +330,99 @@
                 'パーツ': '#000000'
             };
 
-            // --- Main Initialization ---
+            // --- メイン処理の開始 ---
+            // 漢字データを取得し、アプリケーションの初期化を行う
             fetchKanjiData();
 
             /**
-             * Fetches data and initializes the application
+             * 外部のJSONファイルから漢字データを取得し、グラフとリストの生成処理を呼び出す
              */
             function fetchKanjiData() {
                 fetch(KANJI_DATA_URL)
                     .then(response => {
+                        // HTTPレスポンスが正常でない場合はエラーを投げる
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
+                        // レスポンスをJSON形式に変換して返す
                         return response.json();
                     })
                     .then(data => {
+                        // データの取得に成功した場合、Cytoscapeグラフと漢字グリッドを初期化する
                         initializeCytoscape(data);
                         populateKanjiGrid(data);
                     })
                     .catch(error => {
-                        console.error('Error fetching or processing kanji data:', error);
+                        // データ取得や処理中にエラーが発生した場合の処理
+                        console.error('漢字データの取得または処理中にエラーが発生しました:', error);
                         showNotification('データの読み込みに失敗しました。');
                     });
             }
 
             /**
-             * Initializes the Cytoscape graph
-             * @param {Array} nodesData - The raw node data from JSON
+             * Cytoscape.jsを使ってグラフを初期化し、描画する
+             * @param {Array} nodesData - JSONから読み込んだ生の漢字データ
              */
             function initializeCytoscape(nodesData) {
+                // グラフ描画用にデータを加工する
                 const { nodes, edges } = processGraphData(nodesData);
 
+                // Cytoscapeインスタンスを生成
                 const cy = cytoscape({
-                    container: $("#IdCytoscape"),
+                    container: $("#IdCytoscape"), // グラフを描画するHTML要素
                     elements: {
-                        nodes: nodes.map(node => ({ data: node })),
-                        edges: edges
+                        nodes: nodes.map(node => ({ data: node })), // ノードデータ
+                        edges: edges // エッジ（ノード間の線）データ
                     },
-                    // Basic styles are set here, but overridden by setStyles function
+                    // 基本的なスタイル。setStyles関数で上書きされる
                     style: [
                         { selector: 'node', style: { 'background-color': '#666', 'label': '' } },
                         { selector: 'edge', style: { 'width': 3, 'line-color': '#ccc', 'target-arrow-color': '#ccc', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier' } }
                     ]
                 });
 
-                setStyles(cy.nodes(), cy.edges()); // Use the old styling function
-                setupPanzoom(cy);
-                setupEventListeners(cy);
+                setStyles(cy.nodes(), cy.edges()); // ノードとエッジに詳細なスタイルを適用
+                setupPanzoom(cy); // パン・ズーム機能を設定
+                setupEventListeners(cy); // UI操作のイベントリスナーを設定
 
-                // Set initial layout
+                // 初期レイアウトを適用
                 runLayout(cy, "fcose");
             }
 
             /**
-             * Processes raw node data to create nodes and edges for Cytoscape
-             * @param {Array} nodesData - The raw node data
-             * @returns {Object} - An object containing processed nodes and edges
+             * 生の漢字データをCytoscapeが解釈できるノードとエッジの形式に変換する
+             * @param {Array} nodesData - JSONから読み込んだ生の漢字データ
+             * @returns {Object} - 処理済みのノードとエッジを含むオブジェクト
              */
             function processGraphData(nodesData) {
-                const nodes = JSON.parse(JSON.stringify(nodesData)); // Deep copy
-                const nodeMap = new Map(nodes.map(node => [node.id, node]));
-                const existingNodeIds = new Set(nodeMap.keys());
+                const nodes = JSON.parse(JSON.stringify(nodesData)); // 元データを変更しないようにディープコピー
+                const nodeMap = new Map(nodes.map(node => [node.id, node])); // IDをキーとしてノードを高速に検索するためのMap
+                const existingNodeIds = new Set(nodeMap.keys()); // 既存のノードIDのセット
                 const edges = [];
                 
                 nodes.forEach(node => {
+                    // 異体字（alternative）を持つノードをグループ化するための処理
                     if (node.alternative && nodeMap.has(node.alternative)) {
-                        const parentValue = "g_" + node.alternative;
-                        node.parent = parentValue;
+                        const parentValue = "g_" + node.alternative; // 親ノードのIDを生成
+                        node.parent = parentValue; // 自分自身の親を設定
                         const altNode = nodeMap.get(node.alternative);
-                        if (altNode) altNode.parent = parentValue;
+                        if (altNode) altNode.parent = parentValue; // 対応する異体字の親も設定
                     }
 
+                    // 親ノードが存在しない場合は、新しい親ノードを追加する
                     if (node.parent && !existingNodeIds.has(node.parent)) {
                         nodes.push({ id: node.parent });
                         existingNodeIds.add(node.parent);
                     }
 
+                    // 構成要素（components）からエッジを生成する
                     if (node.components) {
                         node.components.forEach(targetId => {
                             edges.push({
                                 data: {
-                                    id: `${node.id}-${targetId}`,
-                                    source: targetId,
-                                    target: node.id
+                                    id: `${node.id}-${targetId}`, // エッジの一意なID
+                                    source: targetId, // エッジの始点（部品）
+                                    target: node.id   // エッジの終点（漢字）
                                 }
                             });
                         });
@@ -420,116 +432,126 @@
             }
 
             /**
-             * Applies visual styles to nodes and edges (Old Design)
-             * @param {Object} nodes - Cytoscape nodes collection
-             * @param {Object} edges - Cytoscape edges collection
+             * ノードとエッジに視覚的なスタイルを適用する
+             * @param {Object} nodes - Cytoscapeのノードコレクション
+             * @param {Object} edges - Cytoscapeのエッジコレクション
              */
             function setStyles(nodes, edges) {
+                // 全てのノードに対してスタイルを設定
                 nodes.forEach(function (node) {
+                    // ノードの種別に応じて色を決定。定義がなければ白
                     var nodeColor = NODE_COLORS[node.data('type')] || '#ffffff';
+                    // 種別があるノードは白、ないノード（親ノードなど）はグレーの枠線
                     var borderColor = node.data('type') ? '#ffffff' : '#dddddd';
                     node.style({
-                        "width": 80,
-                        "height": 80,
-                        "content": node.data('label') || ' ',
-                        "text-valign": "center",
-                        "text-halign": "center",
-                        "background-color": nodeColor,
-                        "color": "#ffffff",
-                        "font-size": "24px",
-                        "font-weight": "bold",
-                        "border-width": "2px",
-                        "border-color": borderColor,
-                        "transition-property": "background-color, border-color",
-                        "transition-duration": "0.3s"
+                        "width": 80, // 幅
+                        "height": 80, // 高さ
+                        "content": node.data('label') || ' ', // 表示するテキスト（漢字）
+                        "text-valign": "center", // テキストの垂直位置
+                        "text-halign": "center", // テキストの水平位置
+                        "background-color": nodeColor, // 背景色
+                        "color": "#ffffff", // テキストの色
+                        "font-size": "24px", // フォントサイズ
+                        "font-weight": "bold", // フォントの太さ
+                        "border-width": "2px", // 枠線の太さ
+                        "border-color": borderColor, // 枠線の色
+                        "transition-property": "background-color, border-color", // アニメーション効果の対象
+                        "transition-duration": "0.3s" // アニメーションの時間
                     });
                 });
+                // 全てのエッジに対してスタイルを設定
                 edges.forEach(function (edge) {
                     edge.style({
-                        "curve-style": "bezier",
-                        "target-arrow-shape": "triangle",
-                        "line-color": "#95a5a6",
-                        "target-arrow-color": "#95a5a6",
-                        "width": 3,
-                        "opacity": 0.7
+                        "curve-style": "bezier", // 線の種類（ベジェ曲線）
+                        "target-arrow-shape": "triangle", // 矢印の形
+                        "line-color": "#95a5a6", // 線の色
+                        "target-arrow-color": "#95a5a6", // 矢印の色
+                        "width": 3, // 線の太さ
+                        "opacity": 0.7 // 透明度
                     });
                 });
             }
 
-
             /**
-             * Runs a specified layout on the graph
-             * @param {Object} cy - The Cytoscape instance
-             * @param {string} layoutName - The name of the layout to run
+             * 指定されたレイアウトアルゴリズムをグラフに適用する
+             * @param {Object} cy - Cytoscapeインスタンス
+             * @param {string} layoutName - 適用するレイアウトの名前
              */
             function runLayout(cy, layoutName) {
                 const layout = cy.layout({
-                    name: layoutName,
-                    fit: true,
-                    animate: true,
-                    animationDuration: 500,
-                    padding: 50
+                    name: layoutName, // レイアウト名
+                    fit: true, // グラフ全体が画面に収まるように調整
+                    animate: true, // レイアウト変更時にアニメーションを実行
+                    animationDuration: 500, // アニメーションの時間
+                    padding: 50 // 画面の端からの余白
                 });
-                layout.run();
+                layout.run(); // レイアウトを実行
             }
             
             /**
-             * Configures the panzoom UI
-             * @param {Object} cy - The Cytoscape instance
+             * グラフのパン（移動）・ズーム機能を設定する
+             * @param {Object} cy - Cytoscapeインスタンス
              */
             function setupPanzoom(cy) {
-                cy.panzoom({ /* Default options */ });
+                cy.panzoom({ /* デフォルトオプションを使用 */ });
             }
 
             /**
-             * Sets up all UI event listeners
-             * @param {Object} cy - The Cytoscape instance
+             * UI要素（レイアウト選択、検索など）のイベントリスナーをまとめて設定する
+             * @param {Object} cy - Cytoscapeインスタンス
              */
             function setupEventListeners(cy) {
+                // レイアウト選択ドロップダウンが変更されたときの処理
                 $("#IdLayout").change(() => runLayout(cy, $("#IdLayout").val()));
 
+                // 検索ボタンがクリックされたときの処理
                 $("#IdSearchButton").on('click', () => focusOnNode(cy));
+                // 検索ボックスでEnterキーが押されたときの処理
                 $("#IdSearch").keypress(e => {
-                    if (e.which == 13) {
-                        e.preventDefault();
+                    if (e.which == 13) { // 13はEnterキーのキーコード
+                        e.preventDefault(); // フォームのデフォルト送信をキャンセル
                         focusOnNode(cy);
                     }
                 });
                 
-                // Stop propagation on controls (Old Design)
+                // コントロールUI上でのマウスクリックがグラフに伝播しないようにする
                 $('#IdLayoutContainer').on('mousedown mouseup click dblclick', e => e.stopPropagation());
                 $('#IdSearchContainer').on('mousedown mouseup click dblclick', e => e.stopPropagation());
             }
 
             /**
-             * Finds and centers the view on a specific node
-             * @param {Object} cy - The Cytoscape instance
+             * 検索された漢字をグラフの中心に表示する
+             * @param {Object} cy - Cytoscapeインスタンス
              */
             function focusOnNode(cy) {
-                const searchTerm = $("#IdSearch").val();
-                if (!searchTerm) return;
+                const searchTerm = $("#IdSearch").val(); // 検索ボックスから入力値を取得
+                if (!searchTerm) return; // 入力がなければ何もしない
 
+                // 入力された漢字と一致するラベルを持つノードを検索
                 const foundNode = cy.nodes().filter(ele => ele.data('label') === searchTerm);
 
                 if (foundNode.length > 0) {
+                    // ノードが見つかった場合、そのノードが中心になるようにアニメーションさせる
                     cy.animate({
                         center: { eles: foundNode },
-                        zoom: 1, // Zoom level from old design
+                        zoom: 1,
                         duration: 1000
                     });
                 } else {
+                    // ノードが見つからなかった場合、通知メッセージを表示
                     showNotification(`「${searchTerm}」は見つかりませんでした。`);
                 }
             }
             
             /**
-             * Populates the grid with Kanji items
-             * @param {Array} data - The raw kanji data from JSON
+             * ページ下部のグリッドに、対応している漢字のリストを生成して表示する
+             * @param {Array} data - JSONから読み込んだ生の漢字データ
              */
             function populateKanjiGrid(data) {
                 const grid = document.getElementById('kanji-grid');
                 if (!grid) return;
 
+                // ID（例: k001, p001）のアルファベット順、次に数字順でソートする
                 const sortedData = [...data].sort((a, b) => {
                     const aPrefix = a.id.charAt(0);
                     const bPrefix = b.id.charAt(0);
@@ -541,16 +563,19 @@
                     return aNum - bNum;
                 });
 
+                // DOM操作のパフォーマンスを向上させるためにDocumentFragmentを使用
                 const fragment = document.createDocumentFragment();
                 sortedData.forEach(kanji => {
-                    if (!kanji.label) return; 
+                    if (!kanji.label) return; // ラベルがないデータ（親ノードなど）はスキップ
 
                     const kanjiItem = document.createElement('div');
                     kanjiItem.classList.add('kanji-item');
+                    // 異体字の場合は背景色を変えるためのクラスを追加
                     if (kanji.alternative) {
                         kanjiItem.classList.add('alternative');
                     }
 
+                    // 漢字の種別に応じてCSSクラスを割り当てる
                     let typeClass = '';
                     switch (kanji.type) {
                         case '象形': typeClass = 'shokei'; break;
@@ -561,6 +586,7 @@
                         case 'パーツ': typeClass = 'parts'; break;
                     }
 
+                    // 表示するHTMLを生成
                     kanjiItem.innerHTML = `
                         <div class="id-number">${kanji.id}</div>
                         <div class="kanji">${kanji.label}</div>
@@ -568,19 +594,21 @@
                     `;
                     fragment.appendChild(kanjiItem);
                 });
+                // 完成した要素群を一度にDOMに追加する
                 grid.appendChild(fragment);
             }
 
             /**
-             * Shows a notification message at the top of the screen
-             * @param {string} message - The message to display
+             * 画面上部に通知メッセージを一時的に表示する
+             * @param {string} message - 表示するメッセージ
              */
             function showNotification(message) {
                 const notification = document.getElementById('notification');
                 if (!notification) return;
 
                 notification.textContent = message;
-                notification.classList.add('show');
+                notification.classList.add('show'); // 'show'クラスを追加して表示
+                // 3秒後に'show'クラスを削除して非表示にする
                 setTimeout(() => {
                     notification.classList.remove('show');
                 }, 3000);
