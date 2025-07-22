@@ -1,35 +1,102 @@
-/* https://www.tak-dcxi.com/article/disable-hover-on-mobile-and-hover-implementation-example/, 参照2025-06-21 */
-
+/* ==========================================================
+リセット・共通設定
+https://www.tak-dcxi.com/article/disable-hover-on-mobile-and-hover-implementation-example/, 参照2025-06-21
+========================================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* === セクション === */
+/* ==========================================================
+テーマ定義
+========================================================== */
+:root {
+    /* ----------------------------------------------------------
+    1. カラーパレット
+    基本的な色の値を定義します。
+    ---------------------------------------------------------- */
+    /* --- プライマリーカラー --- */
+    --palette-blue-500: #4590b8;
+    --palette-blue-700: #1d4ed8;
 
+    /* --- アクセントカラー --- */
+    --palette-yellow-200: #fef08a;
+
+    /* --- 基本色 --- */
+    --palette-white: #fff;
+    --palette-black-alpha-50: rgba(0, 0, 0, 0.5);
+    --palette-black-alpha-20: rgba(0, 0, 0, 0.2);
+
+    /* --- グレーパレット --- */
+    --palette-gray-900: #1f2937;
+    --palette-gray-900-alpha-70: rgba(31, 41, 55, 0.7);
+    --palette-gray-700: #374151;
+    --palette-gray-500: #6b7280;
+    --palette-gray-300: #d1d5db;
+    --palette-gray-100: #f3f4f6;
+    --palette-gray-50: #f9fafb;
+
+    /* ----------------------------------------------------------
+    2. 意味的（セマンティック）な色の定義
+    パレットの色に「役割」を与えます。実際のスタイリングではこれらの変数を使用します。
+    ---------------------------------------------------------- */
+    /* --- テキストカラー --- */
+    --color-text-heading: var(--palette-gray-900);      /* 見出し */
+    --color-text-body: var(--palette-gray-700);         /* 本文 */
+    --color-text-subtle: var(--palette-gray-500);       /* 補足、キャプション */
+    --color-text-interactive: var(--palette-blue-500);  /* リンク、ボタンテキスト */
+    --color-text-inverted: var(--palette-white);        /* 反転色（濃い背景用） */
+
+    /* --- 背景色 --- */
+    --color-background-page: var(--palette-gray-50);         /* ページ全体 */
+    --color-background-surface: var(--palette-white);        /* コンテンツ領域 */
+    --color-background-subtle: var(--palette-gray-100);      /* コード、テーブルホバーなど */
+    --color-background-interactive: var(--palette-blue-500); /* ボタン */
+    --color-background-highlight: var(--palette-yellow-200); /* マーク */
+    --color-background-dark: var(--palette-gray-900);        /* テーブルヘッダー */
+    --color-background-backdrop: var(--palette-black-alpha-50); /* ダイアログ背景 */
+
+    /* --- ボーダーカラー --- */
+    --color-border-default: var(--palette-gray-300);    /* 標準ボーダー */
+    --color-border-strong: var(--palette-gray-700);     /* 強調ボーダー (h1, h2) */
+    --color-border-subtle: var(--palette-gray-500);     /* 控えめなボーダー (h3, h4) */
+    --color-border-interactive: var(--palette-blue-500);/* インタラクティブ要素のボーダー */
+
+    /* --- アイコンカラー --- */
+    --color-icon-default: var(--palette-gray-900-alpha-70);
+
+    /* --- 影 --- */
+    --shadow-interactive-focus: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    --shadow-dialog: 0 4px 15px var(--palette-black-alpha-20);
+}
+
+
+/* ==========================================================
+セクションレイアウト
+========================================================== */
 body {
     min-height: 100vh;
     line-height: 1.6;
-    color: #2c3e50;
-    background-color: #f9fafb;
+    color: var(--color-text-body);
+    background-color: var(--color-background-page);
     font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic Medium', 'Hiragino Sans', 
     'Meiryo', 'Noto Sans CJK JP', 'Roboto', 'MS PGothic', 'Helvetica Neue', Arial, sans-serif;
 }
 
-header {
-    margin-bottom: 20px;
+header, main, aside, footer {
+    margin: 0 auto;
     padding: 20px;
-    background-color: #fff;
-    text-align: center;
+    background-color: var(--color-background-surface);
 }
 
+header { margin-bottom: 20px; text-align: center; }
+footer { margin-top: 20px; text-align: center; }
+
 main, aside {
-    margin: 0 auto;
     padding: 30px;
     border-radius: 5px;
     max-width: 800px;
-    background: #fff;
 }
 
 @media (max-width: 768px) {
@@ -38,215 +105,200 @@ main, aside {
     }
 }
 
-footer {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #fff;
-    text-align: center;
-}
-
 article, section {
     margin: 40px 0;
     padding: 0;
 }
 
+/* ==========================================================
+見出しスタイル (h1-h6)
+========================================================== */
 h1, h2, h3, h4, h5, h6 {
     margin-top: 1.5em;
     margin-bottom: 0.8em;
-    padding-top: 5px;
-    padding-bottom: 6px;
-    color: #1a252f;
-    font-weight: 400;
+    color: var(--color-text-heading);
+    font-weight: 600;
     letter-spacing: 1px;
-}
-
-h2:first-child,
-h3:first-child,
-h4:first-child,
-h5:first-child,
-h6:first-child {
-    margin-top: 0;
+    border-left: none;
+    padding-left: 0;
 }
 
 h1 {
     margin-top: 0.8em;
-    padding-top: 20px;
-    padding-bottom: 23px;
-    border-top: 1px solid #cbd5e0;
-    border-bottom: 1px solid #cbd5e0;
-    text-align: center;
-    font-size: 2.2em;
-    letter-spacing: 2px;
+    padding-bottom: 0.4em;
+    border-bottom: 3px solid var(--color-border-strong);
+    font-size: 2.0em;
+    letter-spacing: 1.5px;
 }
 
 h2 {
-    border-left: 4px solid #4a5568;
-    padding-left: 16px;
     font-size: 1.5em;
+    padding: 0.5em 0.8em 0.5em 15px;
+    background: var(--color-background-subtle);
+    border-left: 5px solid var(--color-border-strong);
 }
 
 h3 {
-    border-left: 3px solid #4a5568;
-    padding-left: 17px;
-    font-size: 1.2em;
+    font-size: 1.4em;
+    padding-bottom: 0.3em;
+    padding-left: 20px;
+    border-bottom: 3px solid var(--color-border-subtle);
 }
 
 h4 {
-    border-left: 2px solid #4a5568;
-    padding-left: 18px;
-    font-size: 1.05em;
+    font-size: 1.3em;
+    padding-left: 17px;
+    border-left: 3px solid var(--color-border-subtle);
 }
 
 h5 {
-    border-left: 2px solid #cbd5e0;
-    padding-left: 18px;
-    font-size: 1em;
+    font-size: 1.2em;
+    padding-left: 20px;
+    color: var(--color-text-body);
 }
 
 h6 {
-    border-left: 2px dotted #cbd5e0;
-    padding-left: 18px;
-    font-size: 0.95em;
+    font-size: 1.1em;
+    padding-left: 20px;
+    color: var(--color-text-subtle);
 }
 
-/* === コンテンツのグループ化 === */
-
-p {
-    padding-bottom: 1em;
+h2:first-child, h3:first-child, h4:first-child, h5:first-child, h6:first-child,
+h2 + h3, h3 + h4, h4 + h5, h5 + h6 {
+    margin-top: 0;
 }
+
+/* ==========================================================
+コンテンツのグループ化
+========================================================== */
+p { padding-bottom: 1em; }
 
 hr {
     margin: 40px 0;
     border: 0;
     height: 1px;
-    background-color: #d1d5db;
+    background-color: var(--color-border-default);
 }
 
-ol, dl {
-    margin-top: 1em;
-    margin-bottom: 1em;
-    padding-inline-start: 40px;
-}
+ol { padding-inline-start: 40px; }
+ol li { margin-bottom: 5px; padding-left: 5px; }
+ul { padding-inline-start: 45px; }
+ul li { margin-bottom: 5px; padding-left: 0; }
+dl { padding-inline-start: 30px; }
+dl dt { font-weight: bold; }
+dl dd { margin-left: 1em; margin-bottom: 0.5em; }
 
-ol li {
-    margin-bottom: 5px;
-    padding-left: 5px;
-}
-
-ul {
-    margin-top: 1em;
-    margin-bottom: 1em;
-    padding-inline-start: 45px;
-}
-
-ul li {
-    margin-bottom: 5px;
-    padding-left: 0;
-}
-
-dl dt {
-    font-weight: bold;
-}
-
-dl dd {
-    margin-left: 1em;
-    margin-bottom: 0.5em;
-}
-
+/* ==========================================================
+コード・キーボード・サンプル
+========================================================== */
 pre, code:not(pre code), kbd, samp {
     padding: 1px 5px 2px;
-    background-color: #f3f4f6;
+    background-color: var(--color-background-subtle);
     border-radius: 4px;
     font-family: 'Roboto Mono', 'Kosugi Maru', Consolas, monospace, sans-serif;
 }
 
 pre {
+    margin: 20px 0;
     padding: 20px;
     overflow-x: auto;
 }
 
+@media (min-width: 376px) {
+    pre { margin: 20px auto; width: 90%; }
+}
+
 code {
+    font-size: 0.9em;
     font-family: 'Roboto Mono', 'Kosugi Maru', Consolas, monospace, sans-serif;
 }
 
-/* https://pote-chil.com/css-stock/ja/quote#1, 参照2025-06-19 */
+/* ==========================================================
+引用（blockquote）
+========================================================== */
 blockquote {
-    margin: 20px auto;
+    margin: 20px 0;
     padding: 2em 1.5em 1.9em;
-    border-left: 4px solid #cbd5e0;
-    background: #f8fafc;
-    width: 90%;
+    border-left: 4px solid var(--color-border-default);
+    background: var(--color-background-page);
 }
 
-blockquote:has(cite) {
-    padding-bottom: 1em;
+@media (min-width: 376px) {
+    blockquote { margin: 20px auto; width: 90%; }
 }
 
-blockquote > :last-child {
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
+blockquote:has(cite) { padding-bottom: 1em; }
+blockquote > :last-child { margin-bottom: 0; padding-bottom: 0; }
+blockquote cite { display: block; font-size: .8em; text-align: right; }
 
-blockquote cite {
-    display: block;
-    font-size: .8em;
-    text-align: right;
-}
-
-/* === テキストの意味 === */
-
+/* ==========================================================
+テキストの意味・リンク・マーク
+========================================================== */
 a {
-    color: #4590b8;
+    color: var(--color-text-interactive);
     text-decoration: none;
     transition: color 0.2s;
 }
 
 a:focus-visible {
-    color: #1d4ed8;
+    color: var(--palette-blue-700);
     text-decoration: underline;
 }
 
 @media (any-hover: hover) {
     a:hover {
-        color: #1d4ed8;
+        color: var(--palette-blue-700);
         text-decoration: underline;
     }
 }
 
 mark {
     padding: 2px 4px;
-    background-color: #fef08a;
+    background-color: var(--color-background-highlight);
     border-radius: 3px;
 }
 
-/* === テーブル === */
-
+/* ==========================================================
+テーブル
+========================================================== */
 table {
-    margin: 20px 0;
+    margin: 20px auto;
     width: 100%;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border-default);
+    border: none;
     border-collapse: collapse;
-    background: #fff;
+    background: var(--color-background-surface);
     font-size: 0.9em;
+    width: 90%;
 }
 
 caption {
     margin-top: 10px;
     caption-side: bottom;
-    color: #6b7280;
+    color: var(--color-text-subtle);
     font-size: 0.9em;
 }
 
 thead, tfoot {
-    background-color: #1a252f;
-    color: #fff;
+    background-color: var(--color-background-dark);
+    color: var(--color-text-inverted);
+    border: 1px solid var(--color-background-dark);
+
+    background: var(--color-background-subtle);
+    color: var(--color-text-body);
+    border: 1px solid var(--color-background-subtle);
+    font-weight: bold;
+}
+thead {
+    border-bottom: none;
+}
+tfoot {
+    border-top: none;
 }
 
 th {
     padding: 15px 12px;
     text-align: center;
-    font-weight: 500;
-    font-size: 0.85em;
     letter-spacing: 0.5px;
 }
 
@@ -258,98 +310,82 @@ td {
 }
 
 tbody td {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border-default);
+    border-top: none;
+    border-bottom: none;
+    border: none;
 }
-
-tbody tr:nth-child(even) {
-    background: #f8fafc;
+/*
+thead + tbody tr:first-child td {
+    border-top: none;
 }
+tbody tr:last-child td {
+    border-bottom: none;
+}*/
+tbody tr:nth-child(even) { background: var(--color-background-page); }
 
-tbody tr:focus-visible {
-    background: #edf2f7;
-}
-
-@media (any-hover: hover) {
-    tbody tr:hover {
-        background: #edf2f7;
-    }
-}
-
-/* === インタラクティブ === */
-
-/* https://pote-chil.com/css-stock/ja/button#36, 参照2025-06-19 */
+/* ==========================================================
+インタラクティブ要素
+========================================================== */
+/* --- ボタン --- */
 button {
     margin: 10px auto;
     padding: .6em 1.2em .7em;
-    border: 1px solid #4590b8;
+    border: 1px solid var(--color-border-interactive);
     border-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #4590b8;
-    color: #fff;
+    background-color: var(--color-background-interactive);
+    color: var(--color-text-inverted);
     font-size: 1em;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
 }
 
 button:focus-visible {
-    background-color: #fff;
-    color: #4590b8;
-    transition: background-color 0.3s, color 0.3s;
+    background-color: var(--color-background-surface);
+    color: var(--color-text-interactive);
 }
 
 @media (any-hover: hover) {
     button:hover {
-        background-color: #fff;
-        color: #4590b8;
-        transition: background-color 0.3s, color 0.3s;
+        background-color: var(--color-background-surface);
+        color: var(--color-text-interactive);
     }
 }
 
-/* https://pote-chil.com/css-stock/ja/accordion#3, 参照2025-06-19 */
+/* --- アコーディオン --- */
 details {
     margin-bottom: 7px;
-    border-bottom: 2px solid #cbd5e0;
+    border-bottom: 2px solid var(--color-border-default);
 }
 
 details summary {
-    padding: 1em 2em 1.1em;
+    padding: 1em 20px 1.1em;
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: relative;
-    color: #1a252f;
+    color: var(--color-text-heading);
     font-weight: 600;
     cursor: pointer;
 }
 
-details summary::-webkit-details-marker {
-    display: none;
-}
+details summary::-webkit-details-marker { display: none; }
 
 details summary::before,
 details summary::after {
     width: 2px;
     height: .9em;
     border-radius: 5px;
-    background-color: #1a252fb3;
+    background-color: var(--color-icon-default);
     content: '';
 }
 
-details summary::before {
-    position: absolute;
-    right: 2em;
-    rotate: 90deg;
-}
-
-details summary::after {
-    transition: rotate .3s;
-}
-
-details[open] summary::after {
-    rotate: 90deg;
-}
+details summary::before { position: absolute; right: 20px; rotate: 90deg; }
+details summary::after { transition: rotate .3s; }
+details[open] summary::after { rotate: 90deg; }
 
 details > summary + * {
     margin: 0;
@@ -359,7 +395,66 @@ details > summary + * {
     transition: transform .5s, opacity .5s;
 }
 
-details[open] > summary + * {
-    transform: none;
-    opacity: 1;
+details[open] > summary + * { transform: none; opacity: 1; }
+
+/* ==========================================================
+メディア
+========================================================== */
+img, video, embed, object, picture { 
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    border-radius: 8px;
 }
+
+audio, iframe { display: block; margin: 20px auto; }
+figure { margin: 20px 0; padding: 0; border: none; }
+figcaption { margin-top: 8px; font-size: 0.9em; color: var(--color-text-subtle); text-align: center; }
+
+/* ==========================================================
+フォーム
+========================================================== */
+form { margin-top: 20px; }
+
+fieldset {
+    border: 1px solid var(--color-border-default);
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    background-color: var(--color-background-page);
+}
+
+legend { font-weight: 600; padding: 0 10px; color: var(--color-text-heading); }
+label { display: block; margin: 12px 0 4px; font-weight: 500; }
+fieldset > label:first-of-type { margin-top: -5px; }
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--color-border-default);
+    border-radius: 6px;
+    font-size: 1em;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea { resize: vertical; }
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--color-border-interactive);
+    box-shadow: var(--shadow-interactive-focus);
+}
+
+output { font-size: 1.2em; font-weight: bold; }
+
+/* --- ダイアログ --- */
+dialog {
+    margin: auto;
+    border: 1px solid var(--color-border-default);
+    border-radius: 8px;
+    padding: 2em;
+    box-shadow: var(--shadow-dialog);
+}
+
+dialog::backdrop { background: var(--color-background-backdrop); }
