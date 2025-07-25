@@ -9,16 +9,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            renderMathInElement(document.body, {
-                delimiters: [
-                    {left: "$$", right: "$$", display: true},  // ブロック数式
-                    {left: "$", right: "$", display: false}   // インライン数式
-                ]
-            });
-        });
-    </script>
     <style>
     /* スクロールバーのスタイル */
     * {
@@ -251,12 +241,12 @@
             text-overflow: ellipsis;
             cursor: pointer;
         }
-
+        /*
         .history-item:hover .history-title {
             white-space: normal;
             text-overflow: clip;
         }
-
+        */
         .sidebar-footer {
             padding: 16px;
             display: flex;
@@ -374,6 +364,13 @@
         .chat-action-btn:hover {
             color: var(--text-main-color);
             transform: scale(1.1);
+        }
+        
+        .chat-action-btn.is-favorite {
+            color: var(--accent-color);
+        }
+        .chat-action-btn.is-favorite:hover {
+            color: var(--accent-hover-color);
         }
 
         .message-container {
@@ -676,7 +673,7 @@
         
         <!-- 新規チャットボタン -->
         <div class="sidebar-header">
-            <button class="new-chat-btn">
+            <button class="new-chat-btn" title="新しいチャットを始める">
                 <span class="new-chat-icon"><i class="fa-solid fa-plus"></i></span>
                 <span class="new-chat-text">新規チャット</span>
             </button>
@@ -688,31 +685,22 @@
             <!-- 折りたたみ可能なチャットリスト -->
             <div class="history-container">
                 <div class="history-wrapper">
-                    <!-- 保存したチャット - details/summary 使用 -->
+                    <!-- お気に入り -->
                     <details open>
                         <summary>
                             <div>
-                                <i class="fa-solid fa-bookmark history-icon"></i>
-                                保存したチャット
+                                <i class="fa-solid fa-star history-icon"></i>
+                                お気に入り
                             </div>
                             <i class="fa-solid fa-chevron-down chevron"></i>
                         </summary>
                         <div>
-                            <ul class="history-saved">
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="二次関数のグラフ">二次関数のグラフ</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="微分の基本公式">微分の基本公式</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="複素数の極形式">複素数の極形式</div>
-                                </li>
-                            </ul>
+                            <!-- このulはJavaScriptによって動的に生成されます -->
+                            <ul class="history-favorites"></ul>
                         </div>
                     </details>
                     
-                    <!-- チャット履歴 - details/summary 使用 -->
+                    <!-- チャット履歴 -->
                     <details open>
                         <summary>
                             <div>
@@ -722,68 +710,8 @@
                             <i class="fa-solid fa-chevron-down chevron"></i>
                         </summary>
                         <div>
-                            <ol class="history-normal">
-                                <li class="history-item active">
-                                    <div class="history-title" data-raw-title="数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項">数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="積分の計算方法">積分の計算方法</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="ベクトルの内積と外積の意味、また成分表示について">ベクトルの内積と外積の意味、また成分表示について</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="確率分布の期待値">確率分布の期待値</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="微分方程式の解法">微分方程式の解法</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="三角関数の公式">三角関数の公式</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="複素数平面">複素数平面</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="行列の固有値">行列の固有値</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="円の方程式">円の方程式</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="極限の計算">極限の計算</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="一次方程式の解法">一次方程式の解法</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="不等式の解法">不等式の解法</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="連立方程式の解法">連立方程式の解法</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="比例と反比例">比例と反比例</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="指数関数の性質">指数関数の性質</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="対数関数の基本">対数関数の基本</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="三角比の応用">三角比の応用</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="円周角の定理">円周角の定理</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="合同条件の判定">合同条件の判定</div>
-                                </li>
-                                <li class="history-item">
-                                    <div class="history-title" data-raw-title="相似形の性質">相似形の性質</div>
-                                </li>
-                            </ol>
+                            <!-- このolはJavaScriptによって動的に生成されます -->
+                            <ol class="history-normal"></ol>
                         </div>
                     </details>
                 </div>
@@ -809,7 +737,7 @@
             <button class="hamburger-btn" title="メニューを開く">
                 <i class="fa-solid fa-bars"></i>
             </button>
-            <div class="chat-title" data-raw-title="数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項">数列 $a_1=1, a_{n+1}=2\sqrt{a_n}$ の一般項</div>
+            <div class="chat-title" data-raw-title=""></div>
             
             <div class="chat-actions">
                 <!-- モバイルでの表示時にメニューを開くボタン -->
@@ -818,10 +746,10 @@
                 </button>
                 <!-- アクションボタンと更新日のコンテナ -->
                 <div class="actions-dropdown" id="actions-dropdown-content">
-                    <span class="chat-last-update">最終更新日：2025-04-15</span>
-                    <button class="chat-action-btn" title="保存">
-                        <i class="fa-solid fa-bookmark"></i>
-                        <span class="mobile-only-text">保存</span>
+                    <span class="chat-last-update"></span>
+                    <button class="chat-action-btn favorite-toggle-btn" title="お気に入り">
+                        <i class="fa-solid fa-star"></i>
+                        <span class="mobile-only-text">お気に入り</span>
                     </button>
                     <button class="chat-action-btn" title="共有">
                         <i class="fa-solid fa-share-nodes"></i>
@@ -837,128 +765,8 @@
         </div>
         
         <div class="message-container">
-            <div class="messages">
-                <!-- ユーザーのメッセージ -->
-                <div class="message user-message">
-                    <div class="message-content">
-                        この問題を教えてください。<br>
-                        次の条件によって定められる数列${a_n}$の一般項を求めよ。$$a_1=1, a_{n+1}=2\sqrt{a_n}$$
-                    </div>
-                </div>
-                
-                <!-- AIの返信 -->
-                <div class="message ai-message">
-                    <div class="message-content">
-                        <ol>
-                            <li>次の項が前の項の平方根を含む形になっている点に注目しましょう。平方根を含む漸化式では、$a_n$を別の変数で置き換えると整理できる場合があります。</li>
-                            <li>実際に $a_{n+1}$ と $a_n$ の関係を見ていると、指数や対数の考え方を使うと見通しがよくなるかもしれません。</li>
-                            <li>「漸化式を解く」一般的な方法として、数列の各項を何らかの指数関数や対数関数の形に変換してみるという手段があります（例：$b_n = \log(a_n)$ のように置いてみる）。</li>
-                            <li>最初の数項を具体的に書いてみると、どのような変化が起きているかのパターンを見つけやすいでしょう。特に、指数や乗数に注目すると規則性を発見できるかもしれません。</li>
-                        </ol>
-                        上のポイントを確かめながら、数列を変形していくと最終的に一般項の式が得られるはずです。まずは変数の置き換えや最初の数項の様子を丁寧に観察してみてください。
-                    </div>
-                </div>
-
-                <!-- ユーザーのメッセージ -->
-                <div class="message user-message">
-                    <div class="message-content">
-                        そのヒントを参考に、問題を解いてください。
-                    </div>
-                </div>
-                
-                <!-- AIの返信 -->
-                <div class="message ai-message">
-                    <div class="message-content">
-                        以下では、高校で学習する対数の考え方を用いて、与えられた漸化式を整理して一般項を求めます。
-
-                        まず、数列が  
-                        $$
-                        a_1 = 1, \quad a_{n+1} = 2\sqrt{a_n}
-                        $$
-                        を満たすとき、対数（ここでは底を2とします）を用いるために、
-                        $$b_n = \log_2 \bigl(a_n\bigr)$$
-                        とおきます。すると、
-                        $$
-                        \begin{aligned}
-                        a_{n+1} &= 2\sqrt{a_n} \\
-                        \log_2(a_{n+1}) &= \log_2\!\bigl(2\sqrt{a_n}\bigr) \\
-                        b_{n+1} &= \log_2(2) + \log_2\!\bigl(\sqrt{a_n}\bigr) \\
-                        &= 1 + \tfrac12 \log_2(a_n) \\
-                        &= 1 + \tfrac12 b_n
-                        \end{aligned}
-                        $$
-                        となります。  
-                        また、初項については
-                        $$
-                        b_1 = \log_2(a_1) = \log_2(1) = 0
-                        $$
-                        です。
-                        
-                        ここで、新しい数列 $b_n$ は
-                        $$
-                        b_{n+1} = 1 + \tfrac12 b_n
-                        $$
-                        および
-                        $$
-                        b_1 = 0
-                        $$
-                        を満たします。この漸化式をたどっていくと、
-                        $$
-                        b_2 = 1 + \tfrac12 b_1 = 1, \quad
-                        b_3 = 1 + \tfrac12 b_2 = 1 + \tfrac12 \cdot 1 = \tfrac32, \quad
-                        b_4 = 1 + \tfrac12 \cdot \tfrac3 2 = 1 + \tfrac34 = \tfrac74, \dots
-                        $$
-                        というように値が決まっていきます。一般に解を求めると、
-                        $$
-                        b_n = 2 - \tfrac{1}{2^{\,n-2}}
-                        $$
-                        という形になることがわかります（実際に計算を進めるか、あるいは等比数列の考え方を用いて示すことができます）。
-                        
-                        したがって元の数列 $a_n$ は、
-                        $$
-                        a_n = 2^{\,b_n} = 2^{\,\bigl(2 - \tfrac{1}{2^{\,n-2}}\bigr)}
-                        $$
-                        となります。これが数列 $\,\{a_n\}\,$ の一般項です。
-                        
-                        よって、求める一般項は  
-                        $$
-                        \displaystyle a_n = 2^{\,2 \;-\; \tfrac{1}{2^{\,n-2}}}
-                        $$
-                        となります。
-                    </div>
-                </div>
-                
-                <!-- ユーザーのメッセージ -->
-                <div class="message user-message">
-                    <div class="message-content">
-                        問題集の答えには
-                        $$
-                        \displaystyle a_n = 2^{2-2^{2-n}}
-                        $$
-                        と書いてありました。どちらが正しいのですか？
-                    </div>
-                </div>
-                
-                <!-- AIの返信 -->
-                <div class="message ai-message">
-                    <div class="message-content">
-                        両方とも同じ式を別の形で表しているだけなので、どちらも正しいです。実際、分数の形を指数の形に直すと、
-                        $$
-                        \frac{1}{2^{n-2}} = 2^{-(n-2)} = 2^{2-n}
-                        $$
-                        となります。よって、
-                        $$
-                        2^{\,2 - \tfrac{1}{2^{\,n-2}}}
-                        $$
-                        は
-                        $$
-                        2^{2 - 2^{2-n}}
-                        $$
-                        とまったく同じ値を表しています。どちらを使っても同じ数列の一般項になりますので安心してください。
-                    </div>
-                </div>
-
-            </div>
+            <!-- このdivはJavaScriptによって動的に生成されます -->
+            <div class="messages"></div>
         </div>
 
         <div class="image-preview-container" style="display: none;">
@@ -985,149 +793,82 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
-            // サイドバー開閉機能
-            function initSidebarToggle() {
-                const sidebar = document.querySelector('.sidebar');
-                const hamburgerBtn = document.querySelector('.hamburger-btn');
-                const overlay = document.querySelector('.overlay');
-
-                function openSidebar() {
-                    sidebar.classList.add('is-open');
-                    overlay.classList.add('active');
+            // --- DATA ---
+            // アプリケーションの状態を管理するデータオブジェクト
+            const appData = {
+                currentChatId: 'chat-1',
+                chats: {
+                    'chat-1': {
+                        title: '数列 $a_1=1, a_{n+1}=2\\sqrt{a_n}$ の一般項',
+                        isFavorite: true,
+                        lastUpdate: '2025-04-15',
+                        messages: [
+                            { sender: 'user', content: 'この問題を教えてください。<br>次の条件によって定められる数列${a_n}$の一般項を求めよ。$$a_1=1, a_{n+1}=2\\sqrt{a_n}$$' },
+                            { sender: 'ai', content: '<ol><li>次の項が前の項の平方根を含む形になっている点に注目しましょう。平方根を含む漸化式では、$a_n$を別の変数で置き換えると整理できる場合があります。</li><li>実際に $a_{n+1}$ と $a_n$ の関係を見ていると、指数や対数の考え方を使うと見通しがよくなるかもしれません。</li><li>「漸化式を解く」一般的な方法として、数列の各項を何らかの指数関数や対数関数の形に変換してみるという手段があります（例：$b_n = \\log(a_n)$ のように置いてみる）。</li><li>最初の数項を具体的に書いてみると、どのような変化が起きているかのパターンを見つけやすいでしょう。特に、指数や乗数に注目すると規則性を発見できるかもしれません。</li></ol>上のポイントを確かめながら、数列を変形していくと最終的に一般項の式が得られるはずです。まずは変数の置き換えや最初の数項の様子を丁寧に観察してみてください。' },
+                            { sender: 'user', content: 'そのヒントを参考に、問題を解いてください。' },
+                            { sender: 'ai', content: '以下では、高校で学習する対数の考え方を用いて、与えられた漸化式を整理して一般項を求めます。<br><br>まず、数列が$$a_1 = 1, \\quad a_{n+1} = 2\\sqrt{a_n}$$を満たすとき、対数（ここでは底を2とします）を用いるために、$$b_n = \\log_2 \\bigl(a_n\\bigr)$$とおきます。すると、$$ \\begin{aligned} a_{n+1} &= 2\\sqrt{a_n} \\\\ \\log_2(a_{n+1}) &= \\log_2\\!\\bigl(2\\sqrt{a_n}\\bigr) \\\\ b_{n+1} &= \\log_2(2) + \\log_2\\!\\bigl(\\sqrt{a_n}\\bigr) \\\\ &= 1 + \\tfrac12 \\log_2(a_n) \\\\ &= 1 + \\tfrac12 b_n \\end{aligned} $$となります。<br>また、初項については$$ b_1 = \\log_2(a_1) = \\log_2(1) = 0 $$です。<br><br>ここで、新しい数列 $b_n$ は$$ b_{n+1} = 1 + \\tfrac12 b_n $$および$$ b_1 = 0 $$を満たします。この漸化式をたどっていくと、$$ b_2 = 1 + \\tfrac12 b_1 = 1, \\quad b_3 = 1 + \\tfrac12 b_2 = 1 + \\tfrac12 \\cdot 1 = \\tfrac32, \\quad b_4 = 1 + \\tfrac12 \\cdot \\tfrac3 2 = 1 + \\tfrac34 = \\tfrac74, \\dots $$というように値が決まっていきます。一般に解を求めると、$$ b_n = 2 - \\tfrac{1}{2^{\\,n-2}} $$という形になることがわかります（実際に計算を進めるか、あるいは等比数列の考え方を用いて示すことができます）。<br><br>したがって元の数列 $a_n$ は、$$ a_n = 2^{\\,b_n} = 2^{\\,\\bigl(2 - \\tfrac{1}{2^{\\,n-2}}\\bigr)} $$となります。これが数列 $\\{a_n\\}$ の一般項です。<br><br>よって、求める一般項は$$ \\displaystyle a_n = 2^{\\,2 \\;-\\; \\tfrac{1}{2^{\\,n-2}}} $$となります。' },
+                            { sender: 'user', content: '問題集の答えには$$ \\displaystyle a_n = 2^{2-2^{2-n}} $$と書いてありました。どちらが正しいのですか？' },
+                            { sender: 'ai', content: '両方とも同じ式を別の形で表しているだけなので、どちらも正しいです。実際、分数の形を指数の形に直すと、$$ \\frac{1}{2^{n-2}} = 2^{-(n-2)} = 2^{2-n} $$となります。よって、$$ 2^{\\,2 - \\tfrac{1}{2^{\\,n-2}}} $$は$$ 2^{2 - 2^{2-n}} $$とまったく同じ値を表しています。どちらを使っても同じ数列の一般項になりますので安心してください。' }
+                        ]
+                    },
+                    'chat-2': { title: '積分の計算方法', isFavorite: false, lastUpdate: '2025-04-14', messages: [] },
+                    'chat-3': { title: 'ベクトルの内積と外積の意味、また成分表示について', isFavorite: false, lastUpdate: '2025-04-13', messages: [] },
+                    'chat-4': { title: '確率分布の期待値', isFavorite: false, lastUpdate: '2025-04-12', messages: [] },
+                    'chat-5': { title: '微分方程式の解法', isFavorite: false, lastUpdate: '2025-04-11', messages: [] },
+                    'chat-6': { title: '三角関数の公式', isFavorite: false, lastUpdate: '2025-04-10', messages: [] },
+                    'chat-7': { title: '複素数平面', isFavorite: false, lastUpdate: '2025-04-09', messages: [] },
+                    'chat-8': { title: '行列の固有値', isFavorite: false, lastUpdate: '2025-04-08', messages: [] },
+                    'chat-9': { title: '円の方程式', isFavorite: false, lastUpdate: '2025-04-07', messages: [] },
+                    'chat-10': { title: '極限の計算', isFavorite: false, lastUpdate: '2025-04-06', messages: [] },
+                    'chat-11': { title: '一次方程式の解法', isFavorite: false, lastUpdate: '2025-04-05', messages: [] },
+                    'chat-12': { title: '不等式の解法', isFavorite: false, lastUpdate: '2025-04-04', messages: [] },
+                    'chat-13': { title: '連立方程式の解法', isFavorite: false, lastUpdate: '2025-04-03', messages: [] },
+                    'chat-14': { title: '比例と反比例', isFavorite: false, lastUpdate: '2025-04-02', messages: [] },
+                    'chat-15': { title: '指数関数の性質', isFavorite: false, lastUpdate: '2025-04-01', messages: [] },
+                    'chat-16': { title: '対数関数の基本', isFavorite: false, lastUpdate: '2025-03-31', messages: [] },
+                    'chat-17': { title: '三角比の応用', isFavorite: false, lastUpdate: '2025-03-30', messages: [] },
+                    'chat-18': { title: '円周角の定理', isFavorite: false, lastUpdate: '2025-03-29', messages: [] },
+                    'chat-19': { title: '合同条件の判定', isFavorite: false, lastUpdate: '2025-03-28', messages: [] },
+                    'chat-20': { title: '相似形の性質', isFavorite: false, lastUpdate: '2025-03-27', messages: [] },
+                    'saved-1': { title: '二次関数のグラフ', isFavorite: true, lastUpdate: '2025-04-10', messages: [] },
+                    'saved-2': { title: '微分の基本公式', isFavorite: true, lastUpdate: '2025-04-09', messages: [] },
+                    'saved-3': { title: '複素数の極形式', isFavorite: false, lastUpdate: '2025-04-08', messages: [] },
                 }
+            };
+            
+            // --- DOM Elements ---
+            // 主要なDOM要素をここで取得
+            const dom = {
+                sidebar: document.querySelector('.sidebar'),
+                hamburgerBtn: document.querySelector('.hamburger-btn'),
+                overlay: document.querySelector('.overlay'),
+                historyFavoriteList: document.querySelector('.history-favorites'),
+                historyNormalList: document.querySelector('.history-normal'),
+                chatTitle: document.querySelector('.chat-title'),
+                chatLastUpdate: document.querySelector('.chat-last-update'),
+                favoriteToggleBtns: document.querySelectorAll('.favorite-toggle-btn'),
+                messagesContainer: document.querySelector('.messages'),
+                messageContainerWrapper: document.querySelector('.message-container'),
+                sendBtn: document.querySelector('.send-btn'),
+                chatInput: document.querySelector('.chat-input'),
+                uploadBtn: document.querySelector('.upload-image-btn'),
+                fileInput: document.getElementById('image-upload'),
+                previewContainer: document.querySelector('.image-preview-container'),
+                previewImage: document.getElementById('uploaded-image-preview'),
+                removeBtn: document.querySelector('.remove-image-btn'),
+                mobileActionsTrigger: document.getElementById('mobile-actions-trigger'),
+                actionsDropdown: document.getElementById('actions-dropdown-content')
+            };
 
-                function closeSidebar() {
-                    sidebar.classList.remove('is-open');
-                    overlay.classList.remove('active');
-                }
+            // --- RENDER FUNCTIONS ---
+            // データに基づいてUIを描画する関数群
 
-                if (hamburgerBtn) {
-                    hamburgerBtn.addEventListener('click', openSidebar);
-                }
-                
-                if (overlay) {
-                    overlay.addEventListener('click', closeSidebar);
-                }
-            }
-
-            // 画像アップロード機能
-            function initImageUpload() {
-                const uploadBtn = document.querySelector('.upload-image-btn');
-                const fileInput = document.getElementById('image-upload');
-                const previewContainer = document.querySelector('.image-preview-container');
-                const previewImage = document.getElementById('uploaded-image-preview');
-                const removeBtn = document.querySelector('.remove-image-btn');
-
-                uploadBtn.addEventListener('click', () => {
-                    fileInput.click();
-                });
-
-                fileInput.addEventListener('change', () => {
-                    if (fileInput.files && fileInput.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            previewImage.src = e.target.result;
-                            previewContainer.style.display = 'block';
-                        };
-                        reader.readAsDataURL(fileInput.files[0]);
-                    }
-                });
-
-                removeBtn.addEventListener('click', () => {
-                    previewImage.src = '';
-                    previewContainer.style.display = 'none';
-                    fileInput.value = '';
-                });
-
-                return { fileInput, previewContainer, previewImage };
-            }
-
-            // メッセージ送信機能
-            function initSendMessage(imageUploadData) {
-                const sendBtn = document.querySelector('.send-btn');
-                const chatInput = document.querySelector('.chat-input');
-                const messagesContainer = document.querySelector('.messages');
-                const { fileInput, previewContainer, previewImage } = imageUploadData;
-
-                function updateSendButtonState() {
-                    if (chatInput.value.trim() === "" && !(fileInput.files && fileInput.files[0])) {
-                        sendBtn.disabled = true;
-                        sendBtn.style.opacity = "0.5";
-                        sendBtn.style.cursor = "not-allowed";
-                    } else {
-                        sendBtn.disabled = false;
-                        sendBtn.style.opacity = "1";
-                        sendBtn.style.cursor = "pointer";
-                    }
-                }
-
-                updateSendButtonState();
-                chatInput.addEventListener("input", updateSendButtonState);
-                fileInput.addEventListener("change", updateSendButtonState);
-
-                function sendMessage() {
-                    if (sendBtn.disabled) return;
-
-                    const userMessage = document.createElement('div');
-                    userMessage.classList.add('message', 'user-message');
-                    const messageContent = document.createElement('div');
-                    messageContent.classList.add('message-content');
-
-                    if (fileInput.files && fileInput.files[0]) {
-                        const img = document.createElement('img');
-                        img.src = previewImage.src;
-                        img.alt = "ユーザーがアップロードした画像";
-                        img.style.maxWidth = "200px";
-                        img.style.borderRadius = "8px";
-                        messageContent.appendChild(img);
-                        if (chatInput.value.trim() !== "") {
-                            const br = document.createElement('br');
-                            messageContent.appendChild(br);
-                            messageContent.appendChild(document.createTextNode(chatInput.value.trim()));
-                        }
-                    } else {
-                        messageContent.textContent = chatInput.value.trim();
-                    }
-
-                    userMessage.appendChild(messageContent);
-                    messagesContainer.appendChild(userMessage);
-
-                    chatInput.value = "";
-                    previewImage.src = "";
-                    previewContainer.style.display = "none";
-                    fileInput.value = "";
-                    updateSendButtonState();
-
-                    const aiMessage = document.createElement('div');
-                    aiMessage.classList.add('message', 'ai-message');
-                    const aiContent = document.createElement('div');
-                    aiContent.classList.add('message-content');
-                    aiContent.textContent = "これはおためし用の返答です。";
-                    aiMessage.appendChild(aiContent);
-                    messagesContainer.appendChild(aiMessage);
-
-                    const container = document.querySelector('.message-container');
-                    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-                }
-
-                sendBtn.addEventListener('click', sendMessage);
-
-                chatInput.addEventListener("keydown", function(event) {
-                    if (event.key === "Enter" && !event.shiftKey) {
-                        event.preventDefault();
-                        sendMessage();
-                    }
-                });
-            }
-
-            // タイトル編集機能
-            function initTitleEditing() {
-                const chatTitleEl = document.querySelector('.chat-title');
-                const historyTitleEls = document.querySelectorAll('.history-title');
-
-                function renderTitle(element, title) {
-                    if (!element) return;
-                    element.innerHTML = title;
+            /**
+             * KaTeXを特定の要素内でレンダリングする
+             * @param {HTMLElement} element - レンダリング対象の親要素
+             */
+            function renderMath(element) {
+                if (window.renderMathInElement) {
                     renderMathInElement(element, {
                         delimiters: [
                             {left: "$$", right: "$$", display: true},
@@ -1135,26 +876,229 @@
                         ]
                     });
                 }
+            }
 
-                function syncTitle(newRawTitle, sourceElement) {
-                    const activeHistoryItem = document.querySelector('.history-item.active .history-title');
+            /**
+             * チャットのメッセージリストを描画する
+             */
+            function renderMessages() {
+                const currentChat = appData.chats[appData.currentChatId];
+                if (!currentChat) return;
+
+                dom.messagesContainer.innerHTML = ''; // コンテナをクリア
+                
+                currentChat.messages.forEach(msg => {
+                    const messageEl = document.createElement('div');
+                    messageEl.classList.add('message', msg.sender === 'user' ? 'user-message' : 'ai-message');
                     
-                    if (sourceElement === chatTitleEl) {
-                        chatTitleEl.dataset.rawTitle = newRawTitle;
-                        renderTitle(chatTitleEl, newRawTitle);
-                        if (activeHistoryItem) {
-                            activeHistoryItem.dataset.rawTitle = newRawTitle;
-                            renderTitle(activeHistoryItem, newRawTitle);
+                    const contentEl = document.createElement('div');
+                    contentEl.classList.add('message-content');
+                    contentEl.innerHTML = msg.content; // HTMLとして内容をセット
+                    
+                    messageEl.appendChild(contentEl);
+                    dom.messagesContainer.appendChild(messageEl);
+                });
+
+                renderMath(dom.messagesContainer); // メッセージ全体の数式をレンダリング
+                // スクロールを一番下に移動
+                dom.messageContainerWrapper.scrollTo({ top: dom.messageContainerWrapper.scrollHeight });
+            }
+
+            /**
+             * サイドバーのチャット履歴リストを描画する
+             */
+            function renderHistoryLists() {
+                dom.historyFavoriteList.innerHTML = '';
+                dom.historyNormalList.innerHTML = '';
+
+                const createHistoryItemElement = (id, chat) => {
+                    const historyItem = document.createElement('li');
+                    historyItem.className = 'history-item';
+                    historyItem.dataset.chatId = id;
+                    if (id === appData.currentChatId) {
+                        historyItem.classList.add('active');
+                    }
+
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'history-title';
+                    titleDiv.dataset.rawTitle = chat.title;
+                    titleDiv.innerHTML = chat.title;
+
+                    historyItem.title = chat.title; // title属性を付与
+                    historyItem.appendChild(titleDiv);
+                    return historyItem;
+                };
+
+                Object.entries(appData.chats).forEach(([id, chat]) => {
+                    // 通常の履歴リストにはすべて表示
+                    const normalItem = createHistoryItemElement(id, chat);
+                    dom.historyNormalList.appendChild(normalItem);
+                    
+                    // お気に入りリストにはisFavoriteがtrueのものだけ表示
+                    if (chat.isFavorite) {
+                        const favoriteItem = createHistoryItemElement(id, chat);
+                        dom.historyFavoriteList.appendChild(favoriteItem);
+                    }
+                });
+                
+                renderMath(dom.sidebar); // サイドバー全体の数式をレンダリング
+                initTitleEditing(); // タイトル編集機能を再初期化
+            }
+            
+            /**
+             * お気に入りボタンの状態を描画する
+             */
+            function renderFavoriteButtonState() {
+                const currentChat = appData.chats[appData.currentChatId];
+                if (!currentChat) return;
+
+                dom.favoriteToggleBtns.forEach(btn => {
+                    if (currentChat.isFavorite) {
+                        btn.classList.add('is-favorite');
+                    } else {
+                        btn.classList.remove('is-favorite');
+                    }
+                });
+            }
+
+            /**
+             * チャットヘッダーを描画する
+             */
+            function renderChatHeader() {
+                const currentChat = appData.chats[appData.currentChatId];
+                if (!currentChat) return;
+
+                dom.chatTitle.dataset.rawTitle = currentChat.title;
+                dom.chatTitle.innerHTML = currentChat.title;
+                dom.chatTitle.title = currentChat.title;
+                dom.chatLastUpdate.textContent = `最終更新日：${currentChat.lastUpdate}`;
+                renderMath(dom.chatTitle);
+            }
+
+            /**
+             * UI全体を再描画する
+             */
+            function renderAll() {
+                renderChatHeader();
+                renderMessages();
+                renderHistoryLists();
+                renderFavoriteButtonState();
+            }
+
+            // --- EVENT HANDLERS & INITIALIZERS ---
+            // イベント処理と機能の初期化を行う関数群
+
+            function initSidebarToggle() {
+                if (dom.hamburgerBtn) {
+                    dom.hamburgerBtn.addEventListener('click', () => {
+                        dom.sidebar.classList.add('is-open');
+                        dom.overlay.classList.add('active');
+                    });
+                }
+                if (dom.overlay) {
+                    dom.overlay.addEventListener('click', () => {
+                        dom.sidebar.classList.remove('is-open');
+                        dom.overlay.classList.remove('active');
+                    });
+                }
+            }
+
+            function initImageUpload() {
+                dom.uploadBtn.addEventListener('click', () => dom.fileInput.click());
+
+                dom.fileInput.addEventListener('change', () => {
+                    if (dom.fileInput.files && dom.fileInput.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            dom.previewImage.src = e.target.result;
+                            dom.previewContainer.style.display = 'block';
+                        };
+                        reader.readAsDataURL(dom.fileInput.files[0]);
+                    }
+                });
+
+                dom.removeBtn.addEventListener('click', () => {
+                    dom.previewImage.src = '';
+                    dom.previewContainer.style.display = 'none';
+                    dom.fileInput.value = '';
+                });
+            }
+            
+            function initSendMessage() {
+                function updateSendButtonState() {
+                    const hasText = dom.chatInput.value.trim() !== "";
+                    const hasImage = dom.fileInput.files && dom.fileInput.files[0];
+                    const isEnabled = hasText || hasImage;
+                    
+                    dom.sendBtn.disabled = !isEnabled;
+                    dom.sendBtn.style.opacity = isEnabled ? "1" : "0.5";
+                    dom.sendBtn.style.cursor = isEnabled ? "pointer" : "not-allowed";
+                }
+
+                dom.chatInput.addEventListener("input", updateSendButtonState);
+                dom.fileInput.addEventListener("change", updateSendButtonState);
+
+                function sendMessage() {
+                    if (dom.sendBtn.disabled) return;
+                    
+                    const messageText = dom.chatInput.value.trim();
+                    let messageContent = '';
+
+                    if (dom.fileInput.files && dom.fileInput.files[0]) {
+                        messageContent += `<img src="${dom.previewImage.src}" alt="ユーザーがアップロードした画像" style="max-width: 200px; border-radius: 8px;">`;
+                        if (messageText) {
+                            messageContent += `<br>${messageText}`;
                         }
                     } else {
-                        sourceElement.dataset.rawTitle = newRawTitle;
-                        renderTitle(sourceElement, newRawTitle);
-                        if (sourceElement.closest('.history-item').classList.contains('active') && chatTitleEl) {
-                            chatTitleEl.dataset.rawTitle = newRawTitle;
-                            renderTitle(chatTitleEl, newRawTitle);
-                        }
+                        messageContent = messageText;
                     }
+
+                    // データに新しいメッセージを追加
+                    const currentChat = appData.chats[appData.currentChatId];
+                    if (currentChat) {
+                        currentChat.messages.push({ sender: 'user', content: messageContent });
+                        
+                        // AIの返信をシミュレート
+                        setTimeout(() => {
+                            currentChat.messages.push({ sender: 'ai', content: 'これはデータ駆動型の返信です。' });
+                            renderMessages(); // AIの返信後に再描画
+                        }, 1000);
+                    }
+                    
+                    renderMessages(); // ユーザーのメッセージを即時描画
+
+                    // 入力フォームをリセット
+                    dom.chatInput.value = "";
+                    dom.previewImage.src = "";
+                    dom.previewContainer.style.display = "none";
+                    dom.fileInput.value = "";
+                    updateSendButtonState();
                 }
+
+                dom.sendBtn.addEventListener('click', sendMessage);
+                dom.chatInput.addEventListener("keydown", function(event) {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        sendMessage();
+                    }
+                });
+                
+                updateSendButtonState();
+            }
+
+            function initTitleEditing() {
+                // イベントデリゲーションを使用して、動的に生成される要素に対応
+                const setupEditListener = (element) => {
+                    element.addEventListener("dblclick", (e) => {
+                        const target = e.target.closest('.history-title, .chat-title');
+                        if (!target) return;
+                        startEditTitle(target);
+                    });
+                };
+
+                setupEditListener(dom.historyFavoriteList);
+                setupEditListener(dom.historyNormalList);
+                setupEditListener(dom.chatTitle);
 
                 function startEditTitle(targetElement) {
                     const currentRawTitle = targetElement.dataset.rawTitle || targetElement.innerHTML;
@@ -1169,60 +1113,81 @@
                     targetElement.appendChild(input);
                     input.focus();
 
-                    function finishEdit() {
+                    const finishEdit = () => {
                         let newTitle = input.value.trim();
-                        if (!newTitle) {
-                            newTitle = currentRawTitle;
+                        if (!newTitle) newTitle = currentRawTitle;
+                        
+                        // データ更新
+                        const chatId = targetElement.closest('.history-item')?.dataset.chatId || appData.currentChatId;
+                        if (appData.chats[chatId]) {
+                            appData.chats[chatId].title = newTitle;
                         }
-                        syncTitle(newTitle, targetElement);
-                    }
+                        
+                        // 再描画
+                        renderAll();
+                    };
 
                     input.addEventListener("blur", finishEdit);
-                    input.addEventListener("keydown", function(e) {
-                        if (e.key === "Enter") {
-                            finishEdit();
-                        } else if (e.key === "Escape") {
-                            syncTitle(currentRawTitle, targetElement);
+                    input.addEventListener("keydown", (e) => {
+                        if (e.key === "Enter") finishEdit();
+                        else if (e.key === "Escape") {
+                            targetElement.innerHTML = currentRawTitle;
+                            renderMath(targetElement);
                         }
                     });
                 }
-
-                if (chatTitleEl) {
-                    chatTitleEl.addEventListener("dblclick", () => startEditTitle(chatTitleEl));
-                }
-
-                historyTitleEls.forEach(el => {
-                    el.addEventListener("dblclick", () => startEditTitle(el));
+            }
+            
+            function initFavoriteToggle() {
+                dom.favoriteToggleBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const currentChat = appData.chats[appData.currentChatId];
+                        if (currentChat) {
+                            currentChat.isFavorite = !currentChat.isFavorite;
+                            renderAll();
+                        }
+                    });
                 });
             }
 
-            // モバイル用アクションメニュー機能
             function initMobileActionsMenu() {
-                const triggerBtn = document.getElementById('mobile-actions-trigger');
-                const dropdownMenu = document.getElementById('actions-dropdown-content');
-
-                if (!triggerBtn || !dropdownMenu) return;
-
-                triggerBtn.addEventListener('click', (event) => {
-                    event.stopPropagation(); // 親要素へのイベント伝播を停止
-                    dropdownMenu.classList.toggle('is-open');
+                if (!dom.mobileActionsTrigger || !dom.actionsDropdown) return;
+                dom.mobileActionsTrigger.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    dom.actionsDropdown.classList.toggle('is-open');
                 });
-
-                // メニュー外をクリックしたら閉じる
                 document.addEventListener('click', (event) => {
-                    if (dropdownMenu.classList.contains('is-open') && !dropdownMenu.contains(event.target) && !triggerBtn.contains(event.target)) {
-                        dropdownMenu.classList.remove('is-open');
+                    if (dom.actionsDropdown.classList.contains('is-open') && !dom.actionsDropdown.contains(event.target) && !dom.mobileActionsTrigger.contains(event.target)) {
+                        dom.actionsDropdown.classList.remove('is-open');
+                    }
+                });
+            }
+            
+            function initHistoryClick() {
+                const historyContainer = document.querySelector('.history-container');
+                historyContainer.addEventListener('click', (e) => {
+                    const targetItem = e.target.closest('.history-item');
+                    if (targetItem && targetItem.dataset.chatId) {
+                        const newChatId = targetItem.dataset.chatId;
+                        if (newChatId !== appData.currentChatId) {
+                            appData.currentChatId = newChatId;
+                            renderAll();
+                        }
                     }
                 });
             }
 
-            // 各機能の初期化呼び出し
+            // --- INITIALIZATION ---
+            // すべての機能を初期化
             initSidebarToggle();
-            const imageUploadData = initImageUpload();
-            initSendMessage(imageUploadData);
-            initTitleEditing();
+            initImageUpload();
+            initSendMessage();
             initMobileActionsMenu();
+            initHistoryClick();
+            initFavoriteToggle();
+            
+            // 初期描画
+            renderAll();
         });
-    </script>
-</body>
+    </script></body>
 </html>
