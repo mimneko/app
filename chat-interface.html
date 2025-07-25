@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>チャット - MathCompass</title>
+    <!-- Font Awesome（アイコン用） -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Katex CSS and JS -->
+    <!-- KaTeX（数式表示用） -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
     <script>
+        // ページ読み込み時に本文全体の数式をKaTeXでレンダリング
         document.addEventListener("DOMContentLoaded", function() {
             renderMathInElement(document.body, {
                 delimiters: [
@@ -20,7 +22,7 @@
         });
     </script>
     <style>
-    /* スクロールバーのスタイル */
+    /* ===== スクロールバーのスタイル ===== */
     * {
         scrollbar-color: #ececec transparent;
     }
@@ -37,17 +39,19 @@
     }
     </style>
     <style>
-        /* 共通 */
+        /* ===== カラーバリアブル・共通設定 ===== */
         :root {
             --base-color: #3498db;
             --base-hover-color: #2980b9;
             --accent-color: #ea5506;
             --accent-hover-color: #c94400;
             --text-white-color: #fff;
+            --danger-color: #e74c3c;
+            --danger-hover-color: #c0392b;
             --transition: all 0.3s ease;
         }
 
-        /* ライトモード */
+        /* ===== ライトモード用カラーバリアブル ===== */
         :root {
             --bg-color: #fff;
             --bg-card-color: #fff;
@@ -68,7 +72,7 @@
             --overlay-bg: rgba(0, 0, 0, 0.4);
         }
 
-        /* ダークモード */
+        /* ===== ダークモード用カラーバリアブル ===== */
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-color: #121212;
@@ -91,7 +95,7 @@
             }
         }
 
-        /* 基本設定 */
+        /* ===== 基本レイアウト設定 ===== */
         body {
             font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium", "Hiragino Sans", "Meiryo", "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg-color);
@@ -103,7 +107,7 @@
             overflow: hidden;
         }
 
-        /* サイドバー */
+        /* ===== サイドバー全体 ===== */
         .sidebar {
             width: 280px;
             border-right: var(--header-line);
@@ -114,6 +118,7 @@
             flex-shrink: 0;
         }
 
+        /* サイドバー：ロゴ部分 */
         .sidebar-logo {
             padding: 16px;
             display: flex;
@@ -130,6 +135,7 @@
             color: var(--text-main-color);
         }
 
+        /* サイドバー：履歴リスト部分 */
         .sidebar-content {
             flex: 1;
             display: flex;
@@ -137,6 +143,7 @@
             overflow-y: auto;
         }
 
+        /* サイドバー：新規チャットボタン */
         .sidebar-header {
             padding: 8px;
             border-bottom: var(--header-line);
@@ -173,45 +180,209 @@
             margin-right: 12px;
         }
 
+        /* サイドバー：履歴リストの折りたたみ */
         details { margin-bottom: 8px; }
-        summary { padding: 12px 16px; font-size: 14px; font-weight: bold; color: var(--text-pale-color); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: var(--transition); list-style: none; border-radius: 8px; }
+        details.is-hidden { display: none; }
+        summary { 
+            padding: 12px 16px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            color: var(--text-pale-color); 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: var(--transition); 
+            list-style: none; 
+            border-radius: 8px; 
+        }
         summary::-webkit-details-marker { display: none; }
         summary:hover { background-color: var(--sidebar-hover); }
         summary .history-icon { margin-right: 8px; }
         summary .chevron { width: 14px; transition: transform 0.3s ease; }
         details[open] summary .chevron { transform: rotate(180deg); }
-        .history-item { padding: 10px 16px; cursor: pointer; transition: var(--transition); display: flex; align-items: center; border-radius: 8px; margin-top: 1px; }
+        
+        /* ===== 履歴アイテムのスタイル ===== */
+        .history-item {
+            padding: 10px 8px 10px 16px; /* 右のパディングを調整 */
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 8px;
+            margin-top: 1px;
+            position: relative;
+        }
         .history-item:hover { background-color: var(--sidebar-hover); }
         .history-item.active { background-color: var(--sidebar-active); color: var(--base-color); font-weight: bold; }
         .history-icon { margin-right: 10px; color: var(--text-pale-color); font-size: 14px; }
-        .history-title { font-size: 14px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; }
+        .history-title {
+            font-size: 14px;
+            overflow: hidden;
+            white-space: nowrap;
+            /*text-overflow: ellipsis;*/
+            cursor: pointer;
+            flex-grow: 1;
+            margin-right: 8px;
+        }
+        
+        /* ===== 履歴アイテムのアクションメニュー ===== */
+        .history-item-actions {
+            position: relative;
+            flex-shrink: 0;
+        }
+        .history-menu-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-pale-color);
+            font-size: 16px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            line-height: 1;
+            opacity: 0; /* カーソルが当たっていないときは非表示 */
+            transition: opacity 0.2s ease; /* フェードイン・アウトのアニメーション */
+        }
+        .history-item:hover .history-menu-btn {
+            opacity: 1; /* 親要素にカーソルが当たったときに表示 */
+        }
+        .history-menu-btn:hover {
+            background-color: var(--bg-button-hover-color);
+            color: var(--text-main-color);
+        }
+        .history-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--bg-card-color);
+            border: 1px solid var(--card-line);
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            z-index: 100;
+            width: 180px;
+            padding: 4px;
+        }
+        .history-menu.is-open {
+            display: block;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            background: none;
+            border: none;
+            color: var(--text-pale-color);
+            cursor: pointer;
+            text-align: left;
+            border-radius: 4px;
+        }
+        .menu-item:hover {
+            background-color: var(--bg-button-hover-color);
+            color: var(--text-main-color);
+        }
+        .menu-item:hover i {
+            transform: scale(1.1);
+        }
 
-        .sidebar-footer { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-top: var(--header-line); }
-        .user-avatar { font-size: 24px; background-color: transparent; border: none; cursor: pointer; color: var(--base-color); transition: var(--transition); padding: 0; }
+        /* サイドバー：フッター（アバター・設定） */
+        .sidebar-footer { 
+            padding: 16px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-top: var(--header-line); 
+        }
+        .user-avatar { 
+            font-size: 24px; 
+            background-color: transparent; 
+            border: none; 
+            cursor: pointer; 
+            color: var(--base-color); 
+            transition: var(--transition); 
+            padding: 0; 
+        }
         .user-avatar:hover { color: var(--base-hover-color); transform: scale(1.1); }
-        .settings-btn { font-size: 20px; background-color: transparent; border: none; cursor: pointer; color: var(--text-pale-color); transition: var(--transition); }
+        .settings-btn { 
+            font-size: 20px; 
+            background-color: transparent; 
+            border: none; 
+            cursor: pointer; 
+            color: var(--text-pale-color); 
+            transition: var(--transition); 
+        }
         .settings-btn:hover { color: var(--text-main-color); transform: scale(1.1); }
 
-        /* チャットエリア */
-        .chat-area { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-color); height: 100vh; }
-        .chat-header { padding: 0 24px; border-bottom: var(--header-line); display: flex; justify-content: space-between; align-items: center; height: 61px; flex-shrink: 0; background-color: var(--sidebar-bg); }
-        .hamburger-btn { display: none; background: none; border: none; color: var(--text-pale-color); font-size: 20px; cursor: pointer; padding: 8px; margin-right: 12px; }
-        .chat-title { font-weight: bold; font-size: 16px; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; flex-grow: 1; margin-right: 16px; }
-        .chat-actions { display: flex; align-items: center; gap: 12px; position: relative; }
+        /* ===== チャットエリア全体 ===== */
+        .chat-area { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            background-color: var(--bg-color); 
+            height: 100vh; 
+        }
+        /* チャットヘッダー */
+        .chat-header { 
+            padding: 0 24px; 
+            border-bottom: var(--header-line); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            height: 61px; 
+            flex-shrink: 0; 
+            background-color: var(--sidebar-bg); 
+        }
+        .hamburger-btn { 
+            display: none; 
+            background: none; 
+            border: none; 
+            color: var(--text-pale-color); 
+            font-size: 20px; 
+            cursor: pointer; 
+            padding: 8px; 
+            margin-right: 12px; 
+        }
+        .chat-title { 
+            font-weight: bold; 
+            font-size: 16px; 
+            cursor: pointer; 
+            overflow: hidden; 
+            white-space: nowrap; 
+            text-overflow: ellipsis; 
+            flex-grow: 1; 
+            margin-right: 16px; 
+        }
+        .chat-actions { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            position: relative; 
+        }
         .actions-dropdown { display: contents; }
         #mobile-actions-trigger { display: none; }
         .mobile-only-text { display: none; }
         .chat-last-update { color: #aaa; font-size: 12px; white-space: nowrap; }
-        .chat-action-btn { background: none; border: none; color: var(--text-pale-color); cursor: pointer; transition: var(--transition); font-size: 16px; flex-shrink: 0; }
+        .chat-action-btn { 
+            background: none; 
+            border: none; 
+            color: var(--text-pale-color); 
+            cursor: pointer; 
+            transition: var(--transition); 
+            font-size: 16px; 
+            flex-shrink: 0; 
+        }
         .chat-action-btn:hover { color: var(--text-main-color); transform: scale(1.1); }
         .chat-action-btn.is-favorite { color: var(--accent-color); }
         .chat-action-btn.is-favorite:hover { color: var(--accent-hover-color); }
 
+        /* ===== メッセージ表示エリア ===== */
         .message-container { flex: 1; overflow-y: auto; padding: 24px; }
         .messages { max-width: 800px; margin: 0 auto; }
-
         .message { margin-bottom: 32px; display: flex; flex-direction: column; position: relative; }
-        
         .message-content {
             padding: 12px 16px;
             border-radius: 8px;
@@ -225,13 +396,43 @@
         .user-message .message-content { background-color: var(--chat-bg-user); align-self: flex-end; }
         .ai-message .message-content { background-color: var(--chat-bg-ai); }
 
-        .message-actions { position: absolute; display: flex; gap: 4px; background-color: var(--bg-card-color); padding: 4px 8px; border-radius: 20px; border: 1px solid var(--card-line); opacity: 0; visibility: hidden; transform: translateY(5px); transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s; z-index: 10; }
+        .katex-display {
+            padding: 8px 0;
+            margin: 8px 0;
+            overflow-x: auto;
+        }
+
+        /* メッセージのアクション（コピー等） */
+        .message-actions { 
+            position: absolute; 
+            display: flex; 
+            gap: 4px; 
+            background-color: var(--bg-card-color); 
+            padding: 4px 8px; 
+            border-radius: 20px; 
+            border: 1px solid var(--card-line); 
+            opacity: 0; 
+            visibility: hidden; 
+            transform: translateY(5px); 
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s; 
+            z-index: 10; 
+        }
         .ai-message .message-actions { bottom: -16px; left: 0; }
         .user-message .message-actions { bottom: -16px; right: 0; }
         .message:hover .message-actions { opacity: 1; visibility: visible; transform: translateY(0); }
-        .message-action-btn { background: none; border: none; cursor: pointer; color: var(--text-pale-color); padding: 6px; font-size: 14px; line-height: 1; position: relative; }
+        .message-action-btn { 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            color: var(--text-pale-color); 
+            padding: 6px; 
+            font-size: 14px; 
+            line-height: 1; 
+            position: relative; 
+        }
         .message-action-btn:hover { color: var(--text-main-color); }
         
+        /* コピー時のフィードバック表示 */
         .copy-feedback {
             position: absolute;
             bottom: calc(100% + 5px);
@@ -251,9 +452,17 @@
             opacity: 1;
         }
 
-        .chat-input-area-wrapper { padding: 16px 24px; border-top: var(--header-line); background-color: var(--sidebar-bg); }
-        .chat-input-area { display: flex; align-items: flex-end; gap: 12px; }
-        
+        /* ===== チャット入力エリア ===== */
+        .chat-input-area-wrapper { 
+            padding: 16px 24px; 
+            border-top: var(--header-line); 
+            background-color: var(--sidebar-bg); 
+        }
+        .chat-input-area { 
+            display: flex; 
+            align-items: flex-end; 
+            gap: 12px; 
+        }
         .chat-input {
             flex: 1;
             padding: 7px 12px;
@@ -271,49 +480,157 @@
         }
         .chat-input:focus { outline: none; border-color: var(--base-color); }
 
-        .send-btn { background-color: var(--base-color); color: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); flex-shrink: 0; }
+        .send-btn { 
+            background-color: var(--base-color); 
+            color: white; 
+            border: none; 
+            border-radius: 50%; 
+            width: 36px; 
+            height: 36px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: var(--transition); 
+            flex-shrink: 0; 
+        }
         .send-btn:hover:not(:disabled) { background-color: var(--base-hover-color); }
         .send-btn:disabled { background-color: #ccc; cursor: not-allowed; }
         .send-btn.is-loading .fa-paper-plane { display: none; }
-        .send-btn.is-loading::after { content: ''; display: block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.5); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; }
+        .send-btn.is-loading::after { 
+            content: ''; 
+            display: block; 
+            width: 16px; 
+            height: 16px; 
+            border: 2px solid rgba(255,255,255,0.5); 
+            border-top-color: white; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .history-container, .message-container { overflow-y: auto; scrollbar-gutter: stable; scrollbar-width: thin; }
-        .history-container ul, .history-container ol { margin-block-start: 0; margin-block-end: 0; padding: 0; }
-        .history-wrapper { margin: 0 .5em; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--overlay-bg); z-index: 999; }
+        /* ===== 履歴・メッセージのスクロール設定 ===== */
+        .history-container, .message-container { 
+            overflow-x: hidden;
+            overflow-y: auto;
+            scrollbar-gutter: stable; 
+            scrollbar-width: thin; 
+        }
+        .history-container ul, .history-container ol { 
+            margin-block-start: 0; 
+            margin-block-end: 0; 
+            padding: 0; 
+        }
+        .history-wrapper { margin: .5em; }
+        .overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0; 
+            background-color: var(--overlay-bg); 
+            z-index: 999; 
+        }
         .overlay.active { display: block; }
 
-        /* レスポンシブ対応 */
+        /* ===== レスポンシブ対応（モバイル用） ===== */
         @media (max-width: 1030px) {
             body { flex-direction: column; }
-            .sidebar { position: fixed; top: 0; left: 0; height: 100%; z-index: 1000; transform: translateX(-100%); transition: transform 0.3s ease-in-out; border-right: var(--header-line); }
-            .sidebar.is-open { transform: translateX(0); box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
+            .sidebar { 
+                position: fixed; 
+                top: 0; left: 0; 
+                height: 100%; 
+                z-index: 1000; 
+                transform: translateX(-100%); 
+                transition: transform 0.3s ease-in-out; 
+                border-right: var(--header-line); 
+            }
+            .sidebar.is-open { 
+                transform: translateX(0); 
+                box-shadow: 4px 0 15px rgba(0,0,0,0.1); 
+            }
             .chat-area { width: 100%; }
             .hamburger-btn { display: block; }
             .messages { max-width: 100%; }
             #mobile-actions-trigger { display: block; }
-            .actions-dropdown { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 200px; background-color: var(--bg-card-color); border: 1px solid var(--card-line); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10; padding: 8px; }
+            .actions-dropdown { 
+                display: none; 
+                position: absolute; 
+                top: calc(100% + 8px); 
+                right: 0; 
+                width: 200px; 
+                background-color: var(--bg-card-color); 
+                border: 1px solid var(--card-line); 
+                border-radius: 8px; 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+                z-index: 10; 
+                padding: 8px; 
+            }
             .actions-dropdown.is-open { display: block; }
-            .actions-dropdown > * { display: flex; align-items: center; width: 100%; padding: 8px; box-sizing: border-box; border-radius: 4px; margin-bottom: 4px; }
+            .actions-dropdown > * { 
+                display: flex; 
+                align-items: center; 
+                width: 100%; 
+                padding: 8px; 
+                box-sizing: border-box; 
+                border-radius: 4px; 
+                margin-bottom: 4px; 
+            }
             .actions-dropdown > *:last-child { margin-bottom: 0; }
             .actions-dropdown .chat-action-btn { font-size: 14px; transform: none !important; }
             .actions-dropdown .chat-action-btn:hover { background-color: var(--bg-button-hover-color); }
-            .actions-dropdown .chat-last-update { font-size: 12px; color: var(--text-pale-color); justify-content: center; border-bottom: 1px solid var(--card-line); padding-bottom: 12px; }
+            .actions-dropdown .chat-last-update { 
+                font-size: 12px; 
+                color: var(--text-pale-color); 
+                justify-content: center; 
+                border-bottom: 1px solid var(--card-line); 
+                padding-bottom: 12px; 
+            }
             .actions-dropdown .mobile-only-text { display: inline-block; margin-left: 8px; }
         }
         
-        .image-preview-container { padding: 8px 16px; border-top: var(--header-line); flex-shrink: 0; }
+        /* ===== 画像アップロード・プレビュー ===== */
+        .image-preview-container { 
+            padding: 8px 16px; 
+            border-top: var(--header-line); 
+            flex-shrink: 0; 
+        }
         .image-preview { position: relative; display: inline-block; }
-        #uploaded-image-preview { max-height: 120px; max-width: 200px; border-radius: 8px; border: 1px solid var(--card-line); }
-        .remove-image-btn { position: absolute; top: -8px; right: -8px; background-color: var(--bg-card-color); color: var(--text-pale-color); border: 1px solid var(--card-line); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); }
+        #uploaded-image-preview { 
+            max-height: 120px; 
+            max-width: 200px; 
+            border-radius: 8px; 
+            border: 1px solid var(--card-line); 
+        }
+        .remove-image-btn { 
+            position: absolute; 
+            top: -8px; 
+            right: -8px; 
+            background-color: var(--bg-card-color); 
+            color: var(--text-pale-color); 
+            border: 1px solid var(--card-line); 
+            border-radius: 50%; 
+            width: 24px; 
+            height: 24px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            transition: var(--transition); 
+        }
         .remove-image-btn:hover { color: var(--accent-color); }
-        .upload-image-btn { background-color: transparent; color: var(--text-pale-color); border: none; cursor: pointer; font-size: 18px; padding: 8px; transition: var(--transition); }
+        .upload-image-btn { 
+            background-color: transparent; 
+            color: var(--text-pale-color); 
+            border: none; 
+            cursor: pointer; 
+            font-size: 18px; 
+            padding: 8px; 
+            transition: var(--transition); 
+        }
         .upload-image-btn:hover { color: var(--base-color); }
     </style>
 </head>
 <body>
-    <!-- サイドバー - ロゴとチャット履歴 -->
+    <!-- ===== サイドバー（ロゴ・新規チャット・履歴・フッター） ===== -->
     <div class="sidebar">
         <!-- ロゴ部分 -->
         <div class="sidebar-logo">
@@ -328,21 +645,21 @@
             </button>
         </div>
 
-        <!-- サイドバーのメインコンテンツ -->
+        <!-- サイドバーのメインコンテンツ（履歴リスト） -->
         <div class="sidebar-content">
 
             <!-- 折りたたみ可能なチャットリスト -->
             <div class="history-container">
                 <div class="history-wrapper">
-                    <!-- お気に入り -->
-                    <details open>
+                    <!-- お気に入り履歴セクション -->
+                    <details id="favorites-section" open>
                         <summary>
                             <div><i class="fa-solid fa-star history-icon"></i> お気に入り</div>
                             <i class="fa-solid fa-chevron-down chevron"></i>
                         </summary>
                         <div><ul class="history-favorites"></ul></div>
                     </details>
-                    <!-- チャット履歴 -->
+                    <!-- 通常のチャット履歴セクション -->
                     <details open>
                         <summary>
                             <div><i class="fa-regular fa-comment history-icon"></i> チャット履歴</div>
@@ -354,22 +671,26 @@
             </div>
         </div>
         
-        <!-- フッター部分 - アバターと設定ボタン -->
+        <!-- サイドバーのフッター（アバター・設定ボタン） -->
         <div class="sidebar-footer">
             <button class="user-avatar" title="アカウント情報"><i class="fa-solid fa-circle-user"></i></button>
             <button class="settings-btn" title="設定"><i class="fa-solid fa-gear"></i></button>
         </div>
     </div>
     
+    <!-- サイドバー開閉用オーバーレイ（モバイル用） -->
     <div class="overlay"></div>
 
-    <!-- メインチャットエリア -->
+    <!-- ===== メインチャットエリア ===== -->
     <div class="chat-area">
+        <!-- チャットヘッダー（タイトル・アクション） -->
         <div class="chat-header">
             <button class="hamburger-btn" title="メニューを開く"><i class="fa-solid fa-bars"></i></button>
             <div class="chat-title" data-raw-title=""></div>
             <div class="chat-actions">
+                <!-- モバイル用アクションメニューのトリガー -->
                 <button class="chat-action-btn" id="mobile-actions-trigger" title="その他"><i class="fa-solid fa-ellipsis-v"></i></button>
+                <!-- アクションメニュー本体 -->
                 <div class="actions-dropdown" id="actions-dropdown-content">
                     <span class="chat-last-update"></span>
                     <button class="chat-action-btn favorite-toggle-btn" title="お気に入り"><i class="fa-solid fa-star"></i><span class="mobile-only-text">お気に入り</span></button>
@@ -379,39 +700,47 @@
             </div>
         </div>
         
+        <!-- メッセージ表示エリア -->
         <div class="message-container">
             <div class="messages"></div>
         </div>
 
+        <!-- 画像プレビューエリア（画像アップロード時のみ表示） -->
         <div class="image-preview-container" style="display: none;">
             <div class="image-preview">
                 <img id="uploaded-image-preview" src="" alt="プレビュー">
                 <button class="remove-image-btn" title="画像を削除"><i class="fa-solid fa-times"></i></button>
             </div>
         </div>
+        <!-- チャット入力エリア -->
         <div class="chat-input-area-wrapper">
             <div class="chat-input-area">
                 <button class="upload-image-btn" title="画像をアップロード"><i class="fa-solid fa-image"></i></button>
                 <input type="file" id="image-upload" accept="image/*" style="display: none;">
-                <textarea class="chat-input" placeholder="数学の問題や質問を入力してください..." rows="1"></textarea>
+                <textarea class="chat-input" id="chat-input" placeholder="数学の問題や質問を入力してください..." rows="1"></textarea>
                 <button class="send-btn" title="送信" disabled><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
     
     <script>
+        // =========================
+        // メインスクリプト
+        // =========================
         document.addEventListener("DOMContentLoaded", function() {
 
             // --- DATA ---
             // アプリケーションの状態を管理するデータオブジェクト
             const appData = {
-                currentChatId: 'chat-1',
+                currentChatId: 'chat-1', // 現在選択中のチャットID
                 chats: {
+                    // チャットIDごとのチャット情報
                     'chat-1': {
                         title: '数列 $a_1=1, a_{n+1}=2\\sqrt{a_n}$ の一般項',
                         isFavorite: true,
                         lastUpdate: '2025-04-15',
                         messages: [
+                            // メッセージ配列（sender: 'user' or 'ai', content: HTML文字列）
                             { sender: 'user', content: 'この問題を教えてください。<br>次の条件によって定められる数列${a_n}$の一般項を求めよ。$$a_1=1, a_{n+1}=2\\sqrt{a_n}$$' },
                             { sender: 'ai', content: '<ol><li>次の項が前の項の平方根を含む形になっている点に注目しましょう。平方根を含む漸化式では、$a_n$を別の変数で置き換えると整理できる場合があります。</li><li>実際に $a_{n+1}$ と $a_n$ の関係を見ていると、指数や対数の考え方を使うと見通しがよくなるかもしれません。</li><li>「漸化式を解く」一般的な方法として、数列の各項を何らかの指数関数や対数関数の形に変換してみるという手段があります（例：$b_n = \\log(a_n)$ のように置いてみる）。</li><li>最初の数項を具体的に書いてみると、どのような変化が起きているかのパターンを見つけやすいでしょう。特に、指数や乗数に注目すると規則性を発見できるかもしれません。</li></ol>上のポイントを確かめながら、数列を変形していくと最終的に一般項の式が得られるはずです。まずは変数の置き換えや最初の数項の様子を丁寧に観察してみてください。' },
                             { sender: 'user', content: 'そのヒントを参考に、問題を解いてください。' },
@@ -420,6 +749,7 @@
                             { sender: 'ai', content: '両方とも同じ式を別の形で表しているだけなので、どちらも正しいです。実際、分数の形を指数の形に直すと、$$ \\frac{1}{2^{n-2}} = 2^{-(n-2)} = 2^{2-n} $$となります。よって、$$ 2^{\\,2 - \\tfrac{1}{2^{\\,n-2}}} $$は$$ 2^{2 - 2^{2-n}} $$とまったく同じ値を表しています。どちらを使っても同じ数列の一般項になりますので安心してください。' }
                         ]
                     },
+                    // --- 以下、ダミーチャットデータ ---
                     'chat-2': { title: '積分の計算方法', isFavorite: false, lastUpdate: '2025-04-14', messages: [] },
                     'chat-3': { title: 'ベクトルの内積と外積の意味、また成分表示について', isFavorite: false, lastUpdate: '2025-04-13', messages: [] },
                     'chat-4': { title: '確率分布の期待値', isFavorite: false, lastUpdate: '2025-04-12', messages: [] },
@@ -445,25 +775,26 @@
             // --- DOM Elements ---
             // 主要なDOM要素をここで取得
             const dom = {
-                sidebar: document.querySelector('.sidebar'),
-                hamburgerBtn: document.querySelector('.hamburger-btn'),
-                overlay: document.querySelector('.overlay'),
-                historyFavoriteList: document.querySelector('.history-favorites'),
-                historyNormalList: document.querySelector('.history-normal'),
-                chatTitle: document.querySelector('.chat-title'),
-                chatLastUpdate: document.querySelector('.chat-last-update'),
-                favoriteToggleBtns: document.querySelectorAll('.favorite-toggle-btn'),
-                messagesContainer: document.querySelector('.messages'),
-                messageContainerWrapper: document.querySelector('.message-container'),
-                sendBtn: document.querySelector('.send-btn'),
-                chatInput: document.querySelector('.chat-input'),
-                uploadBtn: document.querySelector('.upload-image-btn'),
-                fileInput: document.getElementById('image-upload'),
-                previewContainer: document.querySelector('.image-preview-container'),
-                previewImage: document.getElementById('uploaded-image-preview'),
-                removeBtn: document.querySelector('.remove-image-btn'),
-                mobileActionsTrigger: document.getElementById('mobile-actions-trigger'),
-                actionsDropdown: document.getElementById('actions-dropdown-content')
+                sidebar: document.querySelector('.sidebar'), // サイドバー全体
+                hamburgerBtn: document.querySelector('.hamburger-btn'), // ハンバーガーメニュー（モバイル用）
+                overlay: document.querySelector('.overlay'), // サイドバー開閉用オーバーレイ
+                favoritesSection: document.getElementById('favorites-section'), // お気に入りセクション
+                historyFavoriteList: document.querySelector('.history-favorites'), // お気に入りリスト
+                historyNormalList: document.querySelector('.history-normal'), // 通常履歴リスト
+                chatTitle: document.querySelector('.chat-title'), // チャットタイトル
+                chatLastUpdate: document.querySelector('.chat-last-update'), // 最終更新日表示
+                favoriteToggleBtns: document.querySelectorAll('.favorite-toggle-btn'), // お気に入りトグルボタン
+                messagesContainer: document.querySelector('.messages'), // メッセージリスト
+                messageContainerWrapper: document.querySelector('.message-container'), // メッセージラッパー
+                sendBtn: document.querySelector('.send-btn'), // 送信ボタン
+                chatInput: document.querySelector('.chat-input'), // 入力欄
+                uploadBtn: document.querySelector('.upload-image-btn'), // 画像アップロードボタン
+                fileInput: document.getElementById('image-upload'), // 画像ファイル入力
+                previewContainer: document.querySelector('.image-preview-container'), // 画像プレビューエリア
+                previewImage: document.getElementById('uploaded-image-preview'), // プレビュー画像
+                removeBtn: document.querySelector('.remove-image-btn'), // プレビュー画像削除ボタン
+                mobileActionsTrigger: document.getElementById('mobile-actions-trigger'), // モバイル用アクションメニュートリガー
+                actionsDropdown: document.getElementById('actions-dropdown-content') // アクションメニュー本体
             };
 
             // --- RENDER FUNCTIONS ---
@@ -489,33 +820,39 @@
              */
             function renderMessages() {
                 const currentChat = appData.chats[appData.currentChatId];
-                if (!currentChat) return;
+                if (!currentChat) {
+                    // チャット未選択時の案内
+                    dom.messagesContainer.innerHTML = '<div style="text-align: center; color: var(--text-pale-color); margin-top: 40px;">チャットを選択してください。</div>';
+                    return;
+                }
                 dom.messagesContainer.innerHTML = '';
+                // 各メッセージを描画
                 currentChat.messages.forEach(msg => {
                     const messageEl = document.createElement('div');
                     messageEl.classList.add('message', msg.sender === 'user' ? 'user-message' : 'ai-message');
                     
+                    // メッセージ本文
                     const contentEl = document.createElement('div');
                     contentEl.classList.add('message-content');
-                    // 画面表示用にinnerHTMLを設定
                     contentEl.innerHTML = msg.content;
-                    // ★修正: コピー用に元のHTMLをdata属性に保持
                     contentEl.dataset.rawContent = msg.content;
 
+                    // メッセージアクション（コピー等）
                     const actionsEl = document.createElement('div');
                     actionsEl.className = 'message-actions';
                     
+                    // コピー用ボタン
                     const copyBtn = document.createElement('button');
                     copyBtn.className = 'message-action-btn';
                     copyBtn.title = 'コピー';
                     copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
                     
+                    // コピー時のフィードバック
                     const feedbackEl = document.createElement('div');
                     feedbackEl.className = 'copy-feedback';
                     feedbackEl.textContent = 'コピーしました！';
                     copyBtn.appendChild(feedbackEl);
                     
-                    // ★修正: イベントリスナはボタン自身とフィードバック要素を渡す
                     copyBtn.addEventListener('click', () => copyMessageToClipboard(copyBtn, feedbackEl));
 
                     actionsEl.appendChild(copyBtn);
@@ -524,6 +861,7 @@
                     dom.messagesContainer.appendChild(messageEl);
                 });
                 renderMath(dom.messagesContainer);
+                // メッセージエリアを最下部へ自動スクロール
                 dom.messageContainerWrapper.scrollTo({ top: dom.messageContainerWrapper.scrollHeight, behavior: 'smooth' });
             }
 
@@ -533,19 +871,83 @@
             function renderHistoryLists() {
                 dom.historyFavoriteList.innerHTML = '';
                 dom.historyNormalList.innerHTML = '';
+
+                /**
+                 * 履歴アイテム（li要素）を生成
+                 * @param {string} id - チャットID
+                 * @param {object} chat - チャットデータ
+                 * @returns {HTMLElement} - 履歴アイテム要素
+                 */
                 const createHistoryItemElement = (id, chat) => {
                     const historyItem = document.createElement('li');
                     historyItem.className = 'history-item';
                     historyItem.dataset.chatId = id;
                     if (id === appData.currentChatId) historyItem.classList.add('active');
+
+                    // タイトル部分
                     const titleDiv = document.createElement('div');
                     titleDiv.className = 'history-title';
                     titleDiv.dataset.rawTitle = chat.title;
                     titleDiv.innerHTML = chat.title;
                     historyItem.title = chat.title;
+                    
+                    // アクションメニュー部分
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'history-item-actions';
+
+                    // メニューボタン
+                    const menuBtn = document.createElement('button');
+                    menuBtn.className = 'history-menu-btn';
+                    menuBtn.innerHTML = '<i class="fa-solid fa-ellipsis"></i>';
+                    menuBtn.title = 'メニュー';
+
+                    // メニュー本体
+                    const menu = document.createElement('div');
+                    menu.className = 'history-menu';
+
+                    // お気に入り切り替えボタン
+                    const favBtn = document.createElement('button');
+                    favBtn.className = 'menu-item';
+                    favBtn.title = `${chat.isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'}`;
+                    favBtn.innerHTML = `<i class="fa-solid fa-star"></i> <span>${chat.isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'}</span>`;
+                    favBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        chat.isFavorite = !chat.isFavorite;
+                        renderAll();
+                    });
+
+                    // 削除ボタン
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'menu-item';
+                    delBtn.title = '削除';
+                    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i> <span>削除</span>';
+                    delBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteChat(id);
+                    });
+
+                    menu.appendChild(favBtn);
+                    menu.appendChild(delBtn);
+                    actionsDiv.appendChild(menuBtn);
+                    actionsDiv.appendChild(menu);
+                    
                     historyItem.appendChild(titleDiv);
+                    historyItem.appendChild(actionsDiv);
+
+                    // メニューボタンの開閉制御
+                    menuBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const currentlyOpen = document.querySelector('.history-menu.is-open');
+                        if (currentlyOpen && currentlyOpen !== menu) {
+                            currentlyOpen.classList.remove('is-open');
+                        }
+                        menu.classList.toggle('is-open');
+                    });
+                    
                     return historyItem;
                 };
+
+                // チャット一覧を描画
                 Object.entries(appData.chats).forEach(([id, chat]) => {
                     const normalItem = createHistoryItemElement(id, chat);
                     dom.historyNormalList.appendChild(normalItem);
@@ -556,8 +958,17 @@
                 });
                 renderMath(dom.sidebar);
                 initTitleEditing();
+                checkFavoritesVisibility(); // 描画後に表示チェック
             }
             
+            /**
+             * お気に入りセクションの表示/非表示を切り替える
+             */
+            function checkFavoritesVisibility() {
+                const hasFavorites = dom.historyFavoriteList.children.length > 0;
+                dom.favoritesSection.classList.toggle('is-hidden', !hasFavorites);
+            }
+
             /**
              * お気に入りボタンの状態を描画する
              */
@@ -572,7 +983,12 @@
              */
             function renderChatHeader() {
                 const currentChat = appData.chats[appData.currentChatId];
-                if (!currentChat) return;
+                if (!currentChat) {
+                    dom.chatTitle.innerHTML = '';
+                    dom.chatTitle.title = '';
+                    dom.chatLastUpdate.textContent = '';
+                    return;
+                }
                 dom.chatTitle.dataset.rawTitle = currentChat.title;
                 dom.chatTitle.innerHTML = currentChat.title;
                 dom.chatTitle.title = currentChat.title;
@@ -591,30 +1007,22 @@
             }
 
             /**
-             * ★修正: メッセージをクリップボードにコピーする (data-*属性利用版)
+             * メッセージをクリップボードにコピーする
              * @param {HTMLElement} buttonEl - クリックされたボタン要素
              * @param {HTMLElement} feedbackEl - フィードバック表示用の要素
              */
             function copyMessageToClipboard(buttonEl, feedbackEl) {
-                // ボタンからメッセージコンテント要素を探す
                 const contentEl = buttonEl.closest('.message').querySelector('.message-content');
-                if (!contentEl) {
-                    return;
-                }
-
-                // data属性から元のHTML文字列を取得
+                if (!contentEl) return;
                 const contentHtml = contentEl.dataset.rawContent;
-
-                // 一時的なdiv要素を介してプレーンテキストに変換
+                // HTMLをテキスト化してコピー
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = contentHtml;
                 const textToCopy = tempDiv.innerText;
 
                 navigator.clipboard.writeText(textToCopy).then(() => {
                     feedbackEl.classList.add('show');
-                    setTimeout(() => {
-                        feedbackEl.classList.remove('show');
-                    }, 2000);
+                    setTimeout(() => { feedbackEl.classList.remove('show'); }, 2000);
                 }).catch(err => {
                     console.error('コピーに失敗しました', err);
                     feedbackEl.textContent = '失敗';
@@ -629,6 +1037,32 @@
             // --- EVENT HANDLERS & INITIALIZERS ---
             // イベント処理と機能の初期化を行う関数群
 
+            /**
+             * チャットを削除する
+             * @param {string} chatId - 削除するチャットのID
+             */
+            function deleteChat(chatId) {
+                if (!appData.chats[chatId]) return;
+
+                // 簡易確認ダイアログ（本番ではモーダル推奨）
+                if (!confirm(`「${appData.chats[chatId].title}」を削除しますか？`)) {
+                    return;
+                }
+
+                delete appData.chats[chatId];
+
+                // 削除したチャットが現在表示中のものだった場合、他のチャットに切り替え
+                if (appData.currentChatId === chatId) {
+                    const remainingChatIds = Object.keys(appData.chats);
+                    appData.currentChatId = remainingChatIds.length > 0 ? remainingChatIds[0] : null;
+                }
+                
+                renderAll();
+            }
+
+            /**
+             * サイドバーの開閉（モバイル用）初期化
+             */
             function initSidebarToggle() {
                 if (dom.hamburgerBtn) {
                     dom.hamburgerBtn.addEventListener('click', () => {
@@ -644,8 +1078,13 @@
                 }
             }
 
+            /**
+             * 画像アップロード・プレビュー初期化
+             */
             function initImageUpload() {
+                // 画像アップロードボタン押下時、ファイル選択ダイアログを開く
                 dom.uploadBtn.addEventListener('click', () => dom.fileInput.click());
+                // ファイル選択時、プレビュー表示
                 dom.fileInput.addEventListener('change', () => {
                     if (dom.fileInput.files && dom.fileInput.files[0]) {
                         const reader = new FileReader();
@@ -656,6 +1095,7 @@
                         reader.readAsDataURL(dom.fileInput.files[0]);
                     }
                 });
+                // プレビュー画像の削除
                 dom.removeBtn.addEventListener('click', () => {
                     dom.previewImage.src = '';
                     dom.previewContainer.style.display = 'none';
@@ -663,13 +1103,22 @@
                 });
             }
             
+            /**
+             * メッセージ送信機能の初期化
+             */
             function initSendMessage() {
+                /**
+                 * 送信ボタンの有効/無効を制御
+                 */
                 function updateSendButtonState() {
                     const hasText = dom.chatInput.value.trim() !== "";
                     const hasImage = dom.fileInput.files && dom.fileInput.files[0];
                     dom.sendBtn.disabled = !hasText && !hasImage;
                 }
                 
+                /**
+                 * テキストエリアの自動リサイズ
+                 */
                 function autoResizeTextarea() {
                     dom.chatInput.style.height = 'auto';
                     dom.chatInput.style.height = dom.chatInput.scrollHeight + 'px';
@@ -681,20 +1130,27 @@
                 });
                 dom.fileInput.addEventListener("change", updateSendButtonState);
 
+                /**
+                 * メッセージ送信処理
+                 */
                 function sendMessage() {
                     if (dom.sendBtn.disabled) return;
                     const messageText = dom.chatInput.value.trim();
                     let messageContent = messageText;
+                    // 画像付きの場合は画像タグを先頭に
                     if (dom.fileInput.files && dom.fileInput.files[0]) {
                         messageContent = `<img src="${dom.previewImage.src}" alt="ユーザーがアップロードした画像" style="max-width: 200px; border-radius: 8px;">`;
                         if (messageText) messageContent += `<br>${messageText}`;
                     }
                     const currentChat = appData.chats[appData.currentChatId];
                     if (currentChat) {
+                        // ユーザーメッセージ追加
                         currentChat.messages.push({ sender: 'user', content: messageContent });
+                        // 送信中UI
                         dom.sendBtn.classList.add('is-loading');
                         dom.sendBtn.disabled = true;
                         dom.chatInput.disabled = true;
+                        // 疑似AI返信（1.5秒後）
                         setTimeout(() => {
                             currentChat.messages.push({ sender: 'ai', content: 'これはデータ駆動型の返信です。' });
                             renderMessages();
@@ -704,6 +1160,7 @@
                         }, 1500);
                     }
                     renderMessages();
+                    // 入力欄・画像プレビューをリセット
                     dom.chatInput.value = "";
                     dom.previewImage.src = "";
                     dom.previewContainer.style.display = "none";
@@ -712,7 +1169,9 @@
                     updateSendButtonState();
                 }
 
+                // 送信ボタン押下
                 dom.sendBtn.addEventListener('click', sendMessage);
+                // Enterキーで送信（Shift+Enterは改行）
                 dom.chatInput.addEventListener("keydown", (e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
@@ -723,10 +1182,16 @@
                 autoResizeTextarea();
             }
 
+            /**
+             * タイトル編集機能の初期化
+             */
             function initTitleEditing() {
+                /**
+                 * ダブルクリックで編集開始
+                 */
                 const setupEditListener = (element) => {
                     element.addEventListener("dblclick", (e) => {
-                        const target = e.target.closest('.history-title, .chat-title');
+                        const target = e.target.closest('.history-title');
                         if (!target) return;
                         startEditTitle(target);
                     });
@@ -734,6 +1199,11 @@
                 setupEditListener(dom.historyFavoriteList);
                 setupEditListener(dom.historyNormalList);
                 setupEditListener(dom.chatTitle);
+
+                /**
+                 * タイトル編集開始
+                 * @param {HTMLElement} targetElement - 編集対象
+                 */
                 function startEditTitle(targetElement) {
                     const currentRawTitle = targetElement.dataset.rawTitle || targetElement.innerHTML;
                     const input = document.createElement('input');
@@ -746,6 +1216,9 @@
                     targetElement.innerHTML = "";
                     targetElement.appendChild(input);
                     input.focus();
+                    /**
+                     * 編集終了処理
+                     */
                     const finishEdit = () => {
                         let newTitle = input.value.trim() || currentRawTitle;
                         const chatId = targetElement.closest('.history-item')?.dataset.chatId || appData.currentChatId;
@@ -763,6 +1236,9 @@
                 }
             }
             
+            /**
+             * お気に入りトグルボタンの初期化
+             */
             function initFavoriteToggle() {
                 dom.favoriteToggleBtns.forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -775,22 +1251,27 @@
                 });
             }
 
+            /**
+             * モバイル用アクションメニューの初期化
+             */
             function initMobileActionsMenu() {
                 if (!dom.mobileActionsTrigger || !dom.actionsDropdown) return;
                 dom.mobileActionsTrigger.addEventListener('click', (e) => {
                     e.stopPropagation();
                     dom.actionsDropdown.classList.toggle('is-open');
                 });
-                document.addEventListener('click', (e) => {
-                    if (dom.actionsDropdown.classList.contains('is-open') && !dom.actionsDropdown.contains(e.target) && !dom.mobileActionsTrigger.contains(e.target)) {
-                        dom.actionsDropdown.classList.remove('is-open');
-                    }
-                });
             }
             
+            /**
+             * 履歴リストクリック時のチャット切り替え初期化
+             */
             function initHistoryClick() {
                 const historyContainer = document.querySelector('.history-container');
                 historyContainer.addEventListener('click', (e) => {
+                    // メニューボタンやその中身をクリックした場合は何もしない
+                    if (e.target.closest('.history-item-actions')) {
+                        return;
+                    }
                     const targetItem = e.target.closest('.history-item');
                     if (targetItem && targetItem.dataset.chatId) {
                         const newChatId = targetItem.dataset.chatId;
@@ -798,6 +1279,23 @@
                             appData.currentChatId = newChatId;
                             renderAll();
                         }
+                    }
+                });
+            }
+
+            /**
+             * グローバルなクリックイベント（メニューの自動クローズ等）
+             */
+            function initGlobalListeners() {
+                document.addEventListener('click', (e) => {
+                    // モバイル用アクションメニューを閉じる
+                    if (dom.actionsDropdown.classList.contains('is-open') && !dom.actionsDropdown.contains(e.target) && !dom.mobileActionsTrigger.contains(e.target)) {
+                        dom.actionsDropdown.classList.remove('is-open');
+                    }
+                    // 履歴アイテムのメニューを閉じる
+                    const openHistoryMenu = document.querySelector('.history-menu.is-open');
+                    if (openHistoryMenu && !openHistoryMenu.closest('.history-item-actions').contains(e.target)) {
+                        openHistoryMenu.classList.remove('is-open');
                     }
                 });
             }
@@ -810,6 +1308,7 @@
             initMobileActionsMenu();
             initHistoryClick();
             initFavoriteToggle();
+            initGlobalListeners();
             
             // 初期描画
             renderAll();
