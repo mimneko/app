@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15パズル</title>
+    <style>
+        /* CSSスタイル */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            /* body全体でテキスト選択を無効化 */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE10+/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        h1 {
+            color: #444;
+            margin-bottom: 20px;
+        }
+
+        #puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(4, 100px);
+            gap: 4px;
+            padding: 10px;
+            background-color: #a0a0a0;
+            border: 2px solid #333;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .tile {
+            width: 100px;
+            height: 100px;
+            background-color: #dcdcdc;
+            border: 1px solid #888;
+            box-sizing: border-box;
+            cursor: pointer;
+            position: relative;
+            transition: grid-row-start 0.3s ease, grid-column-start 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #444;
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        .tile.movable {
+            background-color: #a7c7e7; /* 明るい青色 */
+            border: 2px solid #0056b3;
+        }
+
+        .path::before,
+        .path::after {
+            content: '';
+            position: absolute;
+            background-color: #ff7f50; /* コーラル色 */
+            border-radius: 5px;
+        }
+
+        /* --- 道の形状 --- */
+        .path-v::before { width: 20px; height: 100%; left: 40px; }
+        .path-h::before { width: 100%; height: 20px; top: 40px; }
+        .path-tr::before { width: 20px; height: 60px; left: 40px; top: 0; }
+        .path-tr::after { width: 60px; height: 20px; left: 40px; top: 40px; }
+        .path-tl::before { width: 20px; height: 60px; left: 40px; top: 0; }
+        .path-tl::after { width: 60px; height: 20px; left: 0; top: 40px; }
+        .path-br::before { width: 20px; height: 60px; left: 40px; top: 40px; }
+        .path-br::after { width: 60px; height: 20px; left: 40px; top: 40px; }
+        .path-bl::before { width: 20px; height: 60px; left: 40px; top: 40px; }
+        .path-bl::after { width: 60px; height: 20px; left: 0; top: 40px; }
+        .path-t-down::before { width: 100%; height: 20px; left: 0; top: 40px; }
+        .path-t-down::after { width: 20px; height: 60px; left: 40px; top: 40px; }
+        .path-t-up::before { width: 100%; height: 20px; left: 0; top: 40px; }
+        .path-t-up::after { width: 20px; height: 60px; left: 40px; top: 0; }
+        .path-t-left::before { width: 60px; height: 20px; left: 0; top: 40px; }
+        .path-t-left::after { width: 20px; height: 100%; left: 40px; top: 0; }
+        .path-t-right::before { width: 60px; height: 20px; left: 40px; top: 40px; }
+        .path-t-right::after { width: 20px; height: 100%; left: 40px; top: 0; }
+        .path-end-up::before { width: 20px; height: 60px; left: 40px; top: 0; }
+        .path-end-down::before { width: 20px; height: 60px; left: 40px; top: 40px; }
+        .path-end-left::before { width: 60px; height: 20px; left: 0; top: 40px; }
+        .path-end-right::before { width: 60px; height: 20px; left: 40px; top: 40px; }
+
+        /* --- 新しいT字パネルのスタイル (ヘルパーdiv使用) --- */
+        .path-helper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        .path-helper::before {
+            content: '';
+            position: absolute;
+            background-color: #ff7f50;
+            border-radius: 5px;
+        }
+
+        /* デザインA: 右下L字 + 左の短い線 */
+        .path-t-down-A::before { /* L字の縦棒 */
+            width: 20px;
+            height: 60px;
+            top: 40px;
+            left: 40px;
+        }
+        .path-t-down-A::after { /* L字の横棒 */
+            width: 60px;
+            height: 20px;
+            top: 40px;
+            left: 40px;
+        }
+        .path-t-down-A .path-helper::before { /* 短い線 */
+            width: 38px; /* 40px - 2pxの隙間 */
+            height: 20px;
+            top: 40px;
+            left: 0;
+        }
+
+        /* デザインB: 左下L字 + 右の短い線 */
+        .path-t-down-B::before { /* L字の縦棒 */
+            width: 20px;
+            height: 60px;
+            top: 40px;
+            left: 40px;
+        }
+        .path-t-down-B::after { /* L字の横棒 */
+            width: 60px;
+            height: 20px;
+            top: 40px;
+            left: 0;
+        }
+        .path-t-down-B .path-helper::before { /* 短い線 */
+            width: 38px; /* 40px - 2pxの隙間 */
+            height: 20px;
+            top: 40px;
+            left: 62px; /* 60px + 2pxの隙間 */
+        }
+
+        /* --- バリアのスタイル --- */
+        .barrier {
+            position: absolute;
+            background-color: #5a5a5a;
+            border: 1px solid #333;
+            box-shadow: 0 0 3px rgba(0,0,0,0.5);
+            z-index: 2; /* パネルより手前に表示 */
+        }
+
+        /* --- 移動履歴のスタイル --- */
+        .history-container {
+            margin-top: 20px;
+            width: 424px; /* パズルの幅に合わせる */
+            text-align: left;
+        }
+
+        .history-container label {
+            font-weight: bold;
+            font-size: 16px;
+            color: #444;
+        }
+
+        #move-history {
+            width: 100%;
+            height: 110px;
+            padding: 8px;
+            margin-top: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none; /* ユーザーによるリサイズを無効化 */
+            overflow-y: auto; /* 縦方向のスクロールを有効化 */
+            background-color: #fff;
+            box-sizing: border-box;
+            /* textarea内ではテキスト選択を許可 */
+            -webkit-user-select: text; /* Safari */
+            -moz-user-select: text;    /* Firefox */
+            -ms-user-select: text;     /* IE10+/Edge */
+            user-select: text;         /* Standard */
+        }
+
+        /* --- リセットボタンのスタイル --- */
+        #reset-button {
+            margin-top: 15px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #reset-button:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        #reset-button:active {
+            background-color: #004494;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>15パズル</h1>
+    <div id="puzzle-container">
+        <!-- バリアを静的に配置 -->
+        <!-- 縦線 -->
+        <div class="barrier" style="top: 10px; left: 214px; width: 4px; height: 100px;"></div>
+        <div class="barrier" style="top: 113px; left: 110px; width: 4px; height: 100px;"></div>
+        <!-- 横線 -->
+        <div class="barrier" style="top: 318px; left: 217px; width: 100px; height: 4px;"></div>
+        <div class="barrier" style="top: 318px; left: 113px; width: 100px; height: 4px;"></div>
+    </div>
+
+    <!-- 移動履歴表示エリア -->
+    <div class="history-container">
+        <label for="move-history">移動履歴:</label>
+        <textarea id="move-history" readonly></textarea>
+    </div>
+
+    <!-- リセットボタン -->
+    <button id="reset-button">リセット</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('puzzle-container');
+            const resetButton = document.getElementById('reset-button');
+            const moveHistoryTextarea = document.getElementById('move-history'); // 履歴表示エリアを取得
+            const GRID_SIZE = 4;
+
+            const boardLayout = [
+                { path: 'path-br', isMovable: true },   { path: 'path-br' },        { path: 'path-t-down-A' },  { path: 'path-end-down' },
+                { path: 'path-tl' },                    { path: 'path-bl' },        { path: 'path-tr' },        { path: 'path-tl' },
+                { path: 'path-bl' },                    { path: 'path-tr' },        { path: 'path-t-down-B' },  { path: 'path-tl' },
+                { path: 'path-tr' },                    { path: 'path-end-left' },  { path: 'path-bl' },        { path: 'path-br' }
+            ];
+
+            let tiles = [];
+            let currentState = [];
+            let moveHistory = []; // 移動履歴を格納する配列
+
+            function init() {
+                // コンテナから既存のタイルのみを削除 (バリアは残す)
+                const existingTiles = container.querySelectorAll('.tile');
+                existingTiles.forEach(t => t.remove());
+
+                tiles = [];
+                currentState = [];
+                moveHistory = []; // 履歴をリセット
+                moveHistoryTextarea.value = ''; // 表示をクリア
+
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    const rowState = [];
+                    for (let c = 0; c < GRID_SIZE; c++) {
+                        const index = r * GRID_SIZE + c;
+                        const tileData = boardLayout[index];
+                        rowState.push(tileData);
+
+                        const tileElement = document.createElement('div');
+                        tileElement.classList.add('tile', 'path', tileData.path);
+
+                        if (tileData.path === 'path-t-down-A' || tileData.path === 'path-t-down-B') {
+                            const helper = document.createElement('div');
+                            helper.classList.add('path-helper');
+                            tileElement.appendChild(helper);
+                        }
+
+                        tileElement.dataset.row = r;
+                        tileElement.dataset.col = c;
+                        tileElement.dataset.id = index;
+
+                        if (tileData.isMovable) {
+                            tileElement.classList.add('movable');
+                        }
+
+                        tileElement.addEventListener('click', () => onTileClick(tileElement));
+
+                        container.appendChild(tileElement);
+                        tiles.push(tileElement);
+                    }
+                    currentState.push(rowState);
+                }
+                updateTilePositions();
+            }
+
+            function onTileClick(clickedTile) {
+                const movableTile = document.querySelector('.movable');
+                if (clickedTile === movableTile) return;
+
+                const clickedPos = getTilePosition(clickedTile);
+                const movablePos = getTilePosition(movableTile);
+
+                const dx = Math.abs(clickedPos.col - movablePos.col);
+                const dy = Math.abs(clickedPos.row - movablePos.row);
+
+                if ((dx === 1 && dy === 0) || (dx === 0 && dy === 1)) {
+                    swapTiles(clickedTile, movableTile);
+                }
+            }
+
+            function swapTiles(tile1, tile2) {
+                const pos1 = getTilePosition(tile1); // クリックされたタイルの位置
+                const pos2 = getTilePosition(tile2); // 空きマスの位置
+
+                // 移動方向を判定 (空きマスがどの方向に移動したかを記録)
+                let direction = '';
+                if (pos1.row > pos2.row) { // パネルが上に移動 -> 空きマスは下に移動
+                    direction = '下';
+                } else if (pos1.row < pos2.row) { // パネルが下に移動 -> 空きマスは上に移動
+                    direction = '上';
+                } else if (pos1.col > pos2.col) { // パネルが左に移動 -> 空きマスは右に移動
+                    direction = '右';
+                } else if (pos1.col < pos2.col) { // パネルが右に移動 -> 空きマスは左に移動
+                    direction = '左';
+                }
+
+                // 履歴を記録して表示を更新
+                if (direction) {
+                    moveHistory.push(direction);
+                    moveHistoryTextarea.value = moveHistory.join(',');
+                    // テキストエリアを常に一番下までスクロール
+                    moveHistoryTextarea.scrollTop = moveHistoryTextarea.scrollHeight;
+                }
+
+                // タイルの状態を交換
+                [currentState[pos1.row][pos1.col], currentState[pos2.row][pos2.col]] =
+                [currentState[pos2.row][pos2.col], currentState[pos1.row][pos1.col]];
+
+                // データ属性を更新
+                tile1.dataset.row = pos2.row;
+                tile1.dataset.col = pos2.col;
+                tile2.dataset.row = pos1.row;
+                tile2.dataset.col = pos1.col;
+
+                updateTilePositions();
+            }
+
+            function updateTilePositions() {
+                tiles.forEach(tile => {
+                    const { row, col } = getTilePosition(tile);
+                    tile.style.gridRowStart = row + 1;
+                    tile.style.gridColumnStart = col + 1;
+                });
+            }
+
+            const getTilePosition = (tile) => ({ row: parseInt(tile.dataset.row), col: parseInt(tile.dataset.col) });
+
+            // リセットボタンにクリックイベントを追加
+            resetButton.addEventListener('click', init);
+
+            // 初期化処理を実行
+            init();
+        });
+    </script>
+
+</body>
+</html>
