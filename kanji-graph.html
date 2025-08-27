@@ -245,10 +245,10 @@
             margin: 0;
         }
         /* 漢字の由来による色のスタイル */
-        .shokei { color: #3498db; } /* 象形 */
-        .shiji { color: #e74c3c; } /* 指事 */
-        .kaii { color: #2ecc71; } /* 会意 */
-        .keisei { color: #f39c12; } /* 形声 */
+        .shokei { color: #2ecc71; } /* 象形 */
+        .shiji { color: #f39c12; } /* 指事 */
+        .kaii { color: #3498db; } /* 会意 */
+        .keisei { color: #e74c3c; } /* 形声 */
         .kaiikeisei { color: #9b59b6; } /* 会意形声 */
         .parts { color: #343a40; } /* パーツ */
 
@@ -294,10 +294,10 @@
         <h1>漢字構成要素グラフ</h1>
 
         <ul class="legend">
-            <li class="legend-item"><div class="legend-color" style="background-color: #3498db;"></div><span>象形：実物の形を表した文字</span></li>
-            <li class="legend-item"><div class="legend-color" style="background-color: #e74c3c;"></div><span>指事：抽象的な概念を図形化した文字</span></li>
-            <li class="legend-item"><div class="legend-color" style="background-color: #2ecc71;"></div><span>会意：複数の意味を組み合わせた文字</span></li>
-            <li class="legend-item"><div class="legend-color" style="background-color: #f39c12;"></div><span>形声：意味と音の組み合わせ</span></li>
+            <li class="legend-item"><div class="legend-color" style="background-color: #2ecc71;"></div><span>象形：実物の形を表した文字</span></li>
+            <li class="legend-item"><div class="legend-color" style="background-color: #f39c12;"></div><span>指事：抽象的な概念を図形化した文字</span></li>
+            <li class="legend-item"><div class="legend-color" style="background-color: #3498db;"></div><span>会意：複数の意味を組み合わせた文字</span></li>
+            <li class="legend-item"><div class="legend-color" style="background-color: #e74c3c;"></div><span>形声：意味と音の組み合わせ</span></li>
             <li class="legend-item"><div class="legend-color" style="background-color: #9b59b6;"></div><span>会意形声：会意と形声の併用</span></li>
             <li class="legend-item"><div class="legend-color" style="background-color: #000000;"></div><span>パーツ：漢字の構成要素</span></li>
         </ul>
@@ -341,10 +341,10 @@
         document.addEventListener("DOMContentLoaded", function () {
             const KANJI_DATA_URL = 'https://mimneko.github.io/kanji-graph/kanji-list.json';
             const NODE_COLORS = {
-                '象形': '#3498db',
-                '指事': '#e74c3c',
-                '会意': '#2ecc71',
-                '形声': '#f39c12',
+                '象形': '#2ecc71',
+                '指事': '#f39c12',
+                '会意': '#3498db',
+                '形声': '#e74c3c',
                 '会意形声': '#9b59b6',
                 'パーツ': '#000000',
                 'default': '#6c757d'
