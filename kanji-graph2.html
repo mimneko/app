@@ -360,34 +360,50 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // --- 定数定義 ---
-            const KANJI_DATA_URL = 'https://mimneko.github.io/kanji-graph/kanji-list.json';
-            const NODE_COLORS = {
-                '象形': '#f39c12', '指事': '#2ecc71', '会意': '#e74c3c',
-                '形声': '#3498db', '会意形声': '#9b59b6', 'パーツ': '#000000',
-                'default': '#6c757d'
+            // --- アプリケーション設定 ---
+            const CONFIG = {
+                kanjiDataUrl: 'https://mimneko.github.io/kanji-graph/kanji-list.json',
+                nodeColors: {
+                    '象形': '#f39c12', '指事': '#2ecc71', '会意': '#e74c3c',
+                    '形声': '#3498db', '会意形声': '#9b59b6', 'パーツ': '#000000',
+                    'default': '#6c757d'
+                },
+                typeToClassMap: {
+                    '象形': 'shokei', '指事': 'shiji', '会意': 'kaii',
+                    '形声': 'keisei', '会意形声': 'kaiikeisei', 'パーツ': 'parts'
+                },
+                defaultLayout: 'fcose',
+                notificationDuration: 3000
             };
-            const DEFAULT_LAYOUT = 'fcose';
-            const NOTIFICATION_DURATION = 3000;
 
-            // --- DOM要素取得 ---
-            const loadingSpinner = document.getElementById('loading-spinner');
-            const layoutSelector = document.getElementById('layout-selector');
-            const searchInput = document.getElementById('search-input');
-            const searchButton = document.getElementById('search-button');
-            const kanjiGridContainer = document.getElementById('kanji-grid-container');
-            const graphControls = document.getElementById('graph-controls');
-            const notificationMessage = document.getElementById('notification-message');
+            // --- DOM要素 ---
+            const ELEMENTS = {
+                loadingSpinner: document.getElementById('loading-spinner'),
+                layoutSelector: document.getElementById('layout-selector'),
+                searchInput: document.getElementById('search-input'),
+                searchButton: document.getElementById('search-button'),
+                kanjiGridContainer: document.getElementById('kanji-grid-container'),
+                graphControls: document.getElementById('graph-controls'),
+                notificationMessage: document.getElementById('notification-message')
+            };
 
+            // --- アプリケーションの状態 ---
             let cy; // Cytoscapeインスタンス
+
+            /**
+             * アプリケーションを初期化
+             */
+            function initialize() {
+                fetchKanjiData();
+            }
 
             /**
              * 外部JSONから漢字データを取得し、グラフとリストを生成
              */
             async function fetchKanjiData() {
-                loadingSpinner.style.display = 'block';
+                ELEMENTS.loadingSpinner.style.display = 'block';
                 try {
-                    const response = await fetch(KANJI_DATA_URL);
+                    const response = await fetch(CONFIG.kanjiDataUrl);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -398,7 +414,7 @@
                     console.error('漢字データの取得または処理中にエラーが発生しました:', error);
                     showNotification('データの読み込みに失敗しました。');
                 } finally {
-                    loadingSpinner.style.display = 'none';
+                    ELEMENTS.loadingSpinner.style.display = 'none';
                 }
             }
 
@@ -435,7 +451,7 @@
                 });
 
                 cy.panzoom({});
-                runLayout(DEFAULT_LAYOUT);
+                runLayout(CONFIG.defaultLayout);
                 setupEventListeners();
             }
 
@@ -451,7 +467,7 @@
                 const alternativePairs = new Set();
 
                 nodes.forEach(node => {
-                    node.color = NODE_COLORS[node.type] || NODE_COLORS['default'];
+                    node.color = CONFIG.nodeColors[node.type] || CONFIG.nodeColors['default'];
 
                     if (node.alternative && nodeMap.has(node.alternative)) {
                         const [sourceId, targetId] = [node.id, node.alternative].sort();
@@ -476,58 +492,105 @@
              * UI要素のイベントリスナーを設定
              */
             function setupEventListeners() {
-                layoutSelector.addEventListener('change', () => runLayout(layoutSelector.value));
-                searchButton.addEventListener('click', () => handleSearch());
-                searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); }});
-                graphControls.addEventListener('mousedown', e => e.stopPropagation());
+                ELEMENTS.layoutSelector.addEventListener('change', () => runLayout(ELEMENTS.layoutSelector.value));
+                ELEMENTS.searchButton.addEventListener('click', handleSearch);
+                ELEMENTS.searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); }});
+                ELEMENTS.graphControls.addEventListener('mousedown', e => e.stopPropagation());
+                ELEMENTS.kanjiGridContainer.addEventListener('click', handleKanjiGridClick);
 
                 cy.on('tap', 'node', handleNodeTap);
                 cy.on('tap', handleBackgroundTap);
-                kanjiGridContainer.addEventListener('click', handleKanjiGridClick);
             }
 
             /**
              * 検索入力に基づいてノードにフォーカス
              */
             function handleSearch() {
-                const searchTerm = searchInput.value;
+                const searchTerm = ELEMENTS.searchInput.value.trim();
                 if (!searchTerm) return;
                 focusOnNode(searchTerm);
             }
 
             /**
-             * 指定された漢字をグラフの中心に表示
+             * 指定された漢字をグラフの中心に表示し、ハイライトする
              * @param {string} searchTerm - 検索する漢字
              */
             function focusOnNode(searchTerm) {
                 const foundNode = cy.nodes().filter(ele => ele.data('label') === searchTerm);
                 if (foundNode.length > 0) {
                     cy.animate({ center: { eles: foundNode }, zoom: 1.2, duration: 1000 });
+                    highlightNode(foundNode);
+                    selectKanjiListItem(searchTerm);
                 } else {
                     showNotification(`「${searchTerm}」は見つかりませんでした。`);
                 }
             }
 
-            function handleNodeTap(evt) {
-                const tappedNode = evt.target;
-                const neighborhood = tappedNode.neighborhood().add(tappedNode);
+            /**
+             * 指定されたノードとその近傍をハイライト表示
+             * @param {object} targetNode - Cytoscapeのノードオブジェクト
+             */
+            function highlightNode(targetNode) {
                 cy.elements().addClass('faded');
+                const neighborhood = targetNode.neighborhood().add(targetNode);
                 neighborhood.removeClass('faded');
             }
 
+            /**
+             * 指定された漢字のリスト項目を選択状態にする
+             * @param {string} kanjiLabel - 選択する漢字
+             */
+            function selectKanjiListItem(kanjiLabel) {
+                const allItems = ELEMENTS.kanjiGridContainer.querySelectorAll('.kanji-item');
+                allItems.forEach(item => {
+                    if (item.dataset.kanjiLabel === kanjiLabel) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+            }
+
+            /**
+             * 全てのハイライトと選択を解除
+             */
+            function clearAllHighlights() {
+                cy.elements().removeClass('faded');
+                const allItems = ELEMENTS.kanjiGridContainer.querySelectorAll('.kanji-item');
+                allItems.forEach(item => item.classList.remove('selected'));
+            }
+
+            /**
+             * ノードがタップされた時の処理
+             * @param {object} evt - イベントオブジェクト
+             */
+            function handleNodeTap(evt) {
+                const tappedNode = evt.target;
+                highlightNode(tappedNode);
+                selectKanjiListItem(tappedNode.data('label'));
+            }
+
+            /**
+             * グラフの背景がタップされた時の処理
+             * @param {object} evt - イベントオブジェクト
+             */
             function handleBackgroundTap(evt) {
                 if (evt.target === cy) {
-                    cy.elements().removeClass('faded');
+                    clearAllHighlights();
                 }
             }
 
+            /**
+             * 漢字グリッドの項目がクリックされた時の処理
+             * @param {object} evt - イベントオブジェクト
+             */
             function handleKanjiGridClick(evt) {
                 const targetItem = evt.target.closest('.kanji-item');
                 if (!targetItem) return;
 
                 const kanjiLabel = targetItem.dataset.kanjiLabel;
                 if (kanjiLabel) {
-                    searchInput.value = kanjiLabel;
+                    ELEMENTS.searchInput.value = kanjiLabel;
                     focusOnNode(kanjiLabel);
                 }
             }
@@ -537,16 +600,6 @@
              * @param {Array} data - 生の漢字データ
              */
             function populateKanjiGrid(data) {
-                // --- 修正点: 漢字の由来とCSSクラスを対応付けるためのオブジェクト ---
-                const typeToClassMap = {
-                    '象形': 'shokei',
-                    '指事': 'shiji',
-                    '会意': 'kaii',
-                    '形声': 'keisei',
-                    '会意形声': 'kaiikeisei',
-                    'パーツ': 'parts'
-                };
-
                 const sortedData = [...data].sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
                 const fragment = document.createDocumentFragment();
                 sortedData.forEach(kanji => {
@@ -556,8 +609,7 @@
                     kanjiItem.className = `kanji-item ${kanji.alternative ? 'alternative' : ''}`;
                     kanjiItem.dataset.kanjiLabel = kanji.label;
 
-                    // --- 修正点: マップを使ってクラス名を確実の取得 ---
-                    const typeClass = typeToClassMap[kanji.type] || '';
+                    const typeClass = CONFIG.typeToClassMap[kanji.type] || '';
 
                     kanjiItem.innerHTML = `
                         <p class="id-number">${kanji.id}</p>
@@ -566,7 +618,7 @@
                     `;
                     fragment.appendChild(kanjiItem);
                 });
-                kanjiGridContainer.appendChild(fragment);
+                ELEMENTS.kanjiGridContainer.appendChild(fragment);
             }
 
             /**
@@ -585,15 +637,15 @@
              * @param {string} message - 表示するメッセージ
              */
             function showNotification(message) {
-                notificationMessage.textContent = message;
-                notificationMessage.classList.add('show');
+                ELEMENTS.notificationMessage.textContent = message;
+                ELEMENTS.notificationMessage.classList.add('show');
                 setTimeout(() => {
-                    notificationMessage.classList.remove('show');
-                }, NOTIFICATION_DURATION);
+                    ELEMENTS.notificationMessage.classList.remove('show');
+                }, CONFIG.notificationDuration);
             }
 
             // --- 初期化処理の実行 ---
-            fetchKanjiData();
+            initialize();
         });
     </script>
 </body>
