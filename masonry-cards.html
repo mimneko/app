@@ -3,36 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>漢字学習サイト - モックアップ</title>
+    <title>漢検1級学習アプリ</title>
     <style>
-        *{
-            --card-gap: 8px;
+        /* --- 変数定義 --- */
+        :root {
+            --card-gap: 12px;
+            --background-color: #F0F2F5;
+            --card-background-color: #FFFFFF;
+            --main-text-color: #1d2129;
+            --secondary-text-color: #65676b;
+            --border-color: #CED0D4;
+            --accent-color: #f9752b;
         }
-        /* --- Reset & Basic Styles --- */
+
+        /* --- リセット & 基本スタイル --- */
         body {
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            background-color: #F5F8FA; /* Twitter-like light grey background */
-            color: #14171A; /* Twitter's main text color */
-            line-height: 1.5;
-        }
-
-        /* --- Layout --- */
-        .container {
-            max-width: 1024px; /* 横幅を少し広げてグリッド表示に対応 */
-            margin: 0 auto;
-            background-color: #FFFFFF;
+            background-color: var(--background-color);
+            color: var(--main-text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
         }
 
-        /* --- Header --- */
+        /* --- レイアウト --- */
+        main {
+            flex-grow: 1;
+            /* 変更: mainの背景色をbodyと同じにし、カードを際立たせる */
+            background-color: var(--background-color);
+            width: 100%;
+        }
+
+        .header-content,
+        .main-content,
+        .footer-content {
+            max-width: 1024px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 16px;
+            padding-right: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* --- ヘッダー --- */
         .site-header {
             position: sticky;
             top: 0;
-            background-color: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid #E1E8ED; /* Light border */
-            padding: 0 16px;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
             height: 53px;
             display: flex;
             align-items: center;
@@ -45,88 +68,147 @@
             margin: 0;
         }
 
-        /* --- Main Content (Timeline) --- */
+        /* --- メインコンテンツ (タイムライン) --- */
         .timeline {
+            /* 変更: 上下に余白を追加 */
+            padding-top: var(--card-gap);
+            padding-bottom: var(--card-gap);
+        }
+
+        /* --- 漢字カード --- */
+        .kanji-card {
+            padding: 16px;
             display: flex;
             flex-direction: column;
-        }
 
-        /* --- Kanji Card --- */
-        .kanji-card {
-            border-bottom: 1px solid #E1E8ED;
-            padding: 16px;
-            transition: background-color 0.2s;
+            /* 変更: カードスタイルをモバイルでも適用 */
+            background-color: var(--card-background-color);
+            margin-bottom: var(--card-gap);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-
-        .kanji-card:hover {
-            background-color: #F5F8FA; /* Slight hover effect */
-        }
-
-        .kanji-content {
-            flex-grow: 1;
-        }
-
-        .kanji-character {
-            font-size: 4rem;
+        
+        .quiz-card-header {
+            font-size: 0.8rem;
             font-weight: bold;
+            color: var(--secondary-text-color);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .quiz-content .quiz-label {
+            font-size: 1rem;
+            color: var(--secondary-text-color);
+            margin-bottom: 4px;
+        }
+
+        .quiz-content .quiz-question {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 8px 0;
             text-align: center;
-            margin: 16px 0;
-            line-height: 1;
+            line-height: 1.4;
         }
-
-        .kanji-details {
-            margin-top: 12px;
-        }
-
-        .detail-item {
-            margin-bottom: 8px;
-        }
-
-        .detail-label {
+        
+        .quiz-question rt {
             font-size: 0.9rem;
-            font-weight: bold;
-            color: #657786; /* Secondary text color */
-            margin-right: 8px;
-            display: inline-block;
-            width: 60px;
+            font-weight: 500;
+            color: var(--secondary-text-color);
         }
 
-        .detail-text {
+        .quiz-content .yojijukugo {
+            letter-spacing: 0.1em;
+        }
+        
+        .quiz-answer-area {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .quiz-answer {
+            padding: 0 4px;
+        }
+        
+        .quiz-answer .answer-text {
             font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--main-text-color);
+            margin: 0 0 8px 0;
         }
 
-        /* --- Loading Spinner (for infinite scroll) --- */
+        .quiz-answer .answer-text strong {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .quiz-answer .comment-text {
+            font-size: 0.9rem;
+            color: var(--secondary-text-color);
+            margin: 0;
+        }
+        
+        .answer-list {
+            list-style: none;
+            padding-left: 0;
+            text-align: center;
+        }
+        
+        .answer-list li {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+
+        .answer-list li ruby {
+            font-size: 1.5rem;
+            line-height: 1.2;
+        }
+        .answer-list li rt {
+            font-size: 0.8rem;
+        }
+
+
+        /* --- フッター --- */
+        footer {
+            padding: 24px 0;
+            background-color: var(--background-color);
+            border-top: 1px solid var(--border-color);
+            color: var(--secondary-text-color);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* --- ローディングスピナー --- */
         .loading-spinner {
             text-align: center;
             padding: 20px;
-            grid-column: 1 / -1; /* Make spinner span all columns in grid view */
+            grid-column: 1 / -1;
+            color: var(--secondary-text-color);
+        }
+        
+        .loading-spinner.hidden {
+            display: none;
         }
 
-        /* --- Masonry Grid for Desktop --- */
-        /* On screens wider than 640px, switch to a column-based layout */
+        /* --- Masonry Grid (デスクトップ向け) --- */
         @media (min-width: 640px) {
             .timeline {
-                /* Override flex behavior for masonry */
-                display: block;
+                 display: block;
                 column-count: 2;
                 column-gap: var(--card-gap);
-                padding: 16px; /* Add some padding to the container */
+                padding-top: 0;
+                padding-bottom: 0;
             }
 
             .kanji-card {
-                /* Prevent cards from breaking across columns */
                 break-inside: avoid;
                 page-break-inside: avoid;
-
-                /* Make cards look more distinct in the grid */
-                margin-bottom: var(--card-gap);
-                border: 1px solid #E1E8ED;
-                border-radius: 12px;
-                box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                padding: 20px;
             }
         }
 
-        /* Increase columns on even wider screens */
         @media (min-width: 900px) {
             .timeline {
                 column-count: 3;
@@ -136,220 +218,138 @@
 </head>
 <body>
 
-    <div class="container">
-        <header class="site-header">
-            <h1>今日の漢字</h1>
-        </header>
+    <header class="site-header">
+        <div class="header-content">
+            <h1>漢検1級学習アプリ</h1>
+        </div>
+    </header>
 
-        <main class="timeline">
-            <!-- JavaScript will generate these cards dynamically. -->
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">鬱</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ウツ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">ふさ.ぐ</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">気がふさぐ。草木が茂る。</span></div>
-                    </div>
+    <main>
+        <div class="main-content">
+            <div class="timeline">
+                <!-- 漢字カードはJavaScriptによってここに動的に生成されます -->
+                <div class="loading-spinner">
+                    <p>読み込み中...</p>
                 </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">薔薇</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ショウ, ソウ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">いばら</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">植物のばら。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">麒麟</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">キ, リン</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">-</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">古代中国の伝説上の霊獣。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">躊躇</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">チュウ, チョ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">ためら.う</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">決心がつかず、ぐずぐずする。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">轟</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ゴウ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">とどろ.く</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">大きな音が鳴り響く。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">醤油</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ショウ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">-</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">日本の代表的な調味料。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">檸檬</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ネイ, モウ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">-</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">果物のレモン。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">挨拶</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">アイ, サツ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">-</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">人と会った時などに交わす言葉。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">胡蝶</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">コ, チョウ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">-</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">蝶の別名。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">遡る</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ソ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">さかのぼ.る</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">流れに逆らって進む。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">頷く</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ガン</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">うなず.く</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">同意や承諾の意を示して首を縦に振る。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">麓</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ロク</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">ふもと</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">山のすそ。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">蔑む</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ベツ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">さげす.む</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">見下して悪く言う。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">蘇る</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ソ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">よみがえ.る</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">死んだものが生き返る。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">貼付</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">チョウ, フ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">は.る</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">貼り付けること。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">庇う</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ヒ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">かば.う</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">他から害を受けないように守る。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">弄る</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ロウ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">いじ.る</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">指先で触ったりなでたりする。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">貶す</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ヘン</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">けな.す</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">わざと欠点を指摘して悪く言う。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">塞ぐ</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">ソク, サイ</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">ふさ.ぐ</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">穴や隙間を閉じる。</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="kanji-card">
-                <div class="kanji-content">
-                    <div class="kanji-character">宛名</div>
-                    <div class="kanji-details">
-                        <div class="detail-item"><span class="detail-label">音読み</span><span class="detail-text">エン</span></div>
-                        <div class="detail-item"><span class="detail-label">訓読み</span><span class="detail-text">あて.な</span></div>
-                        <div class="detail-item"><span class="detail-label">意味</span><span class="detail-text">手紙などを送る相手の氏名。</span></div>
-                    </div>
-                </div>
-            </article>
-
-            <div class="loading-spinner">
-                <!-- A loading indicator could be placed here by JS -->
             </div>
+        </div>
+    </main>
 
-        </main>
-    </div>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 漢字学習アプリ. All Rights Reserved.</p>
+        </div>
+    </footer>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const quizData = [
+                { type: 'yojijukugo', category: '四字熟語', question: '魑魅魍魎', answer: { reading: 'ちみもうりょう', meaning: '様々な種類の妖怪や化け物。' } },
+                { type: 'reading', category: '言葉の読み', question: '遉', answer: 'さすが', comment: '国字の一つ。' },
+                { type: 'antonym', category: '対義語', question: '饒舌', answer: '寡黙', comment: '口数が多いことの反対は、口数が少ないこと。' },
+                { type: 'ikkun', category: '一字訓', question: '約める', answer: 'つづめる', comment: '短く縮める、要約する意。「約まる」とも。' },
+                { type: 'synonym', category: '類義語', question: '阿諛', answer: '追従', comment: 'どちらも、相手にへつらい、こびることを意味する。' },
+                { type: 'reading', category: '言葉の読み', question: '海豚', answer: 'いるか', comment: '熟字訓の一つ。' },
+                { type: 'jukugo_to_ikkun', category: '熟語と一字訓', words: [{ word: '会釈', reading: 'えしゃく' }, { word: '会得', reading: 'えとく' }] },
+                { type: 'yojijukugo', category: '四字熟語', question: '牽強付会', answer: { reading: 'けんきょうふかい', meaning: '自分に都合よく、無理に理屈をこじつけること。' } },
+                { type: 'antonym', category: '対義語', question: '蒙昧', answer: '賢明', comment: '物事の道理に暗いことの反対は、賢く道理に通じていること。' },
+                { type: 'ikkun', category: '一字訓', question: '乍ら', answer: 'ながら', comment: '「～しつつ」の意味。' },
+                { type: 'synonym', category: '類義語', question: '須臾', answer: '刹那', comment: 'どちらも、きわめて短い時間を表す仏教語。' },
+                { type: 'yojijukugo', category: '四字熟語', question: '臥薪嘗胆', answer: { reading: 'がしんしょうたん', meaning: '目的を達成するために、苦労や苦痛に耐えること。' } },
+                { type: 'reading', category: '言葉の読み', question: '美人局', answer: 'つつもたせ', comment: '男女が共謀して、他の男から金品をゆすり取ること。' }
+            ];
+
+            const timeline = document.querySelector('.timeline');
+            const spinner = document.querySelector('.loading-spinner');
+            let currentOffset = 0;
+            const ITEMS_PER_PAGE = 7;
+
+            const createQuizCard = (quiz) => {
+                const card = document.createElement('article');
+                card.className = 'kanji-card';
+
+                let innerHTML = `<div class="quiz-card-header">${quiz.category}</div>`;
+
+                switch (quiz.type) {
+                    case 'reading':
+                    case 'ikkun':
+                        innerHTML += `<div class="quiz-content">
+                                        <p class="quiz-question"><ruby>${quiz.question}<rt>${quiz.answer}</rt></ruby></p>
+                                        ${quiz.comment ? `<div class="quiz-answer-area"><div class="quiz-answer"><p class="comment-text">${quiz.comment}</p></div></div>` : ''}
+                                      </div>`;
+                        break;
+                    case 'yojijukugo':
+                        innerHTML += `<div class="quiz-content">
+                                        <p class="quiz-question yojijukugo"><ruby>${quiz.question}<rt>${quiz.answer.reading}</rt></ruby></p>
+                                        <div class="quiz-answer-area">
+                                            <div class="quiz-answer"><p class="answer-text">${quiz.answer.meaning}</p></div>
+                                        </div>
+                                      </div>`;
+                        break;
+                    case 'antonym':
+                    case 'synonym':
+                        innerHTML += `<div class="quiz-content">
+                                        <p class="quiz-label">「${quiz.question}」の${quiz.type === 'antonym' ? '対義語' : '類義語'}</p>
+                                        <div class="quiz-answer-area">
+                                            <div class="quiz-answer"><p class="answer-text" style="font-size:1.2rem; text-align:center;"><strong>${quiz.answer}</strong></p>
+                                            ${quiz.comment ? `<p class="comment-text" style="text-align:center;">${quiz.comment}</p>` : ''}</div>
+                                        </div>
+                                      </div>`;
+                        break;
+                    case 'jukugo_to_ikkun':
+                        innerHTML += `<div class="quiz-content">
+                                        <div class="quiz-answer-area" style="border-top: none; margin-top: 0; padding-top: 0;">
+                                            <ul class="answer-list">${quiz.words.map(w => `<li><ruby>${w.word}<rt>${w.reading}</rt></ruby></li>`).join('')}</ul>
+                                        </div>
+                                      </div>`;
+                        break;
+                    default:
+                        innerHTML += `<p>未対応の問題形式です。</p>`;
+                }
+                
+                card.innerHTML = innerHTML;
+                return card;
+            };
+
+            const loadMoreItems = () => {
+                spinner.classList.remove('hidden');
+                setTimeout(() => {
+                    const newItems = quizData.slice(currentOffset, currentOffset + ITEMS_PER_PAGE);
+                    if (newItems.length > 0) {
+                        newItems.forEach(item => {
+                            const card = createQuizCard(item);
+                            timeline.insertBefore(card, spinner);
+                        });
+                        currentOffset += ITEMS_PER_PAGE;
+                    }
+                    if (currentOffset >= quizData.length) {
+                        spinner.textContent = 'すべての問題を読み込みました';
+                        observer.disconnect();
+                    } else {
+                        spinner.classList.add('hidden');
+                    }
+                }, 500);
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    loadMoreItems();
+                }
+            }, {
+                rootMargin: '0px 0px 400px 0px'
+            });
+
+            const initialize = () => {
+                loadMoreItems();
+                if (currentOffset < quizData.length) {
+                    observer.observe(spinner);
+                }
+            };
+
+            initialize();
+        });
+    </script>
 </body>
 </html>
+
