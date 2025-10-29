@@ -385,7 +385,6 @@
         .message { margin-bottom: 32px; display: flex; flex-direction: column; position: relative; }
         .message-content {
             padding: 12px 16px;
-            border-radius: 8px;
             max-width: 90%;
             align-self: flex-start;
             line-height: 1.7;
@@ -393,8 +392,15 @@
             overflow-x: hidden;
         }
         .user-message { align-items: flex-end; }
-        .user-message .message-content { background-color: var(--chat-bg-user); align-self: flex-end; }
-        .ai-message .message-content { background-color: var(--chat-bg-ai); }
+        .user-message .message-content {
+            background-color: var(--chat-bg-user);
+            align-self: flex-end;
+            border-radius: 12px 12px 0 12px;
+        }
+        .ai-message .message-content {
+            background-color: var(--chat-bg-ai);
+            border-radius: 12px 12px 12px 0;
+        }
 
         .katex-display {
             padding: 8px 0;
@@ -1316,3 +1322,4 @@
     </script>
 </body>
 </html>
+
