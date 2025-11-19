@@ -20,7 +20,7 @@
         body {
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            background-color: var(--background-color);
+            background-color: var(--card-background-color);
             color: var(--main-text-color);
             line-height: 1.6;
             display: flex;
@@ -31,8 +31,7 @@
         /* --- レイアウト --- */
         main {
             flex-grow: 1;
-            /* 変更: mainの背景色をbodyと同じにし、カードを際立たせる */
-            background-color: var(--background-color);
+            background-color: var(--card-background-color);
             width: 100%;
         }
 
@@ -42,6 +41,8 @@
             max-width: 1024px;
             margin-left: auto;
             margin-right: auto;
+            padding-top: var(--card-gap);
+            padding-bottom: var(--card-gap);
             padding-left: 16px;
             padding-right: 16px;
             width: 100%;
@@ -53,8 +54,8 @@
             position: sticky;
             top: 0;
             background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
             border-bottom: 1px solid var(--border-color);
             height: 53px;
             display: flex;
@@ -70,8 +71,6 @@
 
         /* --- メインコンテンツ (タイムライン) --- */
         .timeline {
-            /* 変更: 上下に余白を追加 */
-            padding-top: var(--card-gap);
             padding-bottom: var(--card-gap);
         }
 
@@ -81,12 +80,11 @@
             display: flex;
             flex-direction: column;
 
-            /* 変更: カードスタイルをモバイルでも適用 */
+            /* カードスタイルをモバイルでも適用 */
             background-color: var(--card-background-color);
             margin-bottom: var(--card-gap);
-            border: 1px solid var(--border-color);
             border-radius: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
         }
         
         .quiz-card-header {
@@ -133,9 +131,8 @@
         }
         
         .quiz-answer .answer-text {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--main-text-color);
+            font-size: 0.9rem;
+            color: var(--secondary-text-color);
             margin: 0 0 8px 0;
         }
 
@@ -173,7 +170,7 @@
         /* --- フッター --- */
         footer {
             padding: 24px 0;
-            background-color: var(--background-color);
+            background-color: var(--card-background-color);
             border-top: 1px solid var(--border-color);
             color: var(--secondary-text-color);
             font-size: 0.9rem;
@@ -352,4 +349,6 @@
     </script>
 </body>
 </html>
+
+
 
