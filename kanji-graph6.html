@@ -409,7 +409,12 @@
                 // 設定値・定数の集約
                 this.config = {
                     kanjiDataUrl: `${BASE_URL}/kanji-list2.json`,
-                    svgBaseUrl: `${BASE_URL}/assets/svg/`,
+                    // SVG 関連設定
+                    svg: {
+                        baseUrl: `${BASE_URL}/assets/svg/`,
+                        graphSubdir: "", // 将来 "graph/" などに変更
+                        listSubdir: ""   // 将来 "list/"  などに変更
+                    },
                     // ノードの種類ごとの色
                     nodeColors: {
                         '象形': '#f39c12', '指事': '#2ecc71', '会意': '#e74c3c',
@@ -504,6 +509,26 @@
             }
 
             /**
+             * グラフ用 SVG の URL を組み立てる
+             * @param {string} filename - "unencoded-glyphs/u840c-k.svg" など
+             */
+            getGraphSvgUrl(filename) {
+                if (!filename) return null;
+                const { baseUrl, graphSubdir } = this.config.svg;
+                return baseUrl + graphSubdir + filename;
+            }
+
+            /**
+             * リスト用 SVG の URL を組み立てる
+             * @param {string} filename
+             */
+            getListSvgUrl(filename) {
+                if (!filename) return null;
+                const { baseUrl, listSubdir } = this.config.svg;
+                return baseUrl + listSubdir + filename;
+            }
+
+            /**
              * Cytoscape.jsを使ってグラフを初期化する
              * @param {Array} nodesData - JSONから読み込んだ生の漢字データ
              */
@@ -542,7 +567,7 @@
                             selector: 'node[svg]',
                             style: {
                                 'content': '',
-                                'background-image': ele => this.config.svgBaseUrl + ele.data('svg'),
+                                'background-image': ele => this.getGraphSvgUrl(ele.data('svg')),
                                 'background-fit': 'contain',
                                 'background-position-x': '50%',
                                 'background-position-y': '50%',
@@ -949,9 +974,10 @@
                     const typeClass = this.config.typeToClassMap[formationType] || '';
 
                     if (kanji.svg) {
+                        const imgUrl = this.getListSvgUrl(kanji.svg);
                         kanjiItem.innerHTML = `
                             <p class="id-number">${kanji.id}</p>
-                            <p class="kanji"><img src="${this.config.svgBaseUrl}${kanji.svg}"></p>
+                            <p class="kanji"><img src="${imgUrl}"></p>
                             <p class="origin ${typeClass}">${formationType || ''}</p>
                         `;
                     } else {
