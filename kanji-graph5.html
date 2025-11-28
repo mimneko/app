@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漢字構成要素グラフ</title>
+
+    <!-- 外部ライブラリの読み込み -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/cytoscape@3.19.1/dist/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/layout-base@2.0.0/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base@2.1.0/cose-base.js"></script>
+    <script src="https://unpkg.com/cytoscape-fcose@2.1.0/cytoscape-fcose.js"></script>
+    <script src="https://unpkg.com/cytoscape-panzoom@2.5.3/cytoscape-panzoom.js"></script>
+
+    <!-- フォントとアイコンの読み込み -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        /* --- 基本スタイル --- */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --primary-color: #3498db;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin: 0 0 24px;
+            font-weight: 700;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+        }
+
+        /* --- 凡例 --- */
+        .legend {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            list-style: none;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .legend-item span {
+            font-size: 0.9rem;
+        }
+
+        /* --- Cytoscape グラフエリア --- */
+        #graph-section {
+            position: relative;
+        }
+
+        #cytoscape-container {
+            width: 100%;
+            height: 580px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background-color: #ffffff;
+            position: relative;
+        }
+
+        /* --- ローディングスピナー --- */
+        #loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 20;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Cytoscape Panzoom UIは非表示にする */
+        .cy-panzoom {
+            display: none;
+        }
+
+        /* --- 操作コントロール --- */
+        #graph-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        select, input[type="text"], button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            font-size: 16px;
+            color: #2c3e50;
+            background-color: #f9f9f9;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        select:hover, input[type="text"]:hover, button:hover {
+            background-color: #f0f0f0;
+        }
+
+        select:focus, input[type="text"]:focus, button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+        }
+
+        input[type="text"] {
+            cursor: text;
+        }
+
+        #search-input {
+            width: 120px;
+            margin-right: 5px;
+        }
+
+        #search-button {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+        }
+
+        #search-button:hover {
+            background-color: #273747;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* --- 漢字リスト用アコーディオン --- */
+        details {
+            background-color: var(--card-bg);
+            margin: 30px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        details summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1em 1.5em;
+            background-color: #f8f9fa;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+        }
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+        }
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+        details summary::after {
+            content: '\f078';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            transition: transform 0.3s ease;
+            font-size: 0.9em;
+        }
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+        .accordion-content {
+            padding: 1.5em;
+        }
+        #kanji-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+        .kanji-item {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+            border: 1px solid #e9ecef;
+            cursor: pointer;
+        }
+        .alternative {
+            background-color: #e9ecef;
+        }
+
+        .kanji-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        .kanji-item.selected {
+            background-color: #d4eaf7;
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .id-number {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin: 0;
+        }
+        .kanji {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #212529;
+            margin: 0 0 5px;
+        }
+        .kanji img {
+            width: 40px;
+            height: 40px;
+            margin: -6px;
+        }
+        .origin {
+            font-size: 0.9em;
+            font-weight: 500;
+            margin: 0;
+        }
+        /* --- 凡例の色と一致させます --- */
+        .shokei { color: #f39c12; }
+        .shiji { color: #2ecc71; }
+        .kaii { color: #e74c3c; }
+        .keisei { color: #3498db; }
+        .kaiikeisei { color: #9b59b6; }
+        .parts { color: #000000; }
+
+        /* --- 通知メッセージ（エラーなど用） --- */
+        #notification-message {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #343a40;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: top 0.5s ease-in-out;
+            font-weight: 500;
+            max-width: 90%;
+            text-align: center;
+        }
+        #notification-message.show {
+            top: 20px;
+        }
+
+        /* --- エッジ説明用ツールチップ --- */
+        .edge-tooltip {
+            position: absolute;
+            padding: 6px 10px;
+            background-color: #ffffff;
+            color: #212529;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            font-size: 0.85rem;
+            max-width: 260px;
+            z-index: 50;
+            pointer-events: none;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            #cytoscape-container {
+                height: 450px;
+            }
+            #kanji-grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <h1>漢字構成要素グラフ</h1>
+
+        <section id="legend-section">
+            <ul class="legend">
+                <li class="legend-item"><div class="legend-color" style="background-color: #f39c12;"></div><span>象形：実物の形を表した文字</span></li>
+                <li class="legend-item"><div class="legend-color" style="background-color: #2ecc71;"></div><span>指事：抽象的な概念を図形化した文字</span></li>
+                <li class="legend-item"><div class="legend-color" style="background-color: #e74c3c;"></div><span>会意：複数の意味を組み合わせた文字</span></li>
+                <li class="legend-item"><div class="legend-color" style="background-color: #3498db;"></div><span>形声：意味と音の組み合わせ</span></li>
+                <li class="legend-item"><div class="legend-color" style="background-color: #9b59b6;"></div><span>会意形声：会意と形声の併用</span></li>
+                <li class="legend-item"><div class="legend-color" style="background-color: #000000;"></div><span>パーツ：漢字の構成要素</span></li>
+            </ul>
+        </section>
+
+        <section id="graph-section" aria-labelledby="graph-heading">
+            <h2 id="graph-heading" class="visually-hidden">グラフ表示エリア</h2>
+            <div id="cytoscape-container">
+                <div id="loading-spinner"></div>
+            </div>
+            <form id="graph-controls">
+                <div id="layout-controls-container">
+                    <label for="layout-selector" class="visually-hidden">レイアウト選択</label>
+                    <select name="NmLayout" id="layout-selector">
+                        <option value="fcose" selected>Force-directed (F-CoSE)</option>
+                        <option value="grid">Grid</option>
+                        <option value="circle">Circle</option>
+                        <option value="concentric">Concentric</option>
+                        <option value="breadthfirst">Breadth-first</option>
+                    </select>
+                </div>
+                <div id="search-controls-container">
+                    <label for="search-input" class="visually-hidden">漢字を検索</label>
+                    <input type="text" id="search-input" placeholder="漢字を入力">
+                    <button id="search-button" type="button">検索</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="kanji-list">
+            <details open>
+                <summary>対応字体リスト</summary>
+                <section class="accordion-content">
+                    <ul id="kanji-grid-container">
+                        <!-- 漢字データはJavaScriptによってここに挿入されます -->
+                    </ul>
+                </section>
+            </details>
+        </section>
+
+        <section id="note-section">
+            <h2 id="note-header">註記</h2>
+            <div>
+                <p>
+                    字源には複数の説が存在するため、ここでは特定の学説を断定しない立場を取ります。ただし、構成要素の整理にあたっては、参考資料として『漢字源』および『新字源』に示される字源の説明を参照し、そこで提示される見解のうち一説を採用しています。
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <div id="notification-message" role="alert"></div>
+
+    <script>
+        class KanjiGraphApp {
+            constructor() {
+                const BASE_URL = 'https://mimneko.github.io/kanji-graph';
+
+                // 設定値・定数の集約
+                this.config = {
+                    kanjiDataUrl: `${BASE_URL}/kanji-list.json`,
+                    svgBaseUrl: `${BASE_URL}/assets/svg/`,
+                    // ノードの種類ごとの色
+                    nodeColors: {
+                        '象形': '#f39c12', '指事': '#2ecc71', '会意': '#e74c3c',
+                        '形声': '#3498db', '会意形声': '#9b59b6', 'パーツ': '#000000',
+                        'default': '#6c757d'
+                    },
+                    // ノードタイプ→CSSクラスの対応
+                    typeToClassMap: {
+                        '象形': 'shokei', '指事': 'shiji', '会意': 'kaii',
+                        '形声': 'keisei', '会意形声': 'kaiikeisei', 'パーツ': 'parts'
+                    },
+                    defaultLayout: 'fcose',
+                    notificationDuration: 5000,
+                    animation: {
+                        duration: 1000,
+                        zoom: 1.2
+                    },
+                    // 利用可能なレイアウト設定
+                    layouts: {
+                        fcose: {
+                            name: 'fcose', fit: true, animate: true, animationDuration: 500,
+                            padding: 50, nodeRepulsion: 4500, idealEdgeLength: 100, gravity: 80
+                        },
+                        grid: {
+                            name: 'grid', fit: true, animate: true, animationDuration: 500, padding: 50
+                        },
+                        circle: {
+                            name: 'circle', fit: true, animate: true, animationDuration: 500, padding: 50
+                        },
+                        concentric: {
+                            name: 'concentric', fit: true, animate: true, animationDuration: 500, padding: 50
+                        },
+                        breadthfirst: {
+                            name: 'breadthfirst', fit: true, animate: true, animationDuration: 500,
+                            padding: 50, directed: true, spacingFactor: 1.5
+                        }
+                    },
+                    // 現在は一律の説明文を格納（将来的にエッジごとの詳細に差し替え可能）
+                    commonEdgeDescription: '天体である「太陽」と「月」からなり、「あかるい」の意味を示す構成である。'
+                };
+
+                // DOM要素の参照をひとまとめに保持
+                this.elements = {
+                    loadingSpinner: document.getElementById('loading-spinner'),
+                    layoutSelector: document.getElementById('layout-selector'),
+                    searchInput: document.getElementById('search-input'),
+                    searchButton: document.getElementById('search-button'),
+                    kanjiGridContainer: document.getElementById('kanji-grid-container'),
+                    graphControls: document.getElementById('graph-controls'),
+                    notificationMessage: document.getElementById('notification-message')
+                };
+
+                this.cy = null;              // Cytoscapeインスタンス
+                this.edgeTooltip = null;     // エッジ説明ツールチップ要素
+
+                this.initialize();           // 初期化処理（非同期）
+                this.createEdgeTooltip();    // ツールチップDOMの生成
+            }
+
+            /**
+             * アプリケーション全体の初期化処理
+             * - JSONからデータを取得
+             * - Cytoscape初期化
+             * - 漢字リスト生成
+             * - 各種イベントリスナの登録
+             */
+            async initialize() {
+                this.showLoadingSpinner(true);
+                try {
+                    const data = await this.fetchKanjiData();
+                    this.initializeCytoscape(data);
+                    this.populateKanjiGrid(data);
+                    this.setupEventListeners();
+                } catch (error) {
+                    console.error('アプリケーションの初期化中にエラーが発生しました:', error);
+                    this.showNotification('データの読み込みに失敗しました。');
+                } finally {
+                    this.showLoadingSpinner(false);
+                }
+            }
+
+            /**
+             * 外部JSONから漢字データを非同期で取得する
+             * @returns {Promise<Array>} 漢字データの配列
+             */
+            async fetchKanjiData() {
+                const response = await fetch(this.config.kanjiDataUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            }
+
+            /**
+             * Cytoscape.jsを使ってグラフを初期化する
+             * @param {Array} nodesData - JSONから読み込んだ生の漢字データ
+             */
+            initializeCytoscape(nodesData) {
+                const { nodes, edges } = this.processGraphData(nodesData);
+
+                this.cy = cytoscape({
+                    container: document.getElementById('cytoscape-container'),
+                    elements: {
+                        nodes: nodes.map(node => ({ data: node })),
+                        edges
+                    },
+                    style: [
+                        // 通常ノードの見た目
+                        {
+                            selector: 'node',
+                            style: {
+                                'width': 80,
+                                'height': 80,
+                                'content': 'data(label)',
+                                'text-valign': 'center',
+                                'text-halign': 'center',
+                                'color': '#ffffff',
+                                'font-size': '24px',
+                                'font-weight': 'bold',
+                                'border-width': '2px',
+                                'border-color': '#ffffff',
+                                'transition-property': 'background-color, border-color, opacity',
+                                'transition-duration': '0.3s',
+                                'background-color': 'data(color)',
+                                'opacity': 1
+                            }
+                        },
+                        // SVGを背景画像として用いるノードの見た目
+                        {
+                            selector: 'node[svg]',
+                            style: {
+                                'content': '',
+                                'background-image': ele => this.config.svgBaseUrl + ele.data('svg'),
+                                'background-fit': 'contain',
+                                'background-position-x': '50%',
+                                'background-position-y': '50%',
+                                'background-repeat': 'no-repeat',
+                                'background-opacity': 1,
+
+                                'background-color': 'data(color)',
+                                'border-width': '2px',
+                                'border-color': '#ffffff',
+                                'transition-property': 'background-color, border-color, opacity',
+                                'transition-duration': '0.3s'
+                            }
+                        },
+                        // エッジの基本スタイル
+                        {
+                            selector: 'edge',
+                            style: {
+                                'curve-style': 'bezier',
+                                'width': 6,
+                                'opacity': 0.7,
+                                'line-color': 'data(color)',
+                                'target-arrow-color': 'data(color)',
+                                'transition-property': 'line-color, opacity',
+                                'transition-duration': '0.3s'
+                            }
+                        },
+                        // 構成要素エッジ（有向）
+                        {
+                            selector: 'edge[type="component"]',
+                            style: {
+                                'target-arrow-shape': 'triangle'
+                            }
+                        },
+                        // 異体字エッジ（無向・破線）
+                        {
+                            selector: 'edge[type="alternative"]',
+                            style: {
+                                'target-arrow-shape': 'none',
+                                'line-style': 'dashed'
+                            }
+                        },
+                        // 非アクティブな要素（文脈外）
+                        {
+                            selector: '.faded',
+                            style: {
+                                'opacity': 0.25
+                            }
+                        }
+                    ]
+                });
+
+                // パン・ズーム用UIは読み込むが、表示はCSS側で無効化している
+                this.cy.panzoom({});
+                this.runLayout(this.config.defaultLayout);
+            }
+
+            /**
+             * 生データをCytoscape用のノードとエッジの形式に変換する
+             * @param {Array} nodesData - 生の漢字データ
+             * @returns {{nodes: Array, edges: Array}} 処理済みのノードとエッジ
+             */
+            processGraphData(nodesData) {
+                // 元データを破壊しないようディープコピー
+                const nodes = JSON.parse(JSON.stringify(nodesData));
+                const nodeMap = new Map(nodes.map(node => [node.id, node]));
+                const edges = [];
+                const alternativePairs = new Set();
+
+                nodes.forEach(node => {
+                    // ノード種別に応じた色付け
+                    node.color = this.config.nodeColors[node.type] || this.config.nodeColors['default'];
+
+                    // 異体字関係のエッジ（無向扱いなので重複防止を行う）
+                    if (node.alternative && nodeMap.has(node.alternative)) {
+                        const [sourceId, targetId] = [node.id, node.alternative].sort();
+                        const pairKey = `${sourceId}-${targetId}`;
+                        if (!alternativePairs.has(pairKey)) {
+                            edges.push({
+                                data: {
+                                    id: `alt-${pairKey}`,
+                                    source: sourceId,
+                                    target: targetId,
+                                    type: 'alternative',
+                                    color: node.color,
+                                    description: this.config.commonEdgeDescription
+                                }
+                            });
+                            alternativePairs.add(pairKey);
+                        }
+                    }
+
+                    // 構成要素（部品）関係のエッジ
+                    if (node.components) {
+                        node.components.forEach(sourceId => {
+                            if (nodeMap.has(sourceId)) {
+                                edges.push({
+                                    data: {
+                                        id: `${node.id}-${sourceId}`,
+                                        source: sourceId,
+                                        target: node.id,
+                                        type: 'component',
+                                        color: node.color,
+                                        description: this.config.commonEdgeDescription
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+                return { nodes, edges };
+            }
+
+            /**
+             * UI要素およびCytoscapeに対するイベントリスナを設定する
+             */
+            setupEventListeners() {
+                // レイアウト変更セレクタ
+                this.elements.layoutSelector.addEventListener('change', () => {
+                    this.hideEdgeTooltip();
+                    this.runLayout(this.elements.layoutSelector.value);
+                });
+
+                // 検索ボタン
+                this.elements.searchButton.addEventListener('click', () => this.handleSearch());
+
+                // Enterキーによる検索実行
+                this.elements.searchInput.addEventListener('keypress', e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.handleSearch();
+                    }
+                });
+
+                // グラフ上部のコントロールでドラッグ操作が伝播しないようにする
+                this.elements.graphControls.addEventListener('mousedown', e => e.stopPropagation());
+                this.elements.graphControls.addEventListener('submit', e => e.preventDefault());
+
+                // 下部漢字リストのクリック処理
+                this.elements.kanjiGridContainer.addEventListener('click', e => this.handleKanjiGridClick(e));
+
+                // Cytoscapeイベント: ノード・エッジ・背景のタップ
+                this.cy.on('tap', 'node', e => this.handleNodeTap(e));
+                this.cy.on('tap', 'edge', e => this.handleEdgeTap(e));
+                this.cy.on('tap', e => this.handleBackgroundTap(e));
+
+                // パン・ズーム操作時はツールチップのみ非表示にする
+                this.cy.on('pan zoom', () => {
+                    this.hideEdgeTooltip();
+                });
+            }
+
+            /**
+             * 検索入力欄の内容に基づき、該当ノードへフォーカスを移動する
+             */
+            handleSearch() {
+                const searchTerm = this.elements.searchInput.value.trim();
+                if (!searchTerm) return;
+                this.focusOnNode(searchTerm);
+            }
+
+            /**
+             * 指定された漢字ラベルを持つノードを中心にズーム・ハイライトする
+             * @param {string} searchTerm - 検索対象の漢字
+             */
+            focusOnNode(searchTerm) {
+                const foundNode = this.cy.nodes().filter(ele => ele.data('label') === searchTerm);
+                if (foundNode.length > 0) {
+                    this.cy.animate({
+                        center: { eles: foundNode },
+                        zoom: this.config.animation.zoom,
+                        duration: this.config.animation.duration
+                    });
+                    this.highlightNode(foundNode);
+                    this.selectKanjiListItem(searchTerm);
+                    this.hideEdgeTooltip();
+                } else {
+                    this.showNotification(`「${searchTerm}」は見つかりませんでした。`);
+                }
+            }
+
+            /**
+             * 指定されたノードとその近傍を文脈としてハイライトする
+             * - 既存のハイライト状態を上書きする
+             * @param {object} targetNode - Cytoscapeノードオブジェクト
+             */
+            highlightNode(targetNode) {
+                // まずすべての要素を文脈外（faded）とする
+                this.cy.elements().addClass('faded');
+                // ノードとその近傍を文脈内として表示
+                const neighborhood = targetNode.neighborhood().add(targetNode);
+                neighborhood.removeClass('faded');
+            }
+
+            /**
+             * 指定されたエッジの両端ノードとその近傍を文脈としてハイライトする
+             * - 既存のハイライト状態を上書きする
+             * @param {object} edge - Cytoscapeエッジオブジェクト
+             */
+            highlightEdge(edge) {
+                // すべての要素を一度 faded にする
+                this.cy.elements().addClass('faded');
+
+                const endpoints = edge.connectedNodes();
+                // エッジ両端ノード + 当該エッジのみを文脈内としてハイライトする
+                // （endpoints.neighborhood() は使わず、関係する 3 要素のみに限定する）
+                const elementsToHighlight = endpoints.add(edge);
+                elementsToHighlight.removeClass('faded');
+            }
+
+            /**
+             * 対象の漢字に対応するリスト項目を選択状態にする
+             * @param {string} kanjiLabel - 漢字ラベル
+             */
+            selectKanjiListItem(kanjiLabel) {
+                const allItems = this.elements.kanjiGridContainer.querySelectorAll('.kanji-item');
+                allItems.forEach(item => {
+                    item.classList.toggle('selected', item.dataset.kanjiLabel === kanjiLabel);
+                });
+            }
+
+            /**
+             * 全てのハイライトと、下部リストの選択状態を解除する
+             */
+            clearAllHighlights() {
+                this.cy.elements().removeClass('faded');
+                const allItems = this.elements.kanjiGridContainer.querySelectorAll('.kanji-item.selected');
+                allItems.forEach(item => item.classList.remove('selected'));
+            }
+
+            /**
+             * ノードがタップされたときの処理
+             * - ノード中心の文脈ハイライトに切り替える
+             * - 対応するリスト項目を選択状態にする
+             */
+            handleNodeTap(evt) {
+                const tappedNode = evt.target;
+                this.hideEdgeTooltip();
+                this.highlightNode(tappedNode);
+                this.selectKanjiListItem(tappedNode.data('label'));
+            }
+
+            /**
+             * エッジがタップされたときの処理
+             * ルールは次の3通り：
+             *  A: 何も選択されていない（= .faded が存在しない）
+             *     → エッジ中心の文脈ハイライトに絞り込む
+             *  B: 部分文脈が存在し、エッジ両端ノードがその文脈の内側
+             *     → 既存の文脈は維持し、ハイライト状態は変更しない
+             *  C: 部分文脈が存在し、エッジ両端ノードのどちらかが文脈外
+             *     → 文脈をエッジ中心に切り替える
+             * いずれの場合も、ツールチップは表示する。
+             */
+            handleEdgeTap(evt) {
+                const edge = evt.target;
+                const description = edge.data('description');
+                if (!description) {
+                    this.hideEdgeTooltip();
+                    return;
+                }
+
+                const endpoints = edge.connectedNodes();
+
+                // .faded が存在するかどうかで「部分文脈の有無」を判定する
+                const hasFaded = this.cy.elements('.faded').length > 0;
+
+                // エッジ両端ノードのうち、少なくとも1つが .faded を持つかどうか
+                let anyEndpointFaded = false;
+                endpoints.forEach(ele => {
+                    if (ele.hasClass('faded')) {
+                        anyEndpointFaded = true;
+                    }
+                });
+
+                if (!hasFaded) {
+                    // 状態A: 何も選択されていない（全体ビュー）
+                    // → エッジ中心の文脈ハイライトへ絞り込む
+                    this.highlightEdge(edge);
+                } else if (anyEndpointFaded) {
+                    // 状態C: 既存文脈の外側にあるエッジ
+                    // → 文脈をエッジ中心に切り替える
+                    this.highlightEdge(edge);
+                } else {
+                    // 状態B: 既存文脈の内側にあるエッジ
+                    // → 文脈はそのまま維持し、ハイライト状態は変更しない
+                    // （ツールチップのみ表示する）
+                }
+
+                // ツールチップの表示（クリック位置のやや右下に出す）
+                const oe = evt.originalEvent;
+                if (oe) {
+                    const x = oe.clientX;
+                    const y = oe.clientY;
+                    this.showEdgeTooltip(description, x + 10, y + 10);
+                } else {
+                    this.hideEdgeTooltip();
+                }
+            }
+
+            /**
+             * グラフの背景がタップされたときの処理
+             * - ハイライトを全解除
+             * - ツールチップを非表示
+             */
+            handleBackgroundTap(evt) {
+                if (evt.target === this.cy) {
+                    this.clearAllHighlights();
+                    this.hideEdgeTooltip();
+                }
+            }
+
+            /**
+             * 漢字グリッドの項目がクリックされたときの処理
+             * - 対応するノードへフォーカスしてハイライト
+             */
+            handleKanjiGridClick(evt) {
+                const targetItem = evt.target.closest('.kanji-item');
+                if (!targetItem) return;
+
+                const kanjiLabel = targetItem.dataset.kanjiLabel;
+                if (kanjiLabel) {
+                    this.elements.searchInput.value = kanjiLabel;
+                    this.focusOnNode(kanjiLabel);
+                }
+            }
+
+            /**
+             * ページ下部のグリッドに漢字リストを表示する
+             * - ID順にソートしてからカードを生成
+             * @param {Array} data - 生の漢字データ
+             */
+            populateKanjiGrid(data) {
+                const sortedData = [...data].sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+                const fragment = document.createDocumentFragment();
+
+                sortedData.forEach(kanji => {
+                    if (!kanji.label) return;
+
+                    const kanjiItem = document.createElement('li');
+                    kanjiItem.className = `kanji-item ${kanji.alternative ? 'alternative' : ''}`;
+                    kanjiItem.dataset.kanjiLabel = kanji.label;
+
+                    const typeClass = this.config.typeToClassMap[kanji.type] || '';
+
+                    if (kanji.svg) {
+                        kanjiItem.innerHTML = `
+                            <p class="id-number">${kanji.id}</p>
+                            <p class="kanji"><img src="${this.config.svgBaseUrl}${kanji.svg}"></p>
+                            <p class="origin ${typeClass}">${kanji.type || ''}</p>
+                        `;
+                    } else {
+                        kanjiItem.innerHTML = `
+                            <p class="id-number">${kanji.id}</p>
+                            <p class="kanji">${kanji.label}</p>
+                            <p class="origin ${typeClass}">${kanji.type || ''}</p>
+                        `;
+                    }
+                    fragment.appendChild(kanjiItem);
+                });
+                this.elements.kanjiGridContainer.appendChild(fragment);
+            }
+
+            /**
+             * グラフにレイアウトを適用する
+             * @param {string} layoutName - 適用するレイアウト名
+             */
+            runLayout(layoutName) {
+                const layoutOptions = this.config.layouts[layoutName] || { name: layoutName };
+                this.cy.layout(layoutOptions).run();
+            }
+
+            /**
+             * エッジ説明用ツールチップDOMを生成する
+             */
+            createEdgeTooltip() {
+                if (this.edgeTooltip) return;
+                const div = document.createElement('div');
+                div.id = 'edge-tooltip';
+                div.className = 'edge-tooltip';
+                div.style.display = 'none';
+                document.body.appendChild(div);
+                this.edgeTooltip = div;
+            }
+
+            /**
+             * エッジ説明ツールチップを指定位置に表示する
+             * @param {string} text - 表示するテキスト
+             * @param {number} x - 表示位置X座標（viewport基準）
+             * @param {number} y - 表示位置Y座標（viewport基準）
+             */
+            showEdgeTooltip(text, x, y) {
+                if (!this.edgeTooltip) return;
+                this.edgeTooltip.textContent = text;
+                this.edgeTooltip.style.left = `${x}px`;
+                this.edgeTooltip.style.top = `${y}px`;
+                this.edgeTooltip.style.display = 'block';
+            }
+
+            /**
+             * エッジ説明ツールチップを非表示にする
+             */
+            hideEdgeTooltip() {
+                if (!this.edgeTooltip) return;
+                this.edgeTooltip.style.display = 'none';
+            }
+
+            /**
+             * ローディングスピナーの表示/非表示を切り替える
+             * @param {boolean} show - trueで表示, falseで非表示
+             */
+            showLoadingSpinner(show) {
+                this.elements.loadingSpinner.style.display = show ? 'block' : 'none';
+            }
+
+            /**
+             * 画面上部に通知メッセージを表示する（エラーや検索失敗など）
+             * @param {string} message - 表示するメッセージ
+             */
+            showNotification(message) {
+                this.elements.notificationMessage.textContent = message;
+                this.elements.notificationMessage.classList.add('show');
+                clearTimeout(this._notificationTimer);
+                this._notificationTimer = setTimeout(() => {
+                    this.elements.notificationMessage.classList.remove('show');
+                }, this.config.notificationDuration);
+            }
+        }
+
+        // --- アプリケーションのインスタンスを生成して実行 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            new KanjiGraphApp();
+        });
+    </script>
+</body>
+</html>
