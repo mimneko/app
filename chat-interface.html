@@ -183,25 +183,25 @@
         /* サイドバー：履歴リストの折りたたみ */
         details { margin-bottom: 8px; }
         details.is-hidden { display: none; }
-        summary { 
-            padding: 12px 16px; 
-            font-size: 14px; 
-            font-weight: bold; 
-            color: var(--text-pale-color); 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            transition: var(--transition); 
-            list-style: none; 
-            border-radius: 8px; 
+        summary {
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-pale-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            list-style: none;
+            border-radius: 8px;
         }
         summary::-webkit-details-marker { display: none; }
         summary:hover { background-color: var(--sidebar-hover); }
         summary .history-icon { margin-right: 8px; }
         summary .chevron { width: 14px; transition: transform 0.3s ease; }
         details[open] summary .chevron { transform: rotate(180deg); }
-        
+
         /* ===== 履歴アイテムのスタイル ===== */
         .history-item {
             padding: 10px 8px 10px 16px; /* 右のパディングを調整 */
@@ -226,7 +226,7 @@
             flex-grow: 1;
             margin-right: 8px;
         }
-        
+
         /* ===== 履歴アイテムのアクションメニュー ===== */
         .history-item-actions {
             position: relative;
@@ -290,90 +290,90 @@
         }
 
         /* サイドバー：フッター（アバター・設定） */
-        .sidebar-footer { 
-            padding: 16px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-top: var(--header-line); 
+        .sidebar-footer {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: var(--header-line);
         }
-        .user-avatar { 
-            font-size: 24px; 
-            background-color: transparent; 
-            border: none; 
-            cursor: pointer; 
-            color: var(--base-color); 
-            transition: var(--transition); 
-            padding: 0; 
+        .user-avatar {
+            font-size: 24px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--base-color);
+            transition: var(--transition);
+            padding: 0;
         }
         .user-avatar:hover { color: var(--base-hover-color); transform: scale(1.1); }
-        .settings-btn { 
-            font-size: 20px; 
-            background-color: transparent; 
-            border: none; 
-            cursor: pointer; 
-            color: var(--text-pale-color); 
-            transition: var(--transition); 
+        .settings-btn {
+            font-size: 20px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-pale-color);
+            transition: var(--transition);
         }
         .settings-btn:hover { color: var(--text-main-color); transform: scale(1.1); }
 
         /* ===== チャットエリア全体 ===== */
-        .chat-area { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            background-color: var(--bg-color); 
-            height: 100vh; 
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-color);
+            height: 100vh;
         }
         /* チャットヘッダー */
-        .chat-header { 
-            padding: 0 24px; 
-            border-bottom: var(--header-line); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            height: 61px; 
-            flex-shrink: 0; 
-            background-color: var(--sidebar-bg); 
+        .chat-header {
+            padding: 0 24px;
+            border-bottom: var(--header-line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 61px;
+            flex-shrink: 0;
+            background-color: var(--sidebar-bg);
         }
-        .hamburger-btn { 
-            display: none; 
-            background: none; 
-            border: none; 
-            color: var(--text-pale-color); 
-            font-size: 20px; 
-            cursor: pointer; 
-            padding: 8px; 
-            margin-right: 12px; 
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-pale-color);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            margin-right: 12px;
         }
-        .chat-title { 
-            font-weight: bold; 
-            font-size: 16px; 
-            cursor: pointer; 
-            overflow: hidden; 
-            white-space: nowrap; 
-            text-overflow: ellipsis; 
-            flex-grow: 1; 
-            margin-right: 16px; 
+        .chat-title {
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            margin-right: 16px;
         }
-        .chat-actions { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            position: relative; 
+        .chat-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
         }
         .actions-dropdown { display: contents; }
         #mobile-actions-trigger { display: none; }
         .mobile-only-text { display: none; }
         .chat-last-update { color: #aaa; font-size: 12px; white-space: nowrap; }
-        .chat-action-btn { 
-            background: none; 
-            border: none; 
-            color: var(--text-pale-color); 
-            cursor: pointer; 
-            transition: var(--transition); 
-            font-size: 16px; 
-            flex-shrink: 0; 
+        .chat-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-pale-color);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 16px;
+            flex-shrink: 0;
         }
         .chat-action-btn:hover { color: var(--text-main-color); transform: scale(1.1); }
         .chat-action-btn.is-favorite { color: var(--accent-color); }
@@ -409,35 +409,35 @@
         }
 
         /* メッセージのアクション（コピー等） */
-        .message-actions { 
-            position: absolute; 
-            display: flex; 
-            gap: 4px; 
-            background-color: var(--bg-card-color); 
-            padding: 4px 8px; 
-            border-radius: 20px; 
-            border: 1px solid var(--card-line); 
-            opacity: 0; 
-            visibility: hidden; 
-            transform: translateY(5px); 
-            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s; 
-            z-index: 10; 
+        .message-actions {
+            position: absolute;
+            display: flex;
+            gap: 4px;
+            background-color: var(--bg-card-color);
+            padding: 4px 8px;
+            border-radius: 20px;
+            border: 1px solid var(--card-line);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(5px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+            z-index: 10;
         }
         .ai-message .message-actions { bottom: -16px; left: 0; }
         .user-message .message-actions { bottom: -16px; right: 0; }
         .message:hover .message-actions { opacity: 1; visibility: visible; transform: translateY(0); }
-        .message-action-btn { 
-            background: none; 
-            border: none; 
-            cursor: pointer; 
-            color: var(--text-pale-color); 
-            padding: 6px; 
-            font-size: 14px; 
-            line-height: 1; 
-            position: relative; 
+        .message-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-pale-color);
+            padding: 6px;
+            font-size: 14px;
+            line-height: 1;
+            position: relative;
         }
         .message-action-btn:hover { color: var(--text-main-color); }
-        
+
         /* コピー時のフィードバック表示 */
         .copy-feedback {
             position: absolute;
@@ -459,15 +459,15 @@
         }
 
         /* ===== チャット入力エリア ===== */
-        .chat-input-area-wrapper { 
-            padding: 16px 24px; 
-            border-top: var(--header-line); 
-            background-color: var(--sidebar-bg); 
+        .chat-input-area-wrapper {
+            padding: 16px 24px;
+            border-top: var(--header-line);
+            background-color: var(--sidebar-bg);
         }
-        .chat-input-area { 
-            display: flex; 
-            align-items: flex-end; 
-            gap: 12px; 
+        .chat-input-area {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
         }
         .chat-input {
             flex: 1;
@@ -486,151 +486,151 @@
         }
         .chat-input:focus { outline: none; border-color: var(--base-color); }
 
-        .send-btn { 
-            background-color: var(--base-color); 
-            color: white; 
-            border: none; 
-            border-radius: 50%; 
-            width: 36px; 
-            height: 36px; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            transition: var(--transition); 
-            flex-shrink: 0; 
+        .send-btn {
+            background-color: var(--base-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            flex-shrink: 0;
         }
         .send-btn:hover:not(:disabled) { background-color: var(--base-hover-color); }
         .send-btn:disabled { background-color: #ccc; cursor: not-allowed; }
         .send-btn.is-loading .fa-paper-plane { display: none; }
-        .send-btn.is-loading::after { 
-            content: ''; 
-            display: block; 
-            width: 16px; 
-            height: 16px; 
-            border: 2px solid rgba(255,255,255,0.5); 
-            border-top-color: white; 
-            border-radius: 50%; 
-            animation: spin 1s linear infinite; 
+        .send-btn.is-loading::after {
+            content: '';
+            display: block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ===== 履歴・メッセージのスクロール設定 ===== */
-        .history-container, .message-container { 
+        .history-container, .message-container {
             overflow-x: hidden;
             overflow-y: auto;
-            scrollbar-gutter: stable; 
-            scrollbar-width: thin; 
+            scrollbar-gutter: stable;
+            scrollbar-width: thin;
         }
-        .history-container ul, .history-container ol { 
-            margin-block-start: 0; 
-            margin-block-end: 0; 
-            padding: 0; 
+        .history-container ul, .history-container ol {
+            margin-block-start: 0;
+            margin-block-end: 0;
+            padding: 0;
         }
         .history-wrapper { margin: .5em; }
-        .overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; right: 0; bottom: 0; 
-            background-color: var(--overlay-bg); 
-            z-index: 999; 
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--overlay-bg);
+            z-index: 999;
         }
         .overlay.active { display: block; }
 
         /* ===== レスポンシブ対応（モバイル用） ===== */
         @media (max-width: 1030px) {
             body { flex-direction: column; }
-            .sidebar { 
-                position: fixed; 
-                top: 0; left: 0; 
-                height: 100%; 
-                z-index: 1000; 
-                transform: translateX(-100%); 
-                transition: transform 0.3s ease-in-out; 
-                border-right: var(--header-line); 
+            .sidebar {
+                position: fixed;
+                top: 0; left: 0;
+                height: 100%;
+                z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                border-right: var(--header-line);
             }
-            .sidebar.is-open { 
-                transform: translateX(0); 
-                box-shadow: 4px 0 15px rgba(0,0,0,0.1); 
+            .sidebar.is-open {
+                transform: translateX(0);
+                box-shadow: 4px 0 15px rgba(0,0,0,0.1);
             }
             .chat-area { width: 100%; }
             .hamburger-btn { display: block; }
             .messages { max-width: 100%; }
             #mobile-actions-trigger { display: block; }
-            .actions-dropdown { 
-                display: none; 
-                position: absolute; 
-                top: calc(100% + 8px); 
-                right: 0; 
-                width: 200px; 
-                background-color: var(--bg-card-color); 
-                border: 1px solid var(--card-line); 
-                border-radius: 8px; 
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-                z-index: 10; 
-                padding: 8px; 
+            .actions-dropdown {
+                display: none;
+                position: absolute;
+                top: calc(100% + 8px);
+                right: 0;
+                width: 200px;
+                background-color: var(--bg-card-color);
+                border: 1px solid var(--card-line);
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                z-index: 10;
+                padding: 8px;
             }
             .actions-dropdown.is-open { display: block; }
-            .actions-dropdown > * { 
-                display: flex; 
-                align-items: center; 
-                width: 100%; 
-                padding: 8px; 
-                box-sizing: border-box; 
-                border-radius: 4px; 
-                margin-bottom: 4px; 
+            .actions-dropdown > * {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                padding: 8px;
+                box-sizing: border-box;
+                border-radius: 4px;
+                margin-bottom: 4px;
             }
             .actions-dropdown > *:last-child { margin-bottom: 0; }
             .actions-dropdown .chat-action-btn { font-size: 14px; transform: none !important; }
             .actions-dropdown .chat-action-btn:hover { background-color: var(--bg-button-hover-color); }
-            .actions-dropdown .chat-last-update { 
-                font-size: 12px; 
-                color: var(--text-pale-color); 
-                justify-content: center; 
-                border-bottom: 1px solid var(--card-line); 
-                padding-bottom: 12px; 
+            .actions-dropdown .chat-last-update {
+                font-size: 12px;
+                color: var(--text-pale-color);
+                justify-content: center;
+                border-bottom: 1px solid var(--card-line);
+                padding-bottom: 12px;
             }
             .actions-dropdown .mobile-only-text { display: inline-block; margin-left: 8px; }
         }
-        
+
         /* ===== 画像アップロード・プレビュー ===== */
-        .image-preview-container { 
-            padding: 8px 16px; 
-            border-top: var(--header-line); 
-            flex-shrink: 0; 
+        .image-preview-container {
+            padding: 8px 16px;
+            border-top: var(--header-line);
+            flex-shrink: 0;
         }
         .image-preview { position: relative; display: inline-block; }
-        #uploaded-image-preview { 
-            max-height: 120px; 
-            max-width: 200px; 
-            border-radius: 8px; 
-            border: 1px solid var(--card-line); 
+        #uploaded-image-preview {
+            max-height: 120px;
+            max-width: 200px;
+            border-radius: 8px;
+            border: 1px solid var(--card-line);
         }
-        .remove-image-btn { 
-            position: absolute; 
-            top: -8px; 
-            right: -8px; 
-            background-color: var(--bg-card-color); 
-            color: var(--text-pale-color); 
-            border: 1px solid var(--card-line); 
-            border-radius: 50%; 
-            width: 24px; 
-            height: 24px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            transition: var(--transition); 
+        .remove-image-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--bg-card-color);
+            color: var(--text-pale-color);
+            border: 1px solid var(--card-line);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
         }
         .remove-image-btn:hover { color: var(--accent-color); }
-        .upload-image-btn { 
-            background-color: transparent; 
-            color: var(--text-pale-color); 
-            border: none; 
-            cursor: pointer; 
-            font-size: 18px; 
-            padding: 8px; 
-            transition: var(--transition); 
+        .upload-image-btn {
+            background-color: transparent;
+            color: var(--text-pale-color);
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 8px;
+            transition: var(--transition);
         }
         .upload-image-btn:hover { color: var(--base-color); }
     </style>
@@ -642,7 +642,7 @@
         <div class="sidebar-logo">
             <span class="logo">MathCompass</span>
         </div>
-        
+
         <!-- 新規チャットボタン -->
         <div class="sidebar-header">
             <button class="new-chat-btn" title="新しいチャットを始める">
@@ -676,14 +676,14 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- サイドバーのフッター（アバター・設定ボタン） -->
         <div class="sidebar-footer">
             <button class="user-avatar" title="アカウント情報"><i class="fa-solid fa-circle-user"></i></button>
             <button class="settings-btn" title="設定"><i class="fa-solid fa-gear"></i></button>
         </div>
     </div>
-    
+
     <!-- サイドバー開閉用オーバーレイ（モバイル用） -->
     <div class="overlay"></div>
 
@@ -705,7 +705,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- メッセージ表示エリア -->
         <div class="message-container">
             <div class="messages"></div>
@@ -728,7 +728,7 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         // =========================
         // メインスクリプト
@@ -777,7 +777,7 @@
                     'chat-20': { title: '相似形の性質', isFavorite: false, lastUpdate: '2025-03-27', messages: [] },
                 }
             };
-            
+
             // --- DOM Elements ---
             // 主要なDOM要素をここで取得
             const dom = {
@@ -820,7 +820,7 @@
                     });
                 }
             }
-            
+
             /**
              * チャットのメッセージリストを描画する
              */
@@ -836,7 +836,7 @@
                 currentChat.messages.forEach(msg => {
                     const messageEl = document.createElement('div');
                     messageEl.classList.add('message', msg.sender === 'user' ? 'user-message' : 'ai-message');
-                    
+
                     // メッセージ本文
                     const contentEl = document.createElement('div');
                     contentEl.classList.add('message-content');
@@ -846,19 +846,19 @@
                     // メッセージアクション（コピー等）
                     const actionsEl = document.createElement('div');
                     actionsEl.className = 'message-actions';
-                    
+
                     // コピー用ボタン
                     const copyBtn = document.createElement('button');
                     copyBtn.className = 'message-action-btn';
                     copyBtn.title = 'コピー';
                     copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
-                    
+
                     // コピー時のフィードバック
                     const feedbackEl = document.createElement('div');
                     feedbackEl.className = 'copy-feedback';
                     feedbackEl.textContent = 'コピーしました！';
                     copyBtn.appendChild(feedbackEl);
-                    
+
                     copyBtn.addEventListener('click', () => copyMessageToClipboard(copyBtn, feedbackEl));
 
                     actionsEl.appendChild(copyBtn);
@@ -896,7 +896,7 @@
                     titleDiv.dataset.rawTitle = chat.title;
                     titleDiv.innerHTML = chat.title;
                     historyItem.title = chat.title;
-                    
+
                     // アクションメニュー部分
                     const actionsDiv = document.createElement('div');
                     actionsDiv.className = 'history-item-actions';
@@ -936,7 +936,7 @@
                     menu.appendChild(delBtn);
                     actionsDiv.appendChild(menuBtn);
                     actionsDiv.appendChild(menu);
-                    
+
                     historyItem.appendChild(titleDiv);
                     historyItem.appendChild(actionsDiv);
 
@@ -949,7 +949,7 @@
                         }
                         menu.classList.toggle('is-open');
                     });
-                    
+
                     return historyItem;
                 };
 
@@ -966,7 +966,7 @@
                 initTitleEditing();
                 checkFavoritesVisibility(); // 描画後に表示チェック
             }
-            
+
             /**
              * お気に入りセクションの表示/非表示を切り替える
              */
@@ -1062,7 +1062,7 @@
                     const remainingChatIds = Object.keys(appData.chats);
                     appData.currentChatId = remainingChatIds.length > 0 ? remainingChatIds[0] : null;
                 }
-                
+
                 renderAll();
             }
 
@@ -1108,7 +1108,7 @@
                     dom.fileInput.value = '';
                 });
             }
-            
+
             /**
              * メッセージ送信機能の初期化
              */
@@ -1121,7 +1121,7 @@
                     const hasImage = dom.fileInput.files && dom.fileInput.files[0];
                     dom.sendBtn.disabled = !hasText && !hasImage;
                 }
-                
+
                 /**
                  * テキストエリアの自動リサイズ
                  */
@@ -1241,7 +1241,7 @@
                     });
                 }
             }
-            
+
             /**
              * お気に入りトグルボタンの初期化
              */
@@ -1267,7 +1267,7 @@
                     dom.actionsDropdown.classList.toggle('is-open');
                 });
             }
-            
+
             /**
              * 履歴リストクリック時のチャット切り替え初期化
              */
@@ -1315,7 +1315,7 @@
             initHistoryClick();
             initFavoriteToggle();
             initGlobalListeners();
-            
+
             // 初期描画
             renderAll();
         });
