@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>localStorage Viewer + details テスト</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 1rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    details {
+      margin: 0.4rem 0;
+      padding: 0.4rem;
+      background: #fafafa;
+      border-radius: 4px;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #ls-view {
+      font-family: monospace;
+      white-space: pre-wrap;
+      background: #f0f0f0;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+    button {
+      padding: 0.3rem 0.8rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      background: #eee;
+    }
+    button:hover {
+      background: #e2e2e2;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>details + localStorage テスト（localStorageビュー付き）</h1>
+
+  <h2>localStorage の内容</h2>
+  <div id="ls-view">(ここに表示)</div>
+
+  <section>
+    <h2>漢字: 心（テスト用）</h2>
+
+    <details class="pref" data-pref-key="reading">
+      <summary>読み</summary>
+      <p>音読み: シン<br>訓読み: こころ</p>
+    </details>
+
+    <details class="pref" data-pref-key="meaning">
+      <summary>意味</summary>
+      <p>心・気持ちなど。</p>
+    </details>
+
+    <details class="pref" data-pref-key="jukugo">
+      <summary>熟語</summary>
+      <ul>
+        <li>安心</li>
+        <li>関心</li>
+      </ul>
+    </details>
+
+    <div style="margin-top:1rem;">
+      <button id="reset">localStorage を初期化</button>
+      <button id="refresh">ビュー更新</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  // -----------------------------------------
+  // 設定値
+  // -----------------------------------------
+  // localStorage に保存するときのキー名の接頭辞。
+  // 実際のキーは「detailsPref:reading」のように、
+  // PREFIX + data-pref-key という形になります。
+  var PREFIX = "detailsPref:";
+
+  // -----------------------------------------
+  // 関数: loadState(detailsEl)
+  // -----------------------------------------
+  // 役割:
+  //   単一の <details> 要素について、
+  //   localStorage に保存されている開閉状態（"open"/"closed"）を読み込み、
+  //   初期状態として反映します。
+  //
+  // 引数:
+  //   detailsEl: 対象の <details> 要素
+  function loadState(detailsEl){
+    // data-pref-key 属性からキー名（例: "reading"）を取得
+    var key = detailsEl.dataset.prefKey;
+    // localStorage から、PREFIX + key（例: "detailsPref:reading"）で値を取得
+    var v = localStorage.getItem(PREFIX + key);
+
+    // saved が "open" なら <details open> にする
+    if (v === "open") detailsEl.open = true;
+    // saved が "closed" なら <details> (閉じる) にする
+    if (v === "closed") detailsEl.open = false;
+    // それ以外（null など）の場合は、HTML 側のデフォルト(open属性の有無)を維持する
+  }
+
+  // -----------------------------------------
+  // 関数: bind(detailsEl)
+  // -----------------------------------------
+  // 役割:
+  //   <details> に対して toggle イベントリスナを登録し、
+  //   ユーザが開閉したタイミングで localStorage に状態を保存します。
+  //
+  // 引数:
+  //   detailsEl: 対象の <details> 要素
+  function bind(detailsEl){
+    // data-pref-key 属性からキー名を取得
+    var key = detailsEl.dataset.prefKey;
+
+    // "toggle" イベント:
+    // <details> が開いた/閉じたときに発火する
+    detailsEl.addEventListener("toggle", function(){
+      // 現在の open 状態(true/false)から、保存用の文字列を決定
+      var v = detailsEl.open ? "open" : "closed";
+
+      // localStorage に保存
+      // 例: key="reading" なら "detailsPref:reading" = "open" など
+      localStorage.setItem(PREFIX + key, v);
+
+      // ビュー更新:
+      // ページ下部の localStorage 一覧表示を更新する
+      renderLocalStorage();
+    });
+  }
+
+  // -----------------------------------------
+  // 関数: renderLocalStorage()
+  // -----------------------------------------
+  // 役割:
+  //   現在の localStorage 内の全てのキーと値を取得し、
+  //   ページ内の #ls-view 要素に一覧として表示します。
+  //   （このドメインで保存されている全キーが対象です）
+  function renderLocalStorage(){
+    var out = [];
+
+    // localStorage.length 回ループしてキーを列挙
+    for (var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);        // i番目のキー名
+      var v = localStorage.getItem(k);    // そのキーに対応する値
+      out.push(k + " = " + v);            // "キー = 値" の形で配列に格納
+    }
+
+    // 改行区切りのテキストとして #ls-view に表示
+    document.getElementById("ls-view").textContent = out.join("\n");
+  }
+
+  // -----------------------------------------
+  // 関数: resetStorage()
+  // -----------------------------------------
+  // 役割:
+  //   localStorage の中から、このスクリプトで使っているキー
+  //   （PREFIX で始まるキー）のみを削除します。
+  //   例: "detailsPref:reading" などは削除対象。
+  function resetStorage(){
+    var remove = [];
+
+    // まず、削除対象のキー名を収集
+    for (var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      // PREFIX で始まるキーのみ削除対象とする
+      if (k.startsWith(PREFIX)) remove.push(k);
+    }
+
+    // 収集したキーを削除
+    remove.forEach(function(k){
+      localStorage.removeItem(k);
+    });
+
+    // ビューを再描画（削除後の状態を反映）
+    renderLocalStorage();
+  }
+
+  // -----------------------------------------
+  // 初期化: DOMContentLoaded
+  // -----------------------------------------
+  // DOM が構築されたタイミングで実行される処理です。
+  document.addEventListener("DOMContentLoaded", function(){
+    // 対象となる <details> 要素を一括取得
+    // "details.pref" クラス + data-pref-key 属性を持つものが対象
+    var ds = document.querySelectorAll("details.pref[data-pref-key]");
+
+    // 各 <details> について:
+    //   1. 保存済みの開閉状態を反映 (loadState)
+    //   2. toggle イベントで状態を保存するハンドラを登録 (bind)
+    ds.forEach(function(el){
+      loadState(el);
+      bind(el);
+    });
+
+    // ボタン: localStorage のリセット
+    document.getElementById("reset").onclick = resetStorage;
+
+    // ボタン: ビューの手動更新
+    document.getElementById("refresh").onclick = renderLocalStorage;
+
+    // ページ初期表示時に一度 localStorage の一覧を描画
+    renderLocalStorage();
+  });
+})();
+</script>
+
+</body>
+</html>
