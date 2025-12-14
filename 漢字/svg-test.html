@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>親字表示テスト（SVG字形 + テキストコピー）</title>
+
+<style>
+  body {
+    font-family: sans-serif;
+    line-height: 1.8;
+    padding: 16px;
+  }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  h2 { font-size: 16px; margin: 24px 0 8px; }
+  p  { margin: 6px 0; }
+
+  .panel {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+    margin: 14px 0;
+  }
+
+  /* デモ表示サイズ（ここを変えると全方式に反映） */
+  :root { --demo-size: 24px; }
+
+  .demo {
+    font-size: var(--demo-size);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .hint {
+    font-size: 13px;
+    color: #333;
+  }
+
+  /* 共通：SVG画像要素のサイズ */
+  .kanji-img {
+    width: 1em;
+    height: 1em;
+    display: block;
+  }
+
+  /* ========= 方法A：画像 + 透明テキスト重ね =========
+     見た目：img（SVG）
+     コピー：重ねた透明テキスト
+  */
+  .oyaji-a {
+    position: relative;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.08em; /* 行ボックス由来のズレを抑制（必要なら調整） */
+  }
+  .oyaji-a img {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .oyaji-a .copytext {
+    position: absolute;
+    inset: 0;            /* box全面に一致 */
+    color: transparent;
+    user-select: text;
+    font-size: 1em;
+    line-height: 1;
+    pointer-events: none; /* クリック対象は親に寄せる */
+  }
+
+  /* ========= 方法B（改良版）：背景画像 + 透明コピー層 =========
+     見た目：背景画像（SVG）
+     当たり判定：この要素のbox（width/height）
+     コピー：box全面に重ねた透明copytext
+  */
+  .oyaji-b2 {
+    position: relative;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+
+    background: center / contain no-repeat;
+    vertical-align: -0.08em; /* 必要なら調整 */
+  }
+  .oyaji-b2 .copytext {
+    position: absolute;
+    inset: 0;            /* 背景画像のboxと一致 */
+    color: transparent;
+    user-select: text;
+    font-size: 1em;
+    line-height: 1;
+  }
+
+  /* ========= 方法C：ボタン操作でコピー =========
+     見た目：img（SVG）をボタン内に表示
+     コピー：navigator.clipboard
+  */
+  .oyaji-c-btn {
+    width: 1em;
+    height: 1em;
+    padding: 0;
+    border: 1px solid #999;
+    background: none;
+    border-radius: 8px;
+    cursor: pointer;
+    vertical-align: -0.08em;
+  }
+  .oyaji-c-btn:active {
+    transform: translateY(1px);
+  }
+  .oyaji-c-btn img {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* コピー結果表示 */
+  .status {
+    font-size: 13px;
+    margin-top: 8px;
+    color: #111;
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+/* ========= 文章中（インライン）用：周囲の文字サイズに追従 =========
+   目的：文章中に置いても、他の文字と同程度の大きさ・ベースラインに揃える
+   使い方：<span class="oyaji-inline" style="--oyaji-img:url('...');">缶</span>
+*/
+.oyaji-inline{
+  position: relative;
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background: var(--oyaji-img) center / contain no-repeat;
+  vertical-align: -0.12em; /* ベースラインのズレ補正（必要なら微調整） */
+}
+.oyaji-inline .copytext{
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  user-select: text;
+  font-size: 1em;
+  line-height: 1;
+}
+</style>
+</head>
+
+<body>
+<h1>親字表示テスト（SVG字形を表示しつつ、コピーはUnicode文字）</h1>
+<p class="hint">対象文字：<span class="mono">缶</span>　字形SVG：<span class="mono">huang-shuang144_shuang3-u7f50-01.svg</span></p>
+
+<div class="panel">
+  <h2>方法A：画像（img）+ 透明テキスト重ね</h2>
+  <p class="hint">ドラッグ選択でコピーしたとき、透明テキストが拾われる場合にUnicode「缶」がコピーされます。</p>
+  <div class="demo">
+    <span class="oyaji-a" aria-label="親字：缶">
+      <img class="kanji-img" src="huang-shuang144_shuang3-u7f50-01.svg" alt="" aria-hidden="true">
+      <span class="copytext">缶</span>
+    </span>
+    <span class="hint">← ここをドラッグ選択してコピー</span>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>方法B：背景画像 + box一致の透明コピー層（推奨）</h2>
+  <p class="hint">背景画像の矩形（CSS box）と、コピー対象（透明copytext）の矩形を一致させ、ヒットボックスずれを抑制します。</p>
+  <div class="demo">
+    <span class="oyaji-b2" id="b2" aria-label="親字：缶">
+      <span class="copytext">缶</span>
+    </span>
+    <span class="hint">← ここをドラッグ選択してコピー</span>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>方法C：ボタン操作でコピー（確実）</h2>
+  <p class="hint">ドラッグ選択ではなく操作コピーです。取得の確実性を優先します。</p>
+  <div class="demo">
+    <button class="oyaji-c-btn" id="copyBtn" title="缶をコピー" aria-label="缶をコピー">
+      <img src="huang-shuang144_shuang3-u7f50-01.svg" alt="缶">
+    </button>
+    <span class="hint">← クリックでコピー</span>
+  </div>
+  <div class="status" id="status">コピー結果：未実行</div>
+</div>
+
+
+<div class="panel">
+  <h2>文章中での表示（インライン）</h2>
+  <p class="hint">周囲の文字サイズ（font-size）に追従させ、本文中でも他の文字と同程度の大きさに揃えます。ドラッグ選択でコピーすると Unicode「缶」になります。</p>
+
+  <p>
+    例（通常サイズ）：この語は<span class="oyaji-inline" style="--oyaji-img:url('huang-shuang144_shuang3-u7f50-01.svg');" aria-label="親字：缶"><span class="copytext">缶</span></span>を含みます。
+  </p>
+
+  <p style="font-size: 20px;">
+    例（大きい本文）：この語は<span class="oyaji-inline" style="--oyaji-img:url('huang-shuang144_shuang3-u7f50-01.svg');" aria-label="親字：缶"><span class="copytext">缶</span></span>を含みます。
+  </p>
+
+  <p style="font-size: 12px;">
+    例（小さい本文）：この語は<span class="oyaji-inline" style="--oyaji-img:url('huang-shuang144_shuang3-u7f50-01.svg');" aria-label="親字：缶"><span class="copytext">缶</span></span>を含みます。
+  </p>
+
+  <p class="hint">見た目の上下位置がずれる場合は、CSSの <span class="mono">vertical-align: -0.12em;</span> の値を調整します。</p>
+</div>
+
+<script>
+  // 方法B（改良版）の背景画像を設定
+  const svgPath = "huang-shuang144_shuang3-u7f50-01.svg";
+  const b2 = document.getElementById("b2");
+  b2.style.backgroundImage = `url('${svgPath}')`;
+
+  // 方法C：クリックでコピー（Clipboard API）
+  const status = document.getElementById("status");
+  document.getElementById("copyBtn").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText("缶");
+      status.textContent = "コピー結果：缶 をクリップボードに書き込みました。";
+    } catch (e) {
+      status.textContent = "コピー結果：失敗しました（ブラウザ権限・HTTPS・設定を確認してください）。";
+    }
+  });
+</script>
+
+</body>
+</html>
