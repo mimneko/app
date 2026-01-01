@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Circle Merge Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f0f2f5;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            touch-action: none;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            background-color: #fff8dc;
+            border-radius: 4px;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 500px;
+            pointer-events: none;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+            color: #333;
+            z-index: 10;
+        }
+
+        .score-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .next-circle-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #next-circle-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ccc;
+            display: inline-block;
+            /* プレビューもcanvas描画にすべきだが、簡易的にCSSで対応 */
+            /* 将来的に画像にする場合は img タグへの置換を検討 */
+        }
+
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+        }
+
+        #game-over-screen h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        #restart-button {
+            padding: 15px 40px;
+            font-size: 24px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            pointer-events: auto;
+        }
+
+        #restart-button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="world"></canvas>
+        
+        <div id="ui-layer">
+            <div class="score-box">Score: <span id="score">0</span></div>
+            <div class="next-circle-box">
+                Next: <div id="next-circle-preview"></div>
+            </div>
+        </div>
+
+        <div id="game-over-screen">
+            <h1>GAME OVER</h1>
+            <p>Score: <span id="final-score">0</span></p>
+            <button id="restart-button">RESTART</button>
+        </div>
+    </div>
+
+    <script>
+        // Matter.js モジュールのエイリアス
+        const Engine = Matter.Engine,
+              Render = Matter.Render,
+              Runner = Matter.Runner,
+              World = Matter.World,
+              Bodies = Matter.Bodies,
+              Body = Matter.Body,
+              Events = Matter.Events,
+              Composite = Matter.Composite,
+              Vertices = Matter.Vertices;
+
+        // ゲーム設定
+        const GAME_CONFIG = {
+            width: 500,
+            height: 700,
+            wallThickness: 100,
+            spawnY: 100,
+            deadlineY: 200,
+            gameOverDuration: 2000,
+            nextQueueSize: 1, // 将来的にNextを複数表示する場合用
+            initialSpawnRange: 4 // 最初の出現レベル範囲 (0 ~ N-1)
+        };
+
+        // オブジェクトタイプの定義（拡張性を考慮した構造）
+        // shape: 形状定義 (circle, rectangle, polygon, etc.)
+        // render: 描画定義 (color, image, sprite, etc.)
+        // physics: 物理挙動定義 (restitution, friction, etc.)
+        const GAME_OBJECT_TYPES = [
+            { 
+                level: 0, 
+                score: 10,
+                shape: { type: 'circle', radius: 15 },
+                render: { type: 'color', value: '#FF6B6B' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            },
+            { 
+                level: 1, 
+                score: 20,
+                shape: { type: 'circle', radius: 25 },
+                render: { type: 'color', value: '#FF9F43' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            },
+            { 
+                level: 2, 
+                score: 30,
+                shape: { type: 'circle', radius: 35 },
+                render: { type: 'color', value: '#Feca57' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            },
+            { 
+                level: 3, 
+                score: 40,
+                shape: { type: 'circle', radius: 45 },
+                render: { type: 'color', value: '#1DD1A1' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            },
+            { 
+                level: 4, 
+                score: 50,
+                shape: { type: 'circle', radius: 55 },
+                render: { type: 'color', value: '#48DBFB' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            },
+            { 
+                level: 5, 
+                score: 60,
+                shape: { type: 'circle', radius: 65 },
+                render: { type: 'color', value: '#54A0FF' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            },
+            { 
+                level: 6, 
+                score: 70,
+                shape: { type: 'circle', radius: 75 },
+                render: { type: 'color', value: '#5F27CD' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            },
+            { 
+                level: 7, 
+                score: 80,
+                shape: { type: 'circle', radius: 85 },
+                render: { type: 'color', value: '#FF9FF3' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            },
+            { 
+                level: 8, 
+                score: 90,
+                shape: { type: 'circle', radius: 95 },
+                render: { type: 'color', value: '#8395A7' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            },
+            { 
+                level: 9, 
+                score: 100,
+                shape: { type: 'circle', radius: 105 },
+                render: { type: 'color', value: '#222F3E' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            },
+            { 
+                level: 10, 
+                score: 150,
+                shape: { type: 'circle', radius: 120 },
+                render: { type: 'color', value: '#000000' },
+                physics: { restitution: 0.5, friction: 0.01, frictionStatic: 0 }
+            }
+        ];
+
+        // グローバル変数
+        let engine;
+        let runner;
+        let canvas;
+        let ctx;
+        
+        let currentObjectTypeIndex = 0;
+        let nextObjectTypeIndex = 0;
+
+        let score = 0;
+        let isGameOver = false;
+        let canDrop = true;
+        let dropX = GAME_CONFIG.width / 2;
+        let gameOverTimerStart = 0;
+        
+        // 要素の取得
+        const scoreEl = document.getElementById('score');
+        const nextPreviewEl = document.getElementById('next-circle-preview');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreEl = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-button');
+
+        function init() {
+            canvas = document.getElementById('world');
+            ctx = canvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            engine = Engine.create();
+            
+            // 壁の作成（壁も汎用的に作れるが、ここは固定で実装）
+            const ground = Bodies.rectangle(
+                GAME_CONFIG.width / 2, 
+                GAME_CONFIG.height + GAME_CONFIG.wallThickness / 2, 
+                GAME_CONFIG.width, 
+                GAME_CONFIG.wallThickness, 
+                { isStatic: true, render: { fillStyle: '#888' }, label: 'wall' }
+            );
+            const leftWall = Bodies.rectangle(
+                0 - GAME_CONFIG.wallThickness / 2, 
+                GAME_CONFIG.height / 2, 
+                GAME_CONFIG.wallThickness, 
+                GAME_CONFIG.height * 2, 
+                { isStatic: true, render: { fillStyle: '#888' }, label: 'wall' }
+            );
+            const rightWall = Bodies.rectangle(
+                GAME_CONFIG.width + GAME_CONFIG.wallThickness / 2, 
+                GAME_CONFIG.height / 2, 
+                GAME_CONFIG.wallThickness, 
+                GAME_CONFIG.height * 2, 
+                { isStatic: true, render: { fillStyle: '#888' }, label: 'wall' }
+            );
+
+            World.add(engine.world, [ground, leftWall, rightWall]);
+
+            Events.on(engine, 'collisionStart', handleCollisions);
+
+            initObjectTypes();
+
+            runner = Runner.create();
+            Runner.run(runner, engine);
+
+            requestAnimationFrame(renderLoop);
+
+            setupInputs();
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('game-container');
+            const aspect = GAME_CONFIG.width / GAME_CONFIG.height;
+            const containerAspect = container.clientWidth / container.clientHeight;
+
+            let displayWidth, displayHeight;
+
+            if (containerAspect < aspect) {
+                displayWidth = container.clientWidth;
+                displayHeight = container.clientWidth / aspect;
+            } else {
+                displayHeight = container.clientHeight;
+                displayWidth = container.clientHeight * aspect;
+            }
+
+            canvas.width = GAME_CONFIG.width;
+            canvas.height = GAME_CONFIG.height;
+            canvas.style.width = `${displayWidth}px`;
+            canvas.style.height = `${displayHeight}px`;
+        }
+
+        function initObjectTypes() {
+            currentObjectTypeIndex = getRandomTypeIndex();
+            nextObjectTypeIndex = getRandomTypeIndex();
+            updateNextPreview();
+        }
+
+        function updateTurn() {
+            currentObjectTypeIndex = nextObjectTypeIndex;
+            nextObjectTypeIndex = getRandomTypeIndex();
+            updateNextPreview();
+        }
+
+        function getRandomTypeIndex() {
+            return Math.floor(Math.random() * GAME_CONFIG.initialSpawnRange);
+        }
+
+        function updateNextPreview() {
+            const typeData = GAME_OBJECT_TYPES[nextObjectTypeIndex];
+            
+            // プレビュー表示ロジック
+            // 現在はCSS背景色変更のみだが、将来的に画像のプレビューなどに対応可能
+            if (typeData.render.type === 'color') {
+                nextPreviewEl.style.backgroundColor = typeData.render.value;
+                nextPreviewEl.style.backgroundImage = 'none';
+            } else if (typeData.render.type === 'image') {
+                nextPreviewEl.style.backgroundColor = 'transparent';
+                nextPreviewEl.style.backgroundImage = `url(${typeData.render.value})`;
+                nextPreviewEl.style.backgroundSize = 'contain';
+            }
+        }
+
+        /**
+         * 拡張されたボディ生成関数
+         * shape.type に応じて異なる形状のボディを生成する
+         */
+        function createGameBody(x, y, typeIndex, isStatic = false) {
+            const typeData = GAME_OBJECT_TYPES[typeIndex];
+            let body;
+
+            // 形状タイプに応じたボディ生成
+            switch (typeData.shape.type) {
+                case 'circle':
+                    body = Bodies.circle(x, y, typeData.shape.radius, {
+                        restitution: typeData.physics.restitution,
+                        friction: typeData.physics.friction,
+                        frictionStatic: typeData.physics.frictionStatic,
+                        label: 'game-object',
+                    });
+                    break;
+                // 将来的な拡張例:
+                // case 'rectangle':
+                //     body = Bodies.rectangle(x, y, typeData.shape.width, typeData.shape.height, { ... });
+                //     break;
+                // case 'polygon':
+                //     body = Bodies.fromVertices(x, y, typeData.shape.vertices, { ... });
+                //     break;
+                default:
+                    console.error('Unknown shape type:', typeData.shape.type);
+                    // フォールバックとして円を作成
+                    body = Bodies.circle(x, y, 20, {}); 
+            }
+
+            // ゲーム用メタデータを付与
+            body.gameData = {
+                typeIndex: typeIndex,
+                level: typeData.level,
+                render: typeData.render,
+                shape: typeData.shape,
+                createdAt: Date.now()
+            };
+            
+            if (isStatic) {
+                Body.setStatic(body, true);
+            }
+            return body;
+        }
+
+        /**
+         * 拡張された描画関数
+         * render.type に応じて描画処理を分岐する
+         */
+        function renderGameBody(ctx, body) {
+            if (!body.gameData) return; // ゲームオブジェクト以外（壁など）は無視、または別処理
+
+            const { render, shape } = body.gameData;
+            const { position, angle } = body;
+
+            ctx.save();
+            ctx.translate(position.x, position.y);
+            ctx.rotate(angle);
+
+            // 1. 形状のパスを作成
+            ctx.beginPath();
+            if (shape.type === 'circle') {
+                ctx.arc(0, 0, shape.radius, 0, 2 * Math.PI);
+            } else {
+                // その他の形状（矩形や多角形）の場合の頂点処理（例）
+                /*
+                const vertices = body.vertices;
+                ctx.moveTo(vertices[0].x - position.x, vertices[0].y - position.y);
+                for (let j = 1; j < vertices.length; j++) {
+                    ctx.lineTo(vertices[j].x - position.x, vertices[j].y - position.y);
+                }
+                ctx.closePath();
+                */
+            }
+            
+            // 2. 塗りつぶし/描画処理
+            if (render.type === 'color') {
+                ctx.fillStyle = render.value;
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            } else if (render.type === 'image') {
+                // 将来的な画像描画の実装例
+                /*
+                const img = getImageAsset(render.value); // 画像管理システムが必要
+                if (img) {
+                    const size = shape.radius * 2; // 円の場合
+                    ctx.drawImage(img, -shape.radius, -shape.radius, size, size);
+                }
+                */
+            }
+
+            ctx.restore();
+        }
+
+        // 壁などの静的オブジェクトの描画
+        function renderStaticBody(ctx, body) {
+             if (body.render.visible === false) return;
+             
+             ctx.beginPath();
+             const vertices = body.vertices;
+             ctx.moveTo(vertices[0].x, vertices[0].y);
+             for (let j = 1; j < vertices.length; j += 1) {
+                 ctx.lineTo(vertices[j].x, vertices[j].y);
+             }
+             ctx.lineTo(vertices[0].x, vertices[0].y);
+             ctx.fillStyle = body.render.fillStyle;
+             ctx.fill();
+             ctx.closePath();
+        }
+
+        function handleCollisions(event) {
+            const pairs = event.pairs;
+
+            for (let i = 0; i < pairs.length; i++) {
+                const bodyA = pairs[i].bodyA;
+                const bodyB = pairs[i].bodyB;
+
+                if (bodyA.label === 'game-object' && bodyB.label === 'game-object') {
+                    // gameDataプロパティを通じてレベルを参照
+                    if (bodyA.gameData.level === bodyB.gameData.level) {
+                        const currentLevel = bodyA.gameData.level;
+                        
+                        if (currentLevel < GAME_OBJECT_TYPES.length - 1) {
+                            if (!bodyA.isRemoved && !bodyB.isRemoved) {
+                                bodyA.isRemoved = true;
+                                bodyB.isRemoved = true;
+
+                                const midX = (bodyA.position.x + bodyB.position.x) / 2;
+                                const midY = (bodyA.position.y + bodyB.position.y) / 2;
+
+                                World.remove(engine.world, [bodyA, bodyB]);
+
+                                const newBody = createGameBody(midX, midY, currentLevel + 1);
+                                World.add(engine.world, newBody);
+
+                                score += GAME_OBJECT_TYPES[currentLevel + 1].score;
+                                scoreEl.textContent = score;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function setupInputs() {
+            const inputHandler = (e) => {
+                if (isGameOver) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = GAME_CONFIG.width / rect.width;
+                let clientX;
+
+                if (e.type.startsWith('touch')) {
+                    clientX = e.touches[0].clientX;
+                } else {
+                    clientX = e.clientX;
+                }
+
+                dropX = (clientX - rect.left) * scaleX;
+
+                // 現在の形状サイズに応じた壁際制限
+                const currentType = GAME_OBJECT_TYPES[currentObjectTypeIndex];
+                let halfWidth;
+                
+                if (currentType.shape.type === 'circle') {
+                    halfWidth = currentType.shape.radius;
+                } else {
+                    // 他の形状の場合は適宜幅を計算
+                    halfWidth = 20; 
+                }
+
+                dropX = Math.max(halfWidth, Math.min(GAME_CONFIG.width - halfWidth, dropX));
+            };
+
+            const dropHandler = (e) => {
+                if (isGameOver || !canDrop) return;
+                
+                if (e.type === 'mousedown' || e.type === 'touchstart') {
+                    inputHandler(e);
+                }
+
+                const newBody = createGameBody(dropX, GAME_CONFIG.spawnY, currentObjectTypeIndex);
+                World.add(engine.world, newBody);
+
+                canDrop = false;
+                updateTurn();
+
+                setTimeout(() => {
+                    canDrop = true;
+                }, 500);
+            };
+
+            document.addEventListener('mousemove', inputHandler);
+            document.addEventListener('mousedown', dropHandler);
+
+            document.addEventListener('touchmove', (e) => { e.preventDefault(); inputHandler(e); }, { passive: false });
+            document.addEventListener('touchstart', (e) => { 
+                inputHandler(e);
+                dropHandler(e);
+            });
+        }
+
+        function renderLoop() {
+            checkGameOver();
+
+            ctx.clearRect(0, 0, GAME_CONFIG.width, GAME_CONFIG.height);
+
+            // デッドライン描画
+            ctx.beginPath();
+            ctx.moveTo(0, GAME_CONFIG.deadlineY);
+            ctx.lineTo(GAME_CONFIG.width, GAME_CONFIG.deadlineY);
+            
+            if (gameOverTimerStart > 0) {
+                const elapsed = Date.now() - gameOverTimerStart;
+                const ratio = Math.min(elapsed / GAME_CONFIG.gameOverDuration, 1);
+                ctx.strokeStyle = `rgba(255, 0, 0, ${0.5 + 0.5 * ratio})`;
+                ctx.lineWidth = 2 + 4 * ratio;
+            } else {
+                ctx.strokeStyle = '#ff0000';
+                ctx.lineWidth = 2;
+            }
+
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.closePath();
+
+            // オブジェクト描画
+            const bodies = Composite.allBodies(engine.world);
+            
+            bodies.forEach(body => {
+                if (body.label === 'game-object') {
+                    renderGameBody(ctx, body);
+                } else {
+                    renderStaticBody(ctx, body);
+                }
+            });
+
+            // 落下ガイド描画
+            if (!isGameOver && canDrop) {
+                const typeData = GAME_OBJECT_TYPES[currentObjectTypeIndex];
+                
+                ctx.save();
+                ctx.translate(dropX, GAME_CONFIG.spawnY);
+
+                // ガイド用の円（または形状）描画
+                ctx.beginPath();
+                if (typeData.shape.type === 'circle') {
+                    ctx.arc(0, 0, typeData.shape.radius, 0, 2 * Math.PI);
+                }
+                
+                if (typeData.render.type === 'color') {
+                    ctx.fillStyle = typeData.render.value;
+                    ctx.fill();
+                    ctx.strokeStyle = '#333';
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+                
+                // ガイド線
+                const halfHeight = typeData.shape.type === 'circle' ? typeData.shape.radius : 20;
+                ctx.beginPath();
+                ctx.moveTo(dropX, GAME_CONFIG.spawnY + halfHeight);
+                ctx.lineTo(dropX, GAME_CONFIG.height);
+                ctx.strokeStyle = '#ccc';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.closePath();
+            }
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        function checkGameOver() {
+            if (isGameOver) return;
+
+            const bodies = Composite.allBodies(engine.world);
+            let isDanger = false;
+
+            for (let body of bodies) {
+                if (body.label === 'game-object' && !body.isStatic) {
+                    // gameDataプロパティを使用
+                    if (Date.now() - body.gameData.createdAt < 1000) continue;
+
+                    if (body.position.y < GAME_CONFIG.deadlineY && body.speed < 0.2) {
+                        isDanger = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isDanger) {
+                if (gameOverTimerStart === 0) {
+                    gameOverTimerStart = Date.now();
+                } else {
+                    if (Date.now() - gameOverTimerStart > GAME_CONFIG.gameOverDuration) {
+                        endGame();
+                    }
+                }
+            } else {
+                gameOverTimerStart = 0;
+            }
+        }
+
+        function endGame() {
+            isGameOver = true;
+            finalScoreEl.textContent = score;
+            gameOverScreen.style.display = 'flex';
+        }
+
+        function restartGame() {
+            World.clear(engine.world);
+            Engine.clear(engine);
+
+            const ground = Bodies.rectangle(
+                GAME_CONFIG.width / 2, 
+                GAME_CONFIG.height + GAME_CONFIG.wallThickness / 2, 
+                GAME_CONFIG.width, 
+                GAME_CONFIG.wallThickness, 
+                { isStatic: true, render: { fillStyle: '#888' }, label: 'wall' }
+            );
+            const leftWall = Bodies.rectangle(
+                0 - GAME_CONFIG.wallThickness / 2, 
+                GAME_CONFIG.height / 2, 
+                GAME_CONFIG.wallThickness, 
+                GAME_CONFIG.height * 2, 
+                { isStatic: true, render: { fillStyle: '#888' }, label: 'wall' }
+            );
+            const rightWall = Bodies.rectangle(
+                GAME_CONFIG.width + GAME_CONFIG.wallThickness / 2, 
+                GAME_CONFIG.height / 2, 
+                GAME_CONFIG.wallThickness, 
+                GAME_CONFIG.height * 2, 
+                { isStatic: true, render: { fillStyle: '#888' }, label: 'wall' }
+            );
+            World.add(engine.world, [ground, leftWall, rightWall]);
+
+            score = 0;
+            scoreEl.textContent = '0';
+            isGameOver = false;
+            gameOverTimerStart = 0;
+            gameOverScreen.style.display = 'none';
+            
+            initObjectTypes();
+        }
+
+        restartButton.addEventListener('click', restartGame);
+
+        window.onload = init;
+
+    </script>
+</body>
+</html>
