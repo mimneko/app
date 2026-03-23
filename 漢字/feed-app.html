@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>漢字フィード</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  background: #111;
+  color: #fff;
+  line-height: 1.6;
+}
+
+/* コンテナ */
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* 各項目 */
+.item {
+  padding: 14px 16px;
+  border-bottom: 1px solid #333;
+}
+
+/* 熟語 */
+.word {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 読み */
+.reading {
+  font-size: 13px;
+  color: #aaa;
+}
+
+/* 意味 */
+.meaning {
+  font-size: 14px;
+  margin-top: 4px;
+  color: #ddd;
+}
+
+/* スマホ微調整 */
+@media (max-width: 480px) {
+  .word {
+    font-size: 17px;
+  }
+  .meaning {
+    font-size: 13.5px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="list"></div>
+
+<script>
+const data = [
+  {word:"琴線に触れる",reading:"きんせんにふれる",meaning:"心の奥深くに感動を与える"},
+  {word:"臥薪嘗胆",reading:"がしんしょうたん",meaning:"苦労して目的を達成しようとする"},
+  {word:"画竜点睛",reading:"がりょうてんせい",meaning:"最後の仕上げで全体が引き締まる"},
+  {word:"一期一会",reading:"いちごいちえ",meaning:"一生に一度の出会いとして大切にする"}
+];
+
+const list = document.getElementById("list");
+
+function createItem(item){
+  const div = document.createElement("div");
+  div.className = "item";
+
+  div.innerHTML = `
+    <div class="word">${item.word}</div>
+    <div class="reading">${item.reading}</div>
+    <div class="meaning">${item.meaning}</div>
+  `;
+
+  return div;
+}
+
+function addItems(n=10){
+  for(let i=0;i<n;i++){
+    const item = data[Math.floor(Math.random()*data.length)];
+    list.appendChild(createItem(item));
+  }
+}
+
+// 初期表示
+addItems(20);
+
+// 無限スクロール
+window.addEventListener("scroll", () => {
+  if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 200){
+    addItems(10);
+  }
+});
+</script>
+
+</body>
+</html>
