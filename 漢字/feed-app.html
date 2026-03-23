@@ -2,52 +2,84 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+
+<!-- スマホ対応：必須 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>漢字フィード</title>
 
 <style>
+/* =========================
+   全体設定
+   ========================= */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-  background: #ffffff;
+  background: #ffffff; /* ← 背景色はここで変更 */
   color: #111;
   line-height: 1.6;
 }
 
+/* =========================
+   横幅制限（PC・タブレット用）
+   ========================= */
 .container {
   max-width: 600px;
   margin: 0 auto;
 }
 
+/* =========================
+   各項目（1熟語）
+   ========================= */
 .item {
-  padding: 14px 16px;
+  padding: 14px 16px; /* ← 余白調整ポイント */
   border-bottom: 1px solid #eee;
-  cursor: pointer;
+  cursor: pointer; /* 全体クリック可能 */
 }
 
+/* =========================
+   ヘッダー（熟語・＋表示）
+   ========================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 熟語本体 */
 .word {
   font-size: 18px;
   font-weight: bold;
 }
 
+/* ＋ / − 表示 */
+.toggle {
+  font-size: 18px;
+  color: #888;
+  user-select: none; /* 長押しで選択されないように */
+}
+
+/* 読み */
 .reading {
   font-size: 13px;
   color: #666;
 }
 
+/* 意味 */
 .meaning {
   font-size: 14px;
   margin-top: 4px;
   color: #333;
 }
 
-/* 追加情報 */
+/* =========================
+   追加情報（初期は非表示）
+   ========================= */
 .extra {
   margin-top: 8px;
   font-size: 13px;
   color: #555;
-  display: none;
+  display: none; /* ← 開閉制御 */
 }
 
 .extra div {
@@ -58,9 +90,16 @@ body {
 
 <body>
 
+<!-- 一覧表示領域 -->
 <div class="container" id="list"></div>
 
 <script>
+/* =========================
+   データ定義
+   =========================
+   ・ここを増やすだけで内容が増える
+   ・extraは任意（無ければ＋は出ない）
+*/
 const data = [
   {
     word:"琴線に触れる",
@@ -76,8 +115,7 @@ const data = [
     reading:"がしんしょうたん",
     meaning:"苦労して目的を達成しようとする",
     extra:{
-      source:"中国の故事（呉越の戦い）",
-      variant:"特になし"
+      source:"中国の故事（呉越の戦い）"
     }
   },
   {
@@ -85,16 +123,13 @@ const data = [
     reading:"がりょうてんせい",
     meaning:"最後の仕上げで全体が引き締まる",
     extra:{
-      source:"中国の逸話（張僧繇）"
+      source:"張僧繇の逸話"
     }
   },
   {
     word:"一期一会",
     reading:"いちごいちえ",
-    meaning:"一生に一度の出会いとして大切にする",
-    extra:{
-      source:"茶道の精神"
-    }
+    meaning:"一生に一度の出会いとして大切にする"
   },
   {
     word:"異口同音",
@@ -128,36 +163,64 @@ const data = [
   }
 ];
 
+/* =========================
+   DOM取得
+   ========================= */
 const list = document.getElementById("list");
 
+/* =========================
+   1項目生成
+   ========================= */
 function createItem(item){
   const div = document.createElement("div");
   div.className = "item";
 
-  const extraHTML = item.extra ? `
-    <div class="extra">
-      ${item.extra.source ? `<div>出典：${item.extra.source}</div>` : ""}
-      ${item.extra.variant ? `<div>別表記：${item.extra.variant}</div>` : ""}
-    </div>
-  ` : "";
+  // extraが存在するか判定
+  const hasExtra = !!item.extra;
 
+  // HTML構築
   div.innerHTML = `
-    <div class="word">${item.word}</div>
+    <div class="header">
+      <div class="word">${item.word}</div>
+      ${hasExtra ? `<div class="toggle">＋</div>` : ""}
+    </div>
     <div class="reading">${item.reading}</div>
     <div class="meaning">${item.meaning}</div>
-    ${extraHTML}
+    ${
+      hasExtra ? `
+      <div class="extra">
+        ${item.extra.source ? `<div>出典：${item.extra.source}</div>` : ""}
+        ${item.extra.variant ? `<div>別表記：${item.extra.variant}</div>` : ""}
+      </div>` : ""
+    }
   `;
 
-  div.addEventListener("click", () => {
+  /* =========================
+     クリック処理（開閉）
+     ========================= */
+  if(hasExtra){
+    const toggle = div.querySelector(".toggle");
     const extra = div.querySelector(".extra");
-    if(extra){
-      extra.style.display = extra.style.display === "block" ? "none" : "block";
-    }
-  });
+
+    div.addEventListener("click", () => {
+      const isOpen = extra.style.display === "block";
+
+      // 表示切替
+      extra.style.display = isOpen ? "none" : "block";
+
+      // ＋ → − 切替
+      toggle.textContent = isOpen ? "＋" : "−";
+    });
+  }
 
   return div;
 }
 
+/* =========================
+   アイテム追加
+   =========================
+   n件ランダムで追加
+*/
 function addItems(n=10){
   for(let i=0;i<n;i++){
     const item = data[Math.floor(Math.random()*data.length)];
@@ -165,10 +228,16 @@ function addItems(n=10){
   }
 }
 
-// 初期表示
+/* =========================
+   初期表示
+   ========================= */
 addItems(20);
 
-// 無限スクロール
+/* =========================
+   無限スクロール
+   =========================
+   下に近づいたら追加
+*/
 window.addEventListener("scroll", () => {
   if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 200){
     addItems(10);
