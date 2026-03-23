@@ -10,50 +10,48 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-  background: #111;
-  color: #fff;
+  background: #ffffff;
+  color: #111;
   line-height: 1.6;
 }
 
-/* コンテナ */
 .container {
   max-width: 600px;
   margin: 0 auto;
 }
 
-/* 各項目 */
 .item {
   padding: 14px 16px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
 }
 
-/* 熟語 */
 .word {
   font-size: 18px;
   font-weight: bold;
 }
 
-/* 読み */
 .reading {
   font-size: 13px;
-  color: #aaa;
+  color: #666;
 }
 
-/* 意味 */
 .meaning {
   font-size: 14px;
   margin-top: 4px;
-  color: #ddd;
+  color: #333;
 }
 
-/* スマホ微調整 */
-@media (max-width: 480px) {
-  .word {
-    font-size: 17px;
-  }
-  .meaning {
-    font-size: 13.5px;
-  }
+/* 追加情報 */
+.extra {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #555;
+  display: none;
+}
+
+.extra div {
+  margin-top: 2px;
 }
 </style>
 </head>
@@ -64,10 +62,70 @@ body {
 
 <script>
 const data = [
-  {word:"琴線に触れる",reading:"きんせんにふれる",meaning:"心の奥深くに感動を与える"},
-  {word:"臥薪嘗胆",reading:"がしんしょうたん",meaning:"苦労して目的を達成しようとする"},
-  {word:"画竜点睛",reading:"がりょうてんせい",meaning:"最後の仕上げで全体が引き締まる"},
-  {word:"一期一会",reading:"いちごいちえ",meaning:"一生に一度の出会いとして大切にする"}
+  {
+    word:"琴線に触れる",
+    reading:"きんせんにふれる",
+    meaning:"心の奥深くに感動を与える",
+    extra:{
+      source:"『琴線』＝琴の弦。感情に触れる意から",
+      variant:"特になし"
+    }
+  },
+  {
+    word:"臥薪嘗胆",
+    reading:"がしんしょうたん",
+    meaning:"苦労して目的を達成しようとする",
+    extra:{
+      source:"中国の故事（呉越の戦い）",
+      variant:"特になし"
+    }
+  },
+  {
+    word:"画竜点睛",
+    reading:"がりょうてんせい",
+    meaning:"最後の仕上げで全体が引き締まる",
+    extra:{
+      source:"中国の逸話（張僧繇）"
+    }
+  },
+  {
+    word:"一期一会",
+    reading:"いちごいちえ",
+    meaning:"一生に一度の出会いとして大切にする",
+    extra:{
+      source:"茶道の精神"
+    }
+  },
+  {
+    word:"異口同音",
+    reading:"いくどうおん",
+    meaning:"多くの人が同じことを言う"
+  },
+  {
+    word:"試行錯誤",
+    reading:"しこうさくご",
+    meaning:"何度も試しながら解決方法を探る"
+  },
+  {
+    word:"電光石火",
+    reading:"でんこうせっか",
+    meaning:"非常に速いことのたとえ"
+  },
+  {
+    word:"温故知新",
+    reading:"おんこちしん",
+    meaning:"昔を学び新しい知識を得る"
+  },
+  {
+    word:"自業自得",
+    reading:"じごうじとく",
+    meaning:"自分の行いの結果を自分で受ける"
+  },
+  {
+    word:"一石二鳥",
+    reading:"いっせきにちょう",
+    meaning:"一つの行動で二つの利益を得る"
+  }
 ];
 
 const list = document.getElementById("list");
@@ -76,11 +134,26 @@ function createItem(item){
   const div = document.createElement("div");
   div.className = "item";
 
+  const extraHTML = item.extra ? `
+    <div class="extra">
+      ${item.extra.source ? `<div>出典：${item.extra.source}</div>` : ""}
+      ${item.extra.variant ? `<div>別表記：${item.extra.variant}</div>` : ""}
+    </div>
+  ` : "";
+
   div.innerHTML = `
     <div class="word">${item.word}</div>
     <div class="reading">${item.reading}</div>
     <div class="meaning">${item.meaning}</div>
+    ${extraHTML}
   `;
+
+  div.addEventListener("click", () => {
+    const extra = div.querySelector(".extra");
+    if(extra){
+      extra.style.display = extra.style.display === "block" ? "none" : "block";
+    }
+  });
 
   return div;
 }
