@@ -21,6 +21,16 @@ body {
     max-height: none;
     overflow: visible;
 }
+/* テキストの選択・コピーを禁止 */
+* {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+input {
+    -webkit-user-select: text;
+    user-select: text;
+}
 </style>
 </head>
 <body>
