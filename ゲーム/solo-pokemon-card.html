@@ -31,6 +31,14 @@
 // デッキを増やす場合は、DECKS配列に同じ形式のデッキを追加してください。
 // cards内のキーが種類です。各カードのcountは省略すると1枚です。
 const DECKS=[
+ {"name":"ばけがくれ","cards":{
+  "pokemon":[{"name":"ダダリン","count":4},{"name":"カゲボウズ","count":3},{"name":"ジュペッタ","count":3},{"name":"チャデス","count":2},{"name":"ヤバソチャ","count":2},{"name":"ノコッチ","count":3},{"name":"ノココッチ","count":2},{"name":"リーリエのピッピex"},{"name":"キチキギスex"},{"name":"ガチグマ アカツキex"},{"name":"ラティアスex"}],
+  "item":[{"name":"ポケパッド","count":4},{"name":"ハイパーボール","count":4},{"name":"夜のタンカ","count":3},{"name":"ポケギア3.0","count":2},{"name":"ポケモンいれかえ","count":0}],
+  "tool":[{"name":"ふうせん", "count":0}],
+  "supporter":[{"name":"リーリエの決心","count":4},{"name":"ボスの指令","count":2},{"name":"ムク","count":4},{"name":"探検家の先導","count":2}],
+  "stadium":[{"name":"プリズムタワー","count":2}],
+  "energy":[{"name":"レガシーエネルギー"},{"name":"テレパス超エネルギー","count":4},{"name":"基本超エネルギー","count":3}]
+ }},
  {"name":"Nゾロ","cards":{
   "pokemon":[{"name":"Nのゾロアークex","count":4},{"name":"Nのゾロア","count":4},{"name":"Nのゼクロム","count":2},{"name":"Nのレシラム"},{"name":"Nのヒヒダルマ"},{"name":"Nのダルマッカ"},{"name":"モモワロウex","count":2},{"name":"キチキギスex"},{"name":"マシマシラ"},{"name":"シャリタツ"}],
   "item":[{"name":"シークレットボックス"},{"name":"Nのポイントアップ","count":4},{"name":"なかよしポフィン","count":4},{"name":"ポケパッド","count":4},{"name":"ハイパーボール","count":2},{"name":"夜のタンカ"}],
@@ -45,14 +53,6 @@ const DECKS=[
   "supporter":[{"name":"リーリエの決心","count":4},{"name":"ゼイユ","count":3},{"name":"ボスの指令","count":2}],
   "stadium":[{"name":"プリズムタワー"}],
   "energy":[{"name":"基本炎エネルギー","count":7},{"name":"基本闘エネルギー","count":15}]
- }},
- {"name":"ばけがくれ","cards":{
-  "pokemon":[{"name":"ダダリン","count":4},{"name":"カゲボウズ","count":3},{"name":"ジュペッタ","count":3},{"name":"チャデス","count":2},{"name":"ヤバソチャ","count":2},{"name":"ノコッチ","count":3},{"name":"ノココッチ","count":2},{"name":"リーリエのピッピex"},{"name":"キチキギスex"},{"name":"ガチグマ アカツキex"},{"name":"ラティアスex"}],
-  "item":[{"name":"ポケパッド","count":4},{"name":"ハイパーボール","count":4},{"name":"夜のタンカ","count":3},{"name":"ポケギア3.0","count":2},{"name":"ポケモンいれかえ","count":0}],
-  "tool":[{"name":"ふうせん", "count":0}],
-  "supporter":[{"name":"リーリエの決心","count":4},{"name":"ボスの指令","count":2},{"name":"ムク","count":4},{"name":"探検家の先導","count":2}],
-  "stadium":[{"name":"プリズムタワー","count":2}],
-  "energy":[{"name":"レガシーエネルギー"},{"name":"テレパス超エネルギー","count":4},{"name":"基本超エネルギー","count":3}]
  }}
 ];
 const TYPE_NAMES={pokemon:'ポケモン',item:'グッズ',supporter:'サポート',tool:'どうぐ',stadium:'スタジアム',energy:'エネルギー'};
