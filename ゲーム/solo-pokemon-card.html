@@ -33,10 +33,10 @@
 const DECKS=[
 {"name":"ギーマゲンガー［調整中］","cards":{
 "pokemon":[{"name":"メガゲンガーex","count":3},{"name":"バンギラス","count":2},{"name":"ストリンダー","count":4},{"name":"エレズン","count":4},{"name":"モモワロウex","count":2},{"name":"キチキギスex","count":1},{"name":"シャリタツ","count":1}],
-"item":[{"name":"ポケパッド","count":4},{"name":"ハイパーボール","count":1},{"name":"夜のタンカ","count":3},{"name":"ロケット団のレシーバー","count":4},{"name":"シークレットボックス"}],
+"item":[{"name":"ポケパッド","count":4},{"name":"なかよしポフィン","count":2},{"name":"ハイパーボール","count":1},{"name":"夜のタンカ","count":3},{"name":"ロケット団のレシーバー","count":4},{"name":"シークレットボックス"}],
 "tool":[{"name":"ふうせん", "count":1},{"name":"　", "count":0}],
-"supporter":[{"name":"リーリエの決心","count":4},{"name":"ボスの指令","count":2},{"name":"ジャッジマン","count":1},{"name":"ロケット団のラムダ","count":4},{"name":"ギーマの一手","count":4}],
-"stadium":[{"name":"夜のアカデミー","count":4}],
+"supporter":[{"name":"リーリエの決心","count":4},{"name":"ボスの指令","count":2},{"name":"ジャッジマン","count":1},{"name":"ロケット団のラムダ","count":4},{"name":"ギーマの一手","count":3}],
+"stadium":[{"name":"夜のアカデミー","count":3}],
 "energy":[{"name":"基本悪エネルギー","count":10}]
 }},
 {"name":"メガゲンガー［調整中］","cards":{
@@ -63,7 +63,7 @@ const DECKS=[
 "stadium":[{"name":"夜のアカデミー","count":4},{"name":"ロケット団の監視塔","count":0}],
 "energy":[{"name":"テレパス超エネルギー","count":4},{"name":"基本超エネルギー","count":4},{"name":"ブーメランエネルギー","count":2}]
 }},
-{"name":"ロケット団","cards":{
+{"name":"ロケット団［未調整］","cards":{
 "pokemon":[{"name":"ドンカラス","count":3},{"name":"ヤミカラス","count":4},{"name":"ポリゴン２","count":1},{"name":"ポリゴン","count":2},{"name":"フリーザー","count":1}],
 "item":[{"name":"ポケパッド","count":2},{"name":"夜のタンカ","count":3},{"name":"ロトり棒","count":4},{"name":"ロケット団のレシーバー","count":4},{"name":"ポケギア3.0","count":4},{"name":"ミラクルインカム"}],
 "tool":[{"name":"ふうせん", "count":0}],
@@ -81,7 +81,7 @@ const DECKS=[
 "energy":[{"name":"テレパス超エネルギー","count":4},{"name":"基本超エネルギー","count":2},{"name":"基本炎エネルギー","count":3},{"name":"ネオアッパーエネルギー","count":1}]
 }},
 */
-{"name":"メガシャンデラ［調整中］","cards":{
+{"name":"メガシャンデラ［未調整］","cards":{
 "pokemon":[{"name":"メガシャンデラex","count":3},{"name":"ランプラー","count":4},{"name":"ヒトモシ","count":4},{"name":"ノココッチ","count":3},{"name":"ノコッチ","count":3},{"name":"リグレー","count":1},{"name":"ミュウex","count":1}],
 "item":[{"name":"ポケパッド","count":4},{"name":"なかよしポフィン","count":2},{"name":"ハイパーボール","count":2},{"name":"夜のタンカ","count":1},{"name":"ふしぎなアメ","count":3},{"name":"ポケギア3.0","count":2}],
 "tool":[{"name":"ふうせん", "count":2},{"name":"重力玉", "count":1}],
@@ -97,7 +97,7 @@ const DECKS=[
 "stadium":[{"name":"バトルコロシアム","count":0},{"name":"ロケット団の監視塔","count":0}],
 "energy":[{"name":"テレパス超エネルギー","count":4},{"name":"基本超エネルギー","count":3},{"name":"基本炎エネルギー","count":2},{"name":"レガシーエネルギー","count":1}]
 }},
-{"name":"ばけがくれ（ノココッチ式ダダリンビート）","cards":{
+{"name":"ばけがくれ（ダダリンビート）","cards":{
 "pokemon":[{"name":"ダダリン","count":4},{"name":"カゲボウズ","count":4},{"name":"ジュペッタ","count":3},{"name":"チャデス","count":2},{"name":"ヤバソチャ","count":2},{"name":"ノコッチ","count":3},{"name":"ノココッチ","count":2},{"name":"リーリエのピッピex"},{"name":"ガチグマ アカツキex"},{"name":"ラティアスex"}],
 "item":[{"name":"ポケパッド","count":4},{"name":"ハイパーボール","count":4},{"name":"夜のタンカ","count":3},{"name":"なかよしポフィン","count":2},{"name":"ポケギア3.0","count":0},{"name":"ポケモンいれかえ","count":1}],
 "tool":[{"name":"ふうせん", "count":0}],
@@ -105,6 +105,7 @@ const DECKS=[
 "stadium":[{"name":"プリズムタワー","count":3}],
 "energy":[{"name":"レガシーエネルギー"},{"name":"テレパス超エネルギー","count":4},{"name":"基本超エネルギー","count":3}]
 }},
+/*
 {"name":"ばけがくれ（ダダリンビート）","cards":{
 "pokemon":[{"name":"ダダリン","count":4},{"name":"カゲボウズ","count":4},{"name":"ジュペッタ","count":4},{"name":"チャデス","count":2},{"name":"ヤバソチャ","count":2},{"name":"リーリエのピッピex"},{"name":"キチキギスex","count":0},{"name":"ガチグマ アカツキex","count":1},{"name":"ラティアスex","count":1},{"name":"ミネズミ","count":0},{"name":"イベルタル","count":0},{"name":"シェイミ","count":0}],
 "item":[{"name":"ポケパッド","count":4},{"name":"ハイパーボール","count":4},{"name":"夜のタンカ","count":3},{"name":"ポケギア3.0","count":3},{"name":"ポケモンいれかえ"}],
@@ -113,6 +114,7 @@ const DECKS=[
 "stadium":[{"name":"プリズムタワー","count":3}],
 "energy":[{"name":"レガシーエネルギー","count":1},{"name":"テレパス超エネルギー","count":4},{"name":"基本超エネルギー","count":3}]
 }},
+*/
 {"name":"ばけがくれ（たましいエンド）［未調整］","cards":{
 "pokemon":[{"name":"ダダリン","count":4},{"name":"カゲボウズ","count":4},{"name":"ジュペッタ","count":4},{"name":"チャデス","count":4},{"name":"ヤバソチャ","count":4},{"name":"ミカルゲ","count":1},{"name":"リーリエのピッピex"},{"name":"キチキギスex","count":0},{"name":"ガチグマ アカツキex","count":1},{"name":"ラティアスex","count":1},{"name":"ミネズミ","count":0},{"name":"イベルタル","count":0},{"name":"シェイミ","count":0}],
 "item":[{"name":"ポケパッド","count":4},{"name":"ハイパーボール","count":4},{"name":"夜のタンカ","count":3},{"name":"ポケモンいれかえ"}],
@@ -121,7 +123,7 @@ const DECKS=[
 "stadium":[{"name":"プリズムタワー","count":3}],
 "energy":[{"name":"レガシーエネルギー","count":1},{"name":"テレパス超エネルギー","count":4},{"name":"基本超エネルギー","count":3}]
 }},
-{"name":"ボムドラパ","cards":{
+{"name":"ボムドラパルト［未調整］","cards":{
 "pokemon":[{"name":"ドラパルトex","count":3},{"name":"ドロンチ","count":4},{"name":"ドラメシヤ","count":4},{"name":"ヨノワール","count":1},{"name":"サマヨール","count":2},{"name":"ヨマワル","count":2},{"name":"スボミー","count":2},{"name":"マシマシラ","count":1},{"name":"ファイヤー","count":1},{"name":"ニャースex","count":1},{"name":"キチキギスex","count":1}],
 "item":[{"name":"ポケパッド","count":4},{"name":"ハイパーボール","count":4},{"name":"なかよしポフィン","count":4},{"name":"ふしぎなアメ","count":2},{"name":"夜のタンカ","count":2},{"name":"スペシャルレッドカード","count":1},{"name":"アンフェアスタンプ","count":1}],
 "tool":[{"name":"きらめく結晶", "count":0}],
